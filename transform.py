@@ -71,6 +71,9 @@ _GLOBAL_MAP = {
     Combo({Modifier.ALT, Modifier.SHIFT}, Key.COMMA): with_mark(Combo(Modifier.CONTROL, Key.HOME)),
     Combo({Modifier.ALT, Modifier.SHIFT}, Key.DOT): with_mark(Combo(Modifier.CONTROL, Key.END)),
 
+    Combo(Modifier.CONTROL, Key.J): Key.ENTER,
+    Combo(Modifier.CONTROL, Key.O): [Key.ENTER, Key.LEFT],
+
     Combo(Modifier.CONTROL, Key.W): [Combo(Modifier.CONTROL, Key.X), set_mark(False)],
     Combo(Modifier.ALT, Key.W): [Combo(Modifier.CONTROL, Key.C), set_mark(False)],
     Combo(Modifier.CONTROL, Key.Y): [Combo(Modifier.CONTROL, Key.V), set_mark(False)],
@@ -78,14 +81,15 @@ _GLOBAL_MAP = {
     Combo(Modifier.CONTROL, Key.D): [Key.DELETE, set_mark(False)],
     Combo(Modifier.ALT, Key.D): [Combo(Modifier.CONTROL, Key.DELETE), set_mark(False)],
 
-    Combo(Modifier.CONTROL, Key.K): [Combo(Modifier.SHIFT, Key.END), Key.DELETE, set_mark(False)],
+    Combo(Modifier.CONTROL, Key.K): [Combo(Modifier.SHIFT, Key.END), Combo(Modifier.CONTROL, Key.X), set_mark(False)],
 
-    Combo(Modifier.CONTROL, Key.SLASH): Combo(Modifier.CONTROL, Key.Z),
+    Combo(Modifier.CONTROL, Key.SLASH): [Combo(Modifier.CONTROL, Key.Z), set_mark(False)],
 
     Combo(Modifier.CONTROL, Key.SPACE): set_mark(True),
 
     Combo(Modifier.CONTROL, Key.S): Key.F3,
     Combo(Modifier.CONTROL, Key.R): Combo(Modifier.SHIFT, Key.F3),
+    Combo({Modifier.ALT, Modifier.SHIFT}, Key.KEY_5): Combo(Modifier.CONTROL, Key.H),
 
     Combo(Modifier.CONTROL, Key.G): [Key.ESC, set_mark(False)],
 
@@ -146,7 +150,6 @@ def transform_key(key, action):
     for value in values:
         if callable(value):
             value = value()
-            print(value)
             if value is None:
                 continue
         if isinstance(value, Key):
