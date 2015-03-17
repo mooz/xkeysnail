@@ -6,9 +6,9 @@ Works at system level with root for grabbing input device.
 
 ## Dependency
 
-python 3.4
+* python 3.4
 
-python-evdev
+* python-evdev
 
 ## License
 
