@@ -4,11 +4,15 @@ Emacs style keyboard macros implemented in Python, using `evdev` and `uinput`.
 
 Works at system level with root for grabbing input device.
 
-## Dependency
+Forked from https://github.com/DreaminginCodeZH/pykeymacs
 
-* python 3.4
+## Installation
 
-* python-evdev
+    sudo pip install --upgrade .
+    
+## Usage
+
+    sudo pykeymacs
 
 ## License
 
