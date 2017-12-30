@@ -1,6 +1,6 @@
 from evdev import ecodes
 from evdev.uinput import UInput
-from key import Action, Combo, Modifier
+from .key import Action, Combo, Modifier
 
 __author__ = 'zh'
 

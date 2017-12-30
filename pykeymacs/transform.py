@@ -1,9 +1,34 @@
 from enum import Enum
-from key import Action, Combo, Key, Modifier
-from output import send_combo, send_key_action, send_key
+from .key import Action, Combo, Key, Modifier
+from .output import send_combo, send_key_action, send_key
 
 __author__ = 'zh'
 
+# ============================================================ #
+
+import Xlib.display
+def get_active_window_wm_class(display=Xlib.display.Display()):
+    """Get active window's WM_CLASS"""
+    current_window = display.get_input_focus().focus
+    pair = get_class_name(current_window)
+    if pair:
+        # (process name, class name)
+        return pair[1]
+    else:
+        return None
+
+def get_class_name(window):
+    """Get window's class name (recursively checks parents)"""
+    wmname = window.get_wm_name()
+    wmclass = window.get_wm_class()
+    if wmclass is None and wmname is None:
+        parent_window = window.query_tree().parent
+        if parent_window:
+            return get_class_name(parent_window)
+        return None
+    return wmclass
+
+# ============================================================ #
 
 _pressed_modifier_keys = set()
 
@@ -118,13 +143,11 @@ _CONTROL_Q_MAP = {}
 
 _mode_map = _GLOBAL_MAP
 
-
 def on_event(event):
     on_key(Key(event.code), Action(event.value))
 
 
 def on_key(key, action):
-
     if key in Modifier.get_all_keys():
         update_pressed_modifier_keys(key, action)
         send_key_action(key, action)
@@ -135,10 +158,14 @@ def on_key(key, action):
 
 
 def transform_key(key, action):
+    wm_class = get_active_window_wm_class()
+    non_target_classes = ("Emacs", "URxvt")
 
     global _mode_map
     combo = Combo(get_pressed_modifiers(), key)
-    if _mode_map is _GLOBAL_MAP and combo not in _mode_map:
+    if ((wm_class in non_target_classes) \
+        or (_mode_map is _GLOBAL_MAP and combo not in _mode_map)):
+        # Pass through keys
         send_key_action(key, action)
         return
     if _mode_map is _CONTROL_Q_MAP:

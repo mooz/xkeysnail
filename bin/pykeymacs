@@ -1,4 +1,6 @@
-from input import loop, select_device
+#!/usr/bin/env python
+
+from pykeymacs.input import loop, select_device
 
 __author__ = 'zh'
 

@@ -1,7 +1,7 @@
 from evdev import ecodes, InputDevice, list_devices
 from select import select
 from sys import exit
-from transform import on_event
+from .transform import on_event
 
 __author__ = 'zh'
 
@@ -14,6 +14,11 @@ def select_device():
         print('error: no input devices found (do you have rw permission on /dev/input/*?)')
         exit(1)
 
+    # Filter out non-keyboard devices (TODO: Make it more robust)
+    import re
+    devices = [device for device in devices
+               if re.search("keyboard", device.name, re.IGNORECASE)]
+
     device_format = '{0:<3} {1.fn:<20} {1.name:<35} {1.phys}'
     device_lines = [device_format.format(n, d) for n, d in enumerate(devices)]
 
@@ -22,8 +27,11 @@ def select_device():
     print('\n'.join(device_lines))
     print('')
 
-    choice = input('Select device [0-{}]:'.format(len(device_lines) - 1))
-    return devices[int(choice)]
+    if len(device_lines) == 1:
+        return devices[0]
+    else:
+        choice = input('Select device [0-{}]:'.format(len(device_lines) - 1))
+        return devices[int(choice)]
 
 
 def loop(device):
