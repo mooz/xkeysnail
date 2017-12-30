@@ -59,6 +59,9 @@ _GLOBAL_MAP = {
     Combo(Modifier.CONTROL, Key.P): with_mark(Key.UP),
     Combo(Modifier.CONTROL, Key.N): with_mark(Key.DOWN),
 
+    Combo(Modifier.CONTROL, Key.H): with_mark(Key.BACKSPACE),
+    Combo(Modifier.CONTROL, Key.M): Key.ENTER,
+
     Combo(Modifier.ALT, Key.B): with_mark(Combo(Modifier.CONTROL, Key.LEFT)),
     Combo(Modifier.ALT, Key.F): with_mark(Combo(Modifier.CONTROL, Key.RIGHT)),
 
