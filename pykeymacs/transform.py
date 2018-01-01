@@ -111,68 +111,71 @@ def create_modifiers_from_strings(modifier_strs):
 
 
 _GLOBAL_MAP = {
+    K("C-b"): with_mark(K("left")),
+    K("C-f"): with_mark(K("right")),
+    K("C-p"): with_mark(K("up")),
+    K("C-n"): with_mark(K("down")),
+    K("C-h"): with_mark(K("backspace")),
 
-    K("C-b"): with_mark(Key.LEFT),
-    K("C-f"): with_mark(Key.RIGHT),
-    K("C-p"): with_mark(Key.UP),
-    K("C-n"): with_mark(Key.DOWN),
-    K("C-h"): with_mark(Key.BACKSPACE),
-    K("C-m"): Key.ENTER,
+    K("M-b"): with_mark(K("C-left")),
+    K("M-f"): with_mark(K("C-right")),
 
-    K("M-b"): with_mark(Combo(Modifier.CONTROL, Key.LEFT)),
-    K("M-f"): with_mark(Combo(Modifier.CONTROL, Key.RIGHT)),
+    K("C-a"): with_mark(K("home")),
+    K("C-e"): with_mark(K("end")),
 
-    K("C-a"): with_mark(Key.HOME),
-    K("C-e"): with_mark(Key.END),
+    K("M-v"): with_mark(K("page_up")),
+    K("C-v"): with_mark(K("page_down")),
 
-    K("M-v"): with_mark(Key.PAGE_UP),
-    K("C-v"): with_mark(Key.PAGE_DOWN),
+    K("M-Shift-comma"): with_mark(K("C-home")),
+    K("M-Shift-dot"): with_mark(K("C-end")),
 
-    K("M-Shift-comma"): with_mark(Combo(Modifier.CONTROL, Key.HOME)),
-    K("M-Shift-dot"): with_mark(Combo(Modifier.CONTROL, Key.END)),
+    K("C-m"): K("enter"),
+    K("C-j"): K("enter"),
+    K("C-o"): [K("enter"), K("left")],
 
-    K("C-j"): Key.ENTER,
-    K("C-o"): [Key.ENTER, Key.LEFT],
+    K("C-w"): [K("C-x"), set_mark(False)],
+    K("M-w"): [K("C-c"), set_mark(False)],
+    K("C-y"): [K("C-v"), set_mark(False)],
 
-    K("C-w"): [Combo(Modifier.CONTROL, Key.X), set_mark(False)],
-    K("M-w"): [Combo(Modifier.CONTROL, Key.C), set_mark(False)],
-    K("C-y"): [Combo(Modifier.CONTROL, Key.V), set_mark(False)],
+    K("C-d"): [K("delete"), set_mark(False)],
+    K("M-d"): [K("C-delete"), set_mark(False)],
 
-    K("C-d"): [Key.DELETE, set_mark(False)],
-    K("M-d"): [Combo(Modifier.CONTROL, Key.DELETE), set_mark(False)],
+    K("C-k"): [K("Shift-end"), K("C-x"), set_mark(False)],
 
-    K("C-k"): [Combo(Modifier.SHIFT, Key.END), Combo(Modifier.CONTROL, Key.X), set_mark(False)],
-
-    K("C-slash"): [Combo(Modifier.CONTROL, Key.Z), set_mark(False)],
+    K("C-slash"): [K("C-z"), set_mark(False)],
 
     K("C-space"): set_mark(True),
 
-    K("C-s"): Key.F3,
-    K("C-r"): Combo(Modifier.SHIFT, Key.F3),
-    K("M-Shift-key_5"): Combo(Modifier.CONTROL, Key.H),
+    K("C-s"): K("F3"),
+    K("C-r"): K("Shift-F3"),
+    K("M-Shift-key_5"): K("C-h"),
 
-    K("C-g"): [Key.ESC, set_mark(False)],
+    K("C-g"): [K("esc"), set_mark(False)],
 
+    # second keymap
     K("C-x"): Mode.CONTROL_X,
     K("C-q"): Mode.CONTROL_Q,
 
     # next/previous tab
-    K("C-M-j"): Combo(Modifier.CONTROL, Key.TAB),
-    K("C-M-k"): Combo({Modifier.CONTROL, Modifier.SHIFT}, Key.TAB),
+    K("C-M-j"): K("C-TAB"),
+    K("C-M-k"): K("C-Shift-TAB"),
 }
 
 _CONTROL_X_MAP = {
-
-    Combo(None, Key.H): [Combo(Modifier.CONTROL, Key.HOME), Combo(Modifier.CONTROL, Key.A), set_mark(True), Mode.GLOBAL],
-
-    Combo(Modifier.CONTROL, Key.F): [Combo(Modifier.CONTROL, Key.O), Mode.GLOBAL],
-
-    Combo(Modifier.CONTROL, Key.S): [Combo(Modifier.CONTROL, Key.S), Mode.GLOBAL],
-
-    Combo(None, Key.K): [Combo(Modifier.CONTROL, Key.F4), Mode.GLOBAL],
-    Combo(Modifier.CONTROL, Key.C): [Combo(Modifier.ALT, Key.F4), Mode.GLOBAL],
-
-    Combo(Modifier.CONTROL, Key.G): Mode.GLOBAL
+    # C-x h (select all)
+    Combo(None, K("h")): [K("C-home"), K("C-a"), set_mark(True), Mode.GLOBAL],
+    # C-x C-f (open)
+    K("C-f"): [K("C-o"), Mode.GLOBAL],
+    # C-x C-s (save)
+    K("C-s"): [K("C-s"), Mode.GLOBAL],
+    # C-x k (kill tab)
+    Combo(None, K("k")): [K("C-f4"), Mode.GLOBAL],
+    # C-x C-c (exit)
+    K("C-c"): [K("M-f4"), Mode.GLOBAL],
+    # cancel
+    K("C-g"): Mode.GLOBAL,
+    # C-x u (undo)
+    Combo(None, K("u")): [K("C-z"), set_mark(False)],
 }
 
 _CONTROL_Q_MAP = {}
