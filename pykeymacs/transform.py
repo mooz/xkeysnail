@@ -103,7 +103,7 @@ def create_modifiers_from_strings(modifier_strs):
         elif modifier_str == 'M' or modifier_str == 'Alt':
             modifiers.add(Modifier.ALT)
         elif modifier_str == 'Super' or modifier_str == 'Win':
-            # modifiers.add(Modifier.SUPER)
+            modifiers.add(Modifier.SUPER)
             pass
         elif modifier_str == 'Shift':
             modifiers.add(Modifier.SHIFT)
