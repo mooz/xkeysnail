@@ -278,14 +278,15 @@ class Action(IntEnum):
 @unique
 class Modifier(Enum):
 
-    CONTROL, ALT, SHIFT = range(3)
+    CONTROL, ALT, SHIFT, SUPER = range(4)
 
     @classmethod
     def _get_modifier_map(cls):
         return {
             cls.CONTROL: {Key.LEFT_CTRL, Key.RIGHT_CTRL},
             cls.ALT: {Key.LEFT_ALT, Key.RIGHT_ALT},
-            cls.SHIFT: {Key.LEFT_SHIFT, Key.RIGHT_SHIFT}
+            cls.SHIFT: {Key.LEFT_SHIFT, Key.RIGHT_SHIFT},
+            cls.SUPER: {Key.LEFT_META, Key.RIGHT_META}
         }
 
     def get_keys(self):
