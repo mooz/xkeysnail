@@ -49,12 +49,16 @@ def loop(devices):
         exit(1)
     try:
         while True:
-            r, w, x = select(devices, [], [])
-            for device in r:
-                # device = devices[fd]
-                for event in device.read():
-                    if event.type == ecodes.EV_KEY:
-                        on_event(event)
+            try:
+                r, w, x = select(devices, [], [])
+                for device in r:
+                    # device = devices[fd]
+                    for event in device.read():
+                        if event.type == ecodes.EV_KEY:
+                            on_event(event)
+            except OSError as e:
+                print("Device removed: " + str(device.name))
+                devices.remove(device)
     finally:
         for device in devices:
             device.ungrab()
