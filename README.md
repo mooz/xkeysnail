@@ -1,13 +1,13 @@
 # xkeysnail
 
-`xkeysnail` is a yet another keyboard remapping tool for X environment. It's
+`xkeysnail` is yet another keyboard remapping tool for X environment. It's
 like `xmodmap` but allows more flexible remappings.
 
 - **Pros**
   - Has high-level and flexible remapping mechanisms, such as
-    - **per-application keymaps**
-    - **multiple stroke keybindings**
-    - **arbitrary commands defined by Python**
+    - **per-application keybindings can be defined**
+    - **multiple stroke keybindings can be defined** such as `Ctrl+x Ctrl+c` to `Ctrl+q`
+    - **not only key remapping but arbitrary commands defined by Python can be bound to a key**
   - Runs in low-level layer (`evdev` and `uinput`), making **remapping work in almost all the places**
 - **Cons**
   - Runs in root-mode (requires `sudo`)
