@@ -82,7 +82,7 @@ Use the second value (in this case `Firefox`) as the `WM_CLASS` value in your
 
 ```python
 import re
-from pykeymacs.transform import K, define_keymap, with_mark, set_mark, escape_next_key
+from xkeysnail.transform import K, define_keymap, with_mark, set_mark, escape_next_key
 
 define_keymap(re.compile("Firefox|Google-chrome"), {
     K("C-M-j"): K("C-TAB"),
