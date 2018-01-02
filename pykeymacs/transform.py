@@ -93,10 +93,7 @@ def K(exp):
         exp = re.sub(r"\A{}-".format(modifier), "", exp)
     key_str = exp.upper()
     key = getattr(Key, key_str)
-    if len(modifier_strs):
-        return Combo(create_modifiers_from_strings(modifier_strs), key)
-    else:
-        return key
+    return Combo(create_modifiers_from_strings(modifier_strs), key)
 
 def create_modifiers_from_strings(modifier_strs):
     modifiers = set()
@@ -166,19 +163,19 @@ _GLOBAL_MAP = {
 
 _CONTROL_X_MAP = {
     # C-x h (select all)
-    Combo(None, K("h")): [K("C-home"), K("C-a"), set_mark(True), Mode.GLOBAL],
+    K("h"): [K("C-home"), K("C-a"), set_mark(True), Mode.GLOBAL],
     # C-x C-f (open)
     K("C-f"): [K("C-o"), Mode.GLOBAL],
     # C-x C-s (save)
     K("C-s"): [K("C-s"), Mode.GLOBAL],
     # C-x k (kill tab)
-    Combo(None, K("k")): [K("C-f4"), Mode.GLOBAL],
+    K("k"): [K("C-f4"), Mode.GLOBAL],
     # C-x C-c (exit)
     K("C-c"): [K("M-f4"), Mode.GLOBAL],
     # cancel
     K("C-g"): Mode.GLOBAL,
     # C-x u (undo)
-    Combo(None, K("u")): [K("C-z"), set_mark(False)],
+    K("u"): [K("C-z"), set_mark(False), Mode.GLOBAL],
 }
 
 _CONTROL_Q_MAP = {}
