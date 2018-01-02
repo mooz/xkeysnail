@@ -3,10 +3,13 @@
 `xkeysnail` is a yet another keyboard remapping tool for X environment. It's
 like `xmodmap` but allows more flexible remappings.
 
-- *Pros*
-  - Has high-level and flexible remapping mechanisms, such as *per-application keymaps*
-  - Runs in low-level layer (`evdev` and `uinput`), making *remapping work in almost all the places*
-- *Cons*
+- **Pros**
+  - Has high-level and flexible remapping mechanisms, such as
+    - **per-application keymaps**
+    - **multiple stroke keybindings**
+    - **arbitrary commands defined by Python**
+  - Runs in low-level layer (`evdev` and `uinput`), making **remapping work in almost all the places**
+- **Cons**
   - Runs in root-mode (requires `sudo`)
 
 The key remapping mechanism of `xkeysnail` is based on `pykeymacs`
@@ -33,10 +36,10 @@ Requires root privilege and Python 3.
 
 ## How to prepare `config.py`?
 
-(If you just need Emacs-like keybindings, consider to
+(**If you just need Emacs-like keybindings, consider to
 use
 [`example/config.py`](https://github.com/mooz/xkeysnail/blob/master/example/config.py),
-which contains Emacs-like keybindings).
+which contains Emacs-like keybindings)**.
 
 Configuration file is a Python script that consists of several keymaps defined
 by `define_keymap(condition, mappings, name)`, which specify remappings on each
@@ -60,6 +63,7 @@ application.
       global mappings behavior on certain applications.
     - `[command1, command2, ...]`: Execute commands sequentially.
     - `function`: Execute the function and use the return value as command.
+    - `dictionary`: Sub-keymap. Used to define multiple stroke keybindings.
 3. `name`: keymap name. optional.
 
 To check `WM_CLASS` of the application you want to have custom keymap, use
