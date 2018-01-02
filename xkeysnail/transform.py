@@ -121,6 +121,7 @@ _toplevel_keymaps = []
 _mode_maps = None
 
 escape_next_key = {}
+pass_through_key = {}
 
 def define_keymap(condition, mappings, name="Anonymous keymap"):
     global _toplevel_keymaps
@@ -195,10 +196,9 @@ def transform_key(key, action):
             elif isinstance(command, dict):
                 _mode_maps = [command]
                 return
-            elif command is None:
+            elif command is pass_through_key:
                 send_key_action(key, action)
                 _mode_maps = None
-                return
         _mode_maps = None
         return
 

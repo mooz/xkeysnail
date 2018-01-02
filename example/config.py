@@ -72,7 +72,7 @@ define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
         # C-x C-c (exit)
         K("C-c"): [K("M-f4")],
         # cancel
-        K("C-g"): None,
+        K("C-g"): pass_through_key,
         # C-x u (undo)
         K("u"): [K("C-z"), set_mark(False)],
     }
