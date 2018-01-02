@@ -11,6 +11,7 @@ def get_devices_list():
 
 
 def is_keyboard_device(device):
+    """Check"""
     capabilities = device.capabilities(verbose=True)
     if ('EV_KEY', 1) not in capabilities:
         return False

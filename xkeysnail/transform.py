@@ -59,11 +59,14 @@ class Mode(Enum):
         }[self]
 
 
+# ============================================================ #
+# Mark
+# ============================================================ #
+
 _mark_set = False
 
 
 def with_mark(combo):
-
     if isinstance(combo, Key):
         combo = Combo(None, combo)
 
@@ -79,6 +82,7 @@ def set_mark(mark_set):
         _mark_set = mark_set
     return _set_mark
 
+# ============================================================ #
 
 def K(exp):
     "Helper function to specify keymap"
@@ -109,81 +113,25 @@ def create_modifiers_from_strings(modifier_strs):
             modifiers.add(Modifier.SHIFT)
     return modifiers
 
+# ============================================================
+# Keymap
+# ============================================================
 
-_GLOBAL_MAP = {
-    K("C-b"): with_mark(K("left")),
-    K("C-f"): with_mark(K("right")),
-    K("C-p"): with_mark(K("up")),
-    K("C-n"): with_mark(K("down")),
-    K("C-h"): with_mark(K("backspace")),
+_toplevel_keymaps = []
+_mode_maps = None
 
-    K("M-b"): with_mark(K("C-left")),
-    K("M-f"): with_mark(K("C-right")),
+escape_next_key = {}
 
-    K("C-a"): with_mark(K("home")),
-    K("C-e"): with_mark(K("end")),
+def define_keymap(condition, mappings, name="Anonymous keymap"):
+    global _toplevel_keymaps
+    _toplevel_keymaps.append((condition, mappings, name))
+    return mappings
 
-    K("M-v"): with_mark(K("page_up")),
-    K("C-v"): with_mark(K("page_down")),
 
-    K("M-Shift-comma"): with_mark(K("C-home")),
-    K("M-Shift-dot"): with_mark(K("C-end")),
+# ============================================================
+# Key handler
+# ============================================================
 
-    K("C-m"): K("enter"),
-    K("C-j"): K("enter"),
-    K("C-o"): [K("enter"), K("left")],
-
-    K("C-w"): [K("C-x"), set_mark(False)],
-    K("M-w"): [K("C-c"), set_mark(False)],
-    K("C-y"): [K("C-v"), set_mark(False)],
-
-    K("C-d"): [K("delete"), set_mark(False)],
-    K("M-d"): [K("C-delete"), set_mark(False)],
-
-    K("C-k"): [K("Shift-end"), K("C-x"), set_mark(False)],
-
-    K("C-slash"): [K("C-z"), set_mark(False)],
-
-    K("C-space"): set_mark(True),
-
-    K("C-s"): K("F3"),
-    K("C-r"): K("Shift-F3"),
-    K("M-Shift-key_5"): K("C-h"),
-
-    K("C-g"): [K("esc"), set_mark(False)],
-
-    # second keymap
-    K("C-x"): Mode.CONTROL_X,
-    K("C-q"): Mode.CONTROL_Q,
-
-    # next/previous tab
-    K("C-M-j"): K("C-TAB"),
-    K("C-M-k"): K("C-Shift-TAB"),
-
-    # undo (C-_)
-    K("C-Shift-ro"): K("C-z"),
-}
-
-_CONTROL_X_MAP = {
-    # C-x h (select all)
-    K("h"): [K("C-home"), K("C-a"), set_mark(True), Mode.GLOBAL],
-    # C-x C-f (open)
-    K("C-f"): [K("C-o"), Mode.GLOBAL],
-    # C-x C-s (save)
-    K("C-s"): [K("C-s"), Mode.GLOBAL],
-    # C-x k (kill tab)
-    K("k"): [K("C-f4"), Mode.GLOBAL],
-    # C-x C-c (exit)
-    K("C-c"): [K("M-f4"), Mode.GLOBAL],
-    # cancel
-    K("C-g"): Mode.GLOBAL,
-    # C-x u (undo)
-    K("u"): [K("C-z"), set_mark(False), Mode.GLOBAL],
-}
-
-_CONTROL_Q_MAP = {}
-
-_mode_map = _GLOBAL_MAP
 
 def on_event(event):
     on_key(Key(event.code), Action(event.value))
@@ -200,33 +148,63 @@ def on_key(key, action):
 
 
 def transform_key(key, action):
-    wm_class = get_active_window_wm_class()
-    non_target_classes = ("Emacs", "URxvt")
+    global _mode_maps
+    global _toplevel_keymaps
 
-    global _mode_map
     combo = Combo(get_pressed_modifiers(), key)
-    if ((wm_class in non_target_classes) \
-        or (_mode_map is _GLOBAL_MAP and combo not in _mode_map)):
-        # Pass through keys
+
+    if _mode_maps is escape_next_key:
         send_key_action(key, action)
-        return
-    if _mode_map is _CONTROL_Q_MAP:
-        send_key_action(key, action)
-    if combo not in _mode_map:
-        _mode_map = _GLOBAL_MAP
+        _mode_maps = None
         return
 
-    values = _mode_map[combo]
-    if not isinstance(values, list):
-        values = [values]
-    for value in values:
-        if callable(value):
-            value = value()
-            if value is None:
-                continue
-        if isinstance(value, Key):
-            send_key(value)
-        elif isinstance(value, Combo):
-            send_combo(value)
-        elif isinstance(value, Mode):
-            _mode_map = value.get_map()
+    is_top_level = False
+    if _mode_maps is None:
+        # Decide keymap(s)
+        is_top_level =True
+        _mode_maps = []
+        wm_class = get_active_window_wm_class()
+        print("Switch to window '{}'".format(wm_class))
+        for condition, mappings, name in _toplevel_keymaps:
+            if (callable(condition) and condition(wm_class)) \
+               or (hasattr(condition, "search") and condition.search(wm_class)) \
+               or condition is None:
+                _mode_maps.append(mappings)
+                print("Use keymap " + name)
+
+    # _mode_maps: [global_map, local_1, local_2, ...]
+    for mappings in _mode_maps:
+        if combo not in mappings:
+            continue
+        # Found key in "mappings". Execute commands defined for the key.
+        commands = mappings[combo]
+        if not isinstance(commands, list):
+            commands = [commands]
+        # Execute commands
+        for command in commands:
+            # Function -> Use returned value as command
+            if callable(command):
+                command = command()
+            # Key
+            if isinstance(command, Key):
+                send_key(command)
+            # Combo
+            elif isinstance(command, Combo):
+                send_combo(command)
+            # Go to next keymap
+            elif isinstance(command, dict):
+                _mode_maps = [command]
+                return
+            elif command is None:
+                send_key_action(key, action)
+                _mode_maps = None
+                return
+        _mode_maps = None
+        return
+
+    # Not found in all keymaps
+    if is_top_level:
+        # If it's top-level, pass through keys
+        send_key_action(key, action)
+
+    _mode_maps = None

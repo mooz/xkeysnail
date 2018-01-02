@@ -2,13 +2,13 @@
 
 from setuptools import setup
 
-setup(name             = "pykeymacs",
+setup(name             = "xkeysnail",
       version          = "0.0.1",
-      author           = "zh",
-      url              = "https://github.com/DreaminginCodeZH/pykeymacs",
-      description      = "Emacs style keyboard macros implemented in Python, using evdev and uinput.",
-      packages         = ["pykeymacs"],
-      scripts          = ["bin/pykeymacs"],
+      author           = "Masafumi Oyamada",
+      url              = "https://github.com/mooz/xkeysnail",
+      description      = "Yet another keyboard remapping tool for X environment.",
+      packages         = ["xkeysnail"],
+      scripts          = ["bin/xkeysnail"],
       license          = "GPL",
       install_requires = ["evdev", "python-xlib"]
       )
