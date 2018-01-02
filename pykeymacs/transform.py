@@ -159,6 +159,9 @@ _GLOBAL_MAP = {
     # next/previous tab
     K("C-M-j"): K("C-TAB"),
     K("C-M-k"): K("C-Shift-TAB"),
+
+    # undo (C-_)
+    K("C-Shift-ro"): K("C-z"),
 }
 
 _CONTROL_X_MAP = {
