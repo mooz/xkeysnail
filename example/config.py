@@ -64,13 +64,13 @@ define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
         # C-x h (select all)
         K("h"): [K("C-home"), K("C-a"), set_mark(True)],
         # C-x C-f (open)
-        K("C-f"): [K("C-o")],
+        K("C-f"): K("C-o"),
         # C-x C-s (save)
-        K("C-s"): [K("C-s")],
+        K("C-s"): K("C-s"),
         # C-x k (kill tab)
-        K("k"): [K("C-f4")],
+        K("k"): K("C-f4"),
         # C-x C-c (exit)
-        K("C-c"): [K("M-f4")],
+        K("C-c"): K("M-f4"),
         # cancel
         K("C-g"): pass_through_key,
         # C-x u (undo)
