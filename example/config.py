@@ -15,7 +15,7 @@ define_keymap(re.compile("Zeal"), {
 }, "Zeal")
 
 # Emacs-like keybindings in non-Emacs applications
-Define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
+define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
     # Cursor
     K("C-b"): with_mark(K("left")),
     K("C-f"): with_mark(K("right")),
@@ -71,7 +71,7 @@ Define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
         # C-x k (kill tab)
         K("k"): K("C-f4"),
         # C-x C-c (exit)
-        K("C-c"): K("M-f4"),
+        K("C-c"): K("C-q"),
         # cancel
         K("C-g"): pass_through_key,
         # C-x u (undo)
