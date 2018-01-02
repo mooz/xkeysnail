@@ -1,20 +1,21 @@
 import re
-from xkeysnail.transform import K, define_keymap, with_mark, set_mark, escape_next_key
+from xkeysnail.transform import *
 
-# Firefox/Chrome
+# Keybindings for Firefox/Chrome
 define_keymap(re.compile("Firefox|Google-chrome"), {
-    # next/previous tab
+    # Ctrl+Alt+j/k to switch next/previous tab
     K("C-M-j"): K("C-TAB"),
     K("C-M-k"): K("C-Shift-TAB"),
-}, "Firefox")
+}, "Firefox and Chrome")
 
-# Zeal
+# Keybindings for Zeal https://github.com/zealdocs/zeal/
 define_keymap(re.compile("Zeal"), {
+    # Ctrl+s to focus search area
     K("C-s"): K("C-k"),
 }, "Zeal")
 
-# Emacs-like keybindings
-define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
+# Emacs-like keybindings in non-Emacs applications
+Define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
     # Cursor
     K("C-b"): with_mark(K("left")),
     K("C-f"): with_mark(K("right")),

@@ -29,7 +29,7 @@ Requires root privilege and Python 3.
     git clone --depth 1 https://github.com/mooz/xkeysnail.git
     cd xkeysnail
     sudo pip install --upgrade .
-    
+
 ## Usage
 
     sudo xkeysnail config.py
@@ -42,29 +42,78 @@ use
 which contains Emacs-like keybindings)**.
 
 Configuration file is a Python script that consists of several keymaps defined
-by `define_keymap(condition, mappings, name)`, which specify remappings on each
-application.
+by `define_keymap(condition, mappings, name)`
 
-`define_keymap(condition, mappings, name)` defines a keymap consists of
-`mappings`, which is activated when the `condition` is satisfied.
+### `define_keymap(condition, mappings, name)`
 
-1. `condition`: one of the followings
-  - Regular expression (e.g., `re.compile("YYY")`)
-    - Activates the `mappings` if the pattern `YYY` matches the `WM_CLASS` of
-      the application.
-  - `lambda wm_class: some_condition(wm_class)`
-    - Activates the `mappings` if the `WM_CLASS` of the application satisfies
-      the condition specified by the `lambda` function.
-2. `mappings`: dictionary (`{key: command, key2: command2, ...}`)
-  - `key`: Key to override specified by `K("YYY")`
-  - `command`: one of the followings
-    - `K("YYY")`: Dispatch custom key to the application.
-    - `None`: Pass through `key` to the application. Useful to override the
-      global mappings behavior on certain applications.
-    - `[command1, command2, ...]`: Execute commands sequentially.
-    - `function`: Execute the function and use the return value as command.
-    - `dictionary`: Sub-keymap. Used to define multiple stroke keybindings.
-3. `name`: keymap name. optional.
+Defines a keymap consists of `mappings`, which is activated when the `condition`
+is satisfied.
+
+Argument `condition` specifies the condition of activating the `mappings` on an
+application and takes one of the following forms:
+- Regular expression (e.g., `re.compile("YYY")`)
+  - Activates the `mappings` if the pattern `YYY` matches the `WM_CLASS` of
+    the application.
+- `lambda wm_class: some_condition(wm_class)`
+  - Activates the `mappings` if the `WM_CLASS` of the application satisfies
+    the condition specified by the `lambda` function.
+- `None`: Refers to no condition. `None`-specified keymap will be a global
+  keymap and is always enabled.
+
+Argument `mappings` is a dictionary in the form of `{key: command, key2:
+command2, ...}` where `key` and `command` take following forms:
+- `key`: Key to override specified by `K("YYY")`
+  - For the syntax of key specification, please refer to
+    the [key specification section](#key-specification).
+- `command`: one of the followings
+  - `K("YYY")`: Dispatch custom key to the application.
+  - `[command1, command2, ...]`: Execute commands sequentially.
+  - `{ ... }`: Sub-keymap. Used to define multiple stroke keybindings.
+    See [multiple stroke keys](#multiple-stroke-keys) for details.
+  - `pass_through_key`: Pass through `key` to the application. Useful to
+    override the global mappings behavior on certain applications.
+  - `escape_next_key`: Escape next key.
+  - arbitrary function: The function is executed and the returned value is used
+    as a command.
+    - Can be used to invoke UNIX commands.
+
+Argument `name` specifies the keymap name. This is an optional argument.
+
+#### Key Specification
+
+Key specification in a keymap is in a form of `K("(<Modifier>-)*<Key>")` where
+
+`<Modifier>` is mone of the followings
+- `C` or `Ctrl` -> Control key
+- `M` or `Alt` -> Alt key
+- `Shift` -> Shift key
+- `Super` or `Win` -> Super/Windows key
+
+and `<Key>` is a key whose name is defined
+in [`key.py`](https://github.com/mooz/xkeysnail/blob/master/xkeysnail/key.py).
+
+Here is a list of key specification examples:
+
+- `K("C-M-j")`: `Ctrl` + `Alt` + `j`
+- `K("Ctrl-m")`: `Ctrl` + `m`
+- `K("Win-o")`: `Super/Windows` + `o`
+- `K("M-Shift-comma")`: `Alt` + `Shift` + `comma` (= `Alt` + `>`)
+
+#### Multiple stroke keys
+
+When you needs multiple stroke keys, define nested keymap. For example, the
+following example remaps `C-x C-c` to `C-q`.
+
+```python
+define_keymap(None, {
+    K("C-x"): {
+      K("C-c"): K("C-q"),
+      K("C-f"): K("C-q"),
+    }
+})
+```
+
+#### Checking an application's `WM_CLASS` with `xprop`
 
 To check `WM_CLASS` of the application you want to have custom keymap, use
 `xprop` command:
@@ -78,19 +127,28 @@ and then click the application. `xprop` tells `WM_CLASS` of the application as f
 Use the second value (in this case `Firefox`) as the `WM_CLASS` value in your
 `config.py`.
 
-### Examples
+### Example `config.py`
+
+Here is an example `config.py`.
 
 ```python
-import re
-from xkeysnail.transform import K, define_keymap, with_mark, set_mark, escape_next_key
+from xkeysnail.transform import *
 
+# Keybindings for Firefox/Chrome
 define_keymap(re.compile("Firefox|Google-chrome"), {
+    # Ctrl+Alt+j/k to switch next/previous tab
     K("C-M-j"): K("C-TAB"),
     K("C-M-k"): K("C-Shift-TAB"),
 }, "Firefox and Chrome")
 
-# Emacs-like keybindings
-define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
+# Keybindings for Zeal https://github.com/zealdocs/zeal/
+define_keymap(re.compile("Zeal"), {
+    # Ctrl+s to focus search area
+    K("C-s"): K("C-k"),
+}, "Zeal")
+
+# Emacs-like keybindings in non-Emacs applications
+Define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
     # Cursor
     K("C-b"): with_mark(K("left")),
     K("C-f"): with_mark(K("right")),
@@ -118,7 +176,7 @@ define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
     K("M-w"): [K("C-c"), set_mark(False)],
     K("C-y"): [K("C-v"), set_mark(False)],
     # Delete
-    [M S2]K("C-d"): [K("delete"), set_mark(False)],
+    K("C-d"): [K("delete"), set_mark(False)],
     K("M-d"): [K("C-delete"), set_mark(False)],
     # Kill line
     K("C-k"): [K("Shift-end"), K("C-x"), set_mark(False)],
@@ -140,15 +198,15 @@ define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
         # C-x h (select all)
         K("h"): [K("C-home"), K("C-a"), set_mark(True)],
         # C-x C-f (open)
-        K("C-f"): [K("C-o")],
+        K("C-f"): K("C-o"),
         # C-x C-s (save)
-        K("C-s"): [K("C-s")],
+        K("C-s"): K("C-s"),
         # C-x k (kill tab)
-        K("k"): [K("C-f4")],
+        K("k"): K("C-f4"),
         # C-x C-c (exit)
-        K("C-c"): [K("M-f4")],
+        K("C-c"): K("M-f4"),
         # cancel
-        K("C-g"): None,
+        K("C-g"): pass_through_key,
         # C-x u (undo)
         K("u"): [K("C-z"), set_mark(False)],
     }
