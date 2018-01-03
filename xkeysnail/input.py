@@ -48,9 +48,10 @@ def select_device(device_paths=None):
     """Select a device from the list of accessible input devices."""
     if not device_paths:
         print("""No keyboard devices specified via (--devices) option.
-xkeysnail guess where are the keyboard devices ... done.
+xkeysnail picks up keyboard-ish devices from the list below:
 """)
         devices = get_devices_from_paths(reversed(list_devices()))
+        print_device_list(devices)
         devices = list(filter(is_keyboard_device, devices))
     else:
         devices = get_devices_from_paths(device_paths)
@@ -62,7 +63,7 @@ xkeysnail guess where are the keyboard devices ... done.
         print('error: no input devices found (do you have rw permission on /dev/input/*?)')
         exit(1)
 
-    print("Following device(s) are remapped:\n")
+    print("Okay, now enable remapping on the following device(s):\n")
     print_device_list(devices)
 
     return devices

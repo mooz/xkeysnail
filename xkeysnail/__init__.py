@@ -26,8 +26,6 @@ def cli_main():
                         help='configuration file (See README.md for syntax)')
     parser.add_argument('--devices', dest="devices", metavar='device', type=str, nargs='+',
                         help='keyboard devices to remap (if omitted, xkeysnail choose proper keyboard devices)')
-    parser.add_argument('--list-devices', dest="list_devices", action="store_true",
-                        help='list available devices')
     args = parser.parse_args()
 
     # Make sure that user have root privilege
