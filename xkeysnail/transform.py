@@ -26,10 +26,10 @@ def get_class_name(window):
             parent_window = window.query_tree().parent
             if parent_window:
                 return get_class_name(parent_window)
-            return None
+            return ""
         return wmclass
     except:
-        return None
+        return ""
 
 # ============================================================ #
 
