@@ -748,6 +748,14 @@ class Modifier(Enum):
             cls.SUPER: {Key.LEFT_META, Key.RIGHT_META}
         }
 
+    def __str__(self):
+        print(self.value)
+        if self.value == self.CONTROL.value: return "C"
+        if self.value == self.ALT.value: return "M"
+        if self.value == self.SHIFT.value: return "Shift"
+        if self.value == self.SUPER.value: return "Super"
+        return None
+
     def get_keys(self):
         return self._get_modifier_map()[self]
 
@@ -794,7 +802,7 @@ class Combo:
         return hash((frozenset(self.modifiers), self.key))
 
     def __str__(self):
-        return "{}, {}".format(str(self.modifiers), str(self.key))
+        return "-".join([str(mod) for mod in self.modifiers] + [self.key.name])
 
     def with_modifier(self, modifiers):
         if isinstance(modifiers, Modifier):
