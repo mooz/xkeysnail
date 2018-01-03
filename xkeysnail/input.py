@@ -30,16 +30,30 @@ def is_keyboard_device(device):
     return True
 
 
+def print_device_list(devices):
+    device_format = '{1.fn:<20} {1.name:<35} {1.phys}'
+    device_lines = [device_format.format(n, d) for n, d in enumerate(devices)]
+    print('-' * len(max(device_lines, key=len)))
+    print('{:<20} {:<35} {}'.format('Device', 'Name', 'Phys'))
+    print('-' * len(max(device_lines, key=len)))
+    print('\n'.join(device_lines))
+    print('')
+
+
+def get_devices_from_paths(device_paths):
+    return [InputDevice(device_fn) for device_fn in device_paths]
+
+
 def select_device(device_paths=None):
     """Select a device from the list of accessible input devices."""
     if not device_paths:
         print("""No keyboard devices specified via (--devices) option.
 xkeysnail guess where are the keyboard devices ... done.
 """)
-        devices = [InputDevice(device_fn) for device_fn in reversed(list_devices())]
-        devices = filter(is_keyboard_device, devices)
+        devices = get_devices_from_paths(reversed(list_devices()))
+        devices = list(filter(is_keyboard_device, devices))
     else:
-        devices = [InputDevice(device_fn) for device_fn in device_paths]
+        devices = get_devices_from_paths(device_paths)
 
     # Exclude evdev device, we use for output emulation, from input monitoring list
     devices = list(filter(lambda device: device.name != "py-evdev-uinput", devices))
@@ -48,15 +62,8 @@ xkeysnail guess where are the keyboard devices ... done.
         print('error: no input devices found (do you have rw permission on /dev/input/*?)')
         exit(1)
 
-    device_format = '{0:<3} {1.fn:<20} {1.name:<35} {1.phys}'
-    device_lines = [device_format.format(n, d) for n, d in enumerate(devices)]
-
     print("Following device(s) are remapped:\n")
-    print('-' * len(max(device_lines, key=len)))
-    print('ID  {:<20} {:<35} {}'.format('Device', 'Name', 'Phys'))
-    print('-' * len(max(device_lines, key=len)))
-    print('\n'.join(device_lines))
-    print('')
+    print_device_list(devices)
 
     return devices
 
