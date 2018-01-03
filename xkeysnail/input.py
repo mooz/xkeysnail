@@ -2,6 +2,8 @@ from evdev import ecodes, InputDevice, list_devices
 from select import select
 from sys import exit
 from .transform import on_event
+from .output import send_event
+from .key import Key
 
 __author__ = 'zh'
 
@@ -11,12 +13,20 @@ def get_devices_list():
 
 
 def is_keyboard_device(device):
-    """Check"""
-    capabilities = device.capabilities(verbose=True)
-    if ('EV_KEY', 1) not in capabilities:
+    """Guess the device is a keyboard or not"""
+    capabilities = device.capabilities(verbose=False)
+    if 1 not in capabilities:
         return False
-    if ('KEY_SPACE', 57) not in capabilities[('EV_KEY', 1)]:
+    supported_keys = capabilities[1]
+    if Key.SPACE not in supported_keys or \
+       Key.A not in supported_keys or \
+       Key.Z not in supported_keys:
+        # Not support common keys. Not keyboard.
         return False
+    if Key.BTN_MOUSE in supported_keys:
+        # Mouse.
+        return False
+    # Otherwise, its keyboard!
     return True
 
 
