@@ -1,11 +1,18 @@
 # xkeysnail
 
-    ██╗  ██╗██╗  ██╗███████╗██╗   ██╗███████╗███╗   ██╗ █████╗ ██╗██╗     
-    ╚██╗██╔╝██║ ██╔╝██╔════╝╚██╗ ██╔╝██╔════╝████╗  ██║██╔══██╗██║██║     
-     ╚███╔╝ █████╔╝ █████╗   ╚████╔╝ ███████╗██╔██╗ ██║███████║██║██║     
-     ██╔██╗ ██╔═██╗ ██╔══╝    ╚██╔╝  ╚════██║██║╚██╗██║██╔══██║██║██║     
-    ██╔╝ ██╗██║  ██╗███████╗   ██║   ███████║██║ ╚████║██║  ██║██║███████╗
-    ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝╚══════╝
+    ██╗  ██╗██╗  ██╗███████╗██╗   ██╗
+    ╚██╗██╔╝██║ ██╔╝██╔════╝╚██╗ ██╔╝
+     ╚███╔╝ █████╔╝ █████╗   ╚████╔╝
+     ██╔██╗ ██╔═██╗ ██╔══╝    ╚██╔╝
+    ██╔╝ ██╗██║  ██╗███████╗   ██║
+    ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝
+      ███████╗███╗   ██╗ █████╗ ██╗██╗
+      ██╔════╝████╗  ██║██╔══██╗██║██║
+      ███████╗██╔██╗ ██║███████║██║██║
+      ╚════██║██║╚██╗██║██╔══██║██║██║
+      ███████║██║ ╚████║██║  ██║██║███████╗
+      ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝╚══════╝
+
 
 `xkeysnail` is yet another keyboard remapping tool for X environment. It's like
 `xmodmap` but allows more flexible remappings.
@@ -13,13 +20,13 @@
 ![screenshot](http://mooz.github.io/image/xkeysnail_screenshot.png)
 
 - **Pros**
-  - Has high-level and flexible remapping mechanisms, such as
-    - **per-application keybindings can be defined**
-    - **multiple stroke keybindings can be defined** such as `Ctrl+x Ctrl+c` to `Ctrl+q`
-    - **not only key remapping but arbitrary commands defined by Python can be bound to a key**
-  - Runs in low-level layer (`evdev` and `uinput`), making **remapping work in almost all the places**
+    - Has high-level and flexible remapping mechanisms, such as
+        - **per-application keybindings can be defined**
+        - **multiple stroke keybindings can be defined** such as `Ctrl+x Ctrl+c` to `Ctrl+q`
+        - **not only key remapping but arbitrary commands defined by Python can be bound to a key**
+    - Runs in low-level layer (`evdev` and `uinput`), making **remapping work in almost all the places**
 - **Cons**
-  - Runs in root-mode (requires `sudo`)
+    - Runs in root-mode (requires `sudo`)
 
 The key remapping mechanism of `xkeysnail` is based on `pykeymacs`
 (https://github.com/DreaminginCodeZH/pykeymacs).
@@ -65,30 +72,23 @@ is satisfied.
 Argument `condition` specifies the condition of activating the `mappings` on an
 application and takes one of the following forms:
 - Regular expression (e.g., `re.compile("YYY")`)
-  - Activates the `mappings` if the pattern `YYY` matches the `WM_CLASS` of
-    the application.
+    - Activates the `mappings` if the pattern `YYY` matches the `WM_CLASS` of the application.
 - `lambda wm_class: some_condition(wm_class)`
-  - Activates the `mappings` if the `WM_CLASS` of the application satisfies
-    the condition specified by the `lambda` function.
-- `None`: Refers to no condition. `None`-specified keymap will be a global
-  keymap and is always enabled.
+    - Activates the `mappings` if the `WM_CLASS` of the application satisfies the condition specified by the `lambda` function.
+- `None`: Refers to no condition. `None`-specified keymap will be a global keymap and is always enabled.
 
 Argument `mappings` is a dictionary in the form of `{key: command, key2:
 command2, ...}` where `key` and `command` take following forms:
 - `key`: Key to override specified by `K("YYY")`
-  - For the syntax of key specification, please refer to
-    the [key specification section](#key-specification).
+    - For the syntax of key specification, please refer to the [key specification section](#key-specification).
 - `command`: one of the followings
-  - `K("YYY")`: Dispatch custom key to the application.
-  - `[command1, command2, ...]`: Execute commands sequentially.
-  - `{ ... }`: Sub-keymap. Used to define multiple stroke keybindings.
-    See [multiple stroke keys](#multiple-stroke-keys) for details.
-  - `pass_through_key`: Pass through `key` to the application. Useful to
-    override the global mappings behavior on certain applications.
-  - `escape_next_key`: Escape next key.
-  - arbitrary function: The function is executed and the returned value is used
-    as a command.
-    - Can be used to invoke UNIX commands.
+    - `K("YYY")`: Dispatch custom key to the application.
+    - `[command1, command2, ...]`: Execute commands sequentially.
+    - `{ ... }`: Sub-keymap. Used to define multiple stroke keybindings. See [multiple stroke keys](#multiple-stroke-keys) for details.
+    - `pass_through_key`: Pass through `key` to the application. Useful to override the global mappings behavior on certain applications.
+    - `escape_next_key`: Escape next key.
+    - Arbitrary function: The function is executed and the returned value is used as a command.
+        - Can be used to invoke UNIX commands.
 
 Argument `name` specifies the keymap name. This is an optional argument.
 
