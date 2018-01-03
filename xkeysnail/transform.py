@@ -155,6 +155,7 @@ def transform_key(key, action):
     combo = Combo(get_pressed_modifiers(), key)
 
     if _mode_maps is escape_next_key:
+        print("Escape key: {}".format(combo))
         send_key_action(key, action)
         _mode_maps = None
         return
@@ -165,13 +166,14 @@ def transform_key(key, action):
         is_top_level =True
         _mode_maps = []
         wm_class = get_active_window_wm_class()
-        print("Switch to window '{}'".format(wm_class))
+        keymap_names = []
         for condition, mappings, name in _toplevel_keymaps:
             if (callable(condition) and condition(wm_class)) \
                or (hasattr(condition, "search") and condition.search(wm_class)) \
                or condition is None:
                 _mode_maps.append(mappings)
-                print("Use keymap " + name)
+                keymap_names.append(name)
+        print("WM_CLASS '{}' | active keymaps = [{}]".format(wm_class, ", ".join(keymap_names)))
 
     print(combo)
 
@@ -194,6 +196,9 @@ def transform_key(key, action):
             # Combo
             elif isinstance(command, Combo):
                 send_combo(command)
+            elif command is escape_next_key:
+                _mode_maps = escape_next_key
+                return
             # Go to next keymap
             elif isinstance(command, dict):
                 _mode_maps = [command]
