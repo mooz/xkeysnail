@@ -749,7 +749,6 @@ class Modifier(Enum):
         }
 
     def __str__(self):
-        print(self.value)
         if self.value == self.CONTROL.value: return "C"
         if self.value == self.ALT.value: return "M"
         if self.value == self.SHIFT.value: return "Shift"
