@@ -1,7 +1,14 @@
 # xkeysnail
 
-`xkeysnail` is yet another keyboard remapping tool for X environment. It's
-like `xmodmap` but allows more flexible remappings.
+    ██╗  ██╗██╗  ██╗███████╗██╗   ██╗███████╗███╗   ██╗ █████╗ ██╗██╗     
+    ╚██╗██╔╝██║ ██╔╝██╔════╝╚██╗ ██╔╝██╔════╝████╗  ██║██╔══██╗██║██║     
+     ╚███╔╝ █████╔╝ █████╗   ╚████╔╝ ███████╗██╔██╗ ██║███████║██║██║     
+     ██╔██╗ ██╔═██╗ ██╔══╝    ╚██╔╝  ╚════██║██║╚██╗██║██╔══██║██║██║     
+    ██╔╝ ██╗██║  ██╗███████╗   ██║   ███████║██║ ╚████║██║  ██║██║███████╗
+    ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝╚══════╝
+
+`xkeysnail` is yet another keyboard remapping tool for X environment. It's like
+`xmodmap` but allows more flexible remappings.
 
 - **Pros**
   - Has high-level and flexible remapping mechanisms, such as
