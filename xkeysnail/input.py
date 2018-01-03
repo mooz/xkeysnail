@@ -57,6 +57,8 @@ def loop(devices):
                     for event in device.read():
                         if event.type == ecodes.EV_KEY:
                             on_event(event)
+                        else:
+                            send_event(event)
             except OSError as e:
                 print("Device removed: " + str(device.name))
                 devices.remove(device)
