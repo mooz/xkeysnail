@@ -10,6 +10,8 @@
 `xkeysnail` is yet another keyboard remapping tool for X environment. It's like
 `xmodmap` but allows more flexible remappings.
 
+![screenshot](http://mooz.github.io/image/xkeysnail_screenshot.png)
+
 - **Pros**
   - Has high-level and flexible remapping mechanisms, such as
     - **per-application keybindings can be defined**
@@ -40,6 +42,10 @@ Requires root privilege and **Python 3**.
 ## Usage
 
     sudo xkeysnail config.py
+
+If you want to specify keyboard devices, use `--devices` option:
+
+    sudo xkeysnail config.py --devices /dev/input/event3 /dev/input/event3
 
 ## How to prepare `config.py`?
 
