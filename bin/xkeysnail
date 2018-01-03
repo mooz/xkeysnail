@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 from xkeysnail.input import loop, select_device
+import argparse
+import sys
 
 
 def eval_file(path):
@@ -9,11 +11,34 @@ def eval_file(path):
 
 
 def main():
-    device = select_device()
-    loop(device)
+    print(logo)
 
+    # Parse args
+    parser = argparse.ArgumentParser(description='Yet another keyboard remapping tool for X environment.')
+    parser.add_argument('config', metavar='config.py', type=str,
+                        help='configuration file (See README.md for syntax)')
+    parser.add_argument('--devices', dest="devices", metavar='device', type=str, nargs='+',
+                        help='keyboard devices to remap (if omitted, xkeysnail choose proper keyboard devices)')
+    args = parser.parse_args()
+
+    # Make sure that user have root privilege
+    from evdev.uinput import UInputError
+    try:
+        from xkeysnail.output import _uinput
+    except UInputError as ex:
+        print("""Failed to open `uinput` in write mode.
+Make sure that you have executed xkeysnail with root privilege such as
+
+    $ sudo xkeysnail config.py
+""")
+        sys.exit(1)
+
+    # Load configuration file
+    eval_file(args.config)
+
+    # Enter event loop
+    from xkeysnail.input import loop, select_device
+    loop(select_device(args.devices))
 
 if __name__ == '__main__':
-    import sys
-    eval_file(sys.argv[1])
     main()
