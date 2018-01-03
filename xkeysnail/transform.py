@@ -173,6 +173,8 @@ def transform_key(key, action):
                 _mode_maps.append(mappings)
                 print("Use keymap " + name)
 
+    print(combo)
+
     # _mode_maps: [global_map, local_1, local_2, ...]
     for mappings in _mode_maps:
         if combo not in mappings:

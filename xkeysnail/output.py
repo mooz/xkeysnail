@@ -28,7 +28,6 @@ def send_event(event):
 
 
 def send_key_action(key, action):
-    print("[{}] {}".format(action.name[:3], key.name))
     update_modifier_key_pressed(key, action)
     _uinput.write(ecodes.EV_KEY, key, action)
     send_sync()
