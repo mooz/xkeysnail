@@ -17,18 +17,18 @@ The key remapping mechanism of `xkeysnail` is based on `pykeymacs`
 
 ## Installation
 
-Requires root privilege and Python 3.
+Requires root privilege and **Python 3**.
 
 ### Ubuntu
 
     sudo apt install python3-pip
-    sudo pip install xkeysnail
+    sudo pip3 install xkeysnail
 
 ### From source
 
     git clone --depth 1 https://github.com/mooz/xkeysnail.git
     cd xkeysnail
-    sudo pip install --upgrade .
+    sudo pip3 install --upgrade .
 
 ## Usage
 
