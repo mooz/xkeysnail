@@ -11,6 +11,10 @@ define_keymap(re.compile("Firefox|Google-chrome"), {
     # Ctrl+Alt+j/k to switch next/previous tab
     K("C-M-j"): K("C-TAB"),
     K("C-M-k"): K("C-Shift-TAB"),
+    # Type C-j to focus to the content
+    K("C-j"): K("C-f6"),
+    # very naive "Edit in editor" feature (just an example)
+    K("C-o"): [K("C-a"), K("C-c"), launch(["gedit"]), sleep(0.5), K("C-v")]
 }, "Firefox and Chrome")
 
 # Keybindings for Zeal https://github.com/zealdocs/zeal/

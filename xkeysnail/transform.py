@@ -71,6 +71,24 @@ def set_mark(mark_set):
     return _set_mark
 
 # ============================================================ #
+# Utility functions for keymap
+# ============================================================ #
+
+def launch(command):
+    """Launch command"""
+    def launcher():
+        from subprocess import Popen
+        Popen(command)
+    return launcher
+
+def sleep(sec):
+    """Sleep sec in commands"""
+    def sleeper():
+        import time
+        time.sleep(sec)
+    return sleeper
+
+# ============================================================ #
 
 def K(exp):
     "Helper function to specify keymap"
