@@ -1,6 +1,11 @@
 import re
 from xkeysnail.transform import *
 
+# Change modifier using modmap feature
+define_modmap({
+    Key.CAPSLOCK: Key.LEFT_CTRL
+})
+
 # Keybindings for Firefox/Chrome
 define_keymap(re.compile("Firefox|Google-chrome"), {
     # Ctrl+Alt+j/k to switch next/previous tab

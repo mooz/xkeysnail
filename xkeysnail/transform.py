@@ -121,9 +121,30 @@ def define_keymap(condition, mappings, name="Anonymous keymap"):
 # Key handler
 # ============================================================
 
+# keycode translation
+# e.g., { Key.CAPSLOCK: Key.LEFT_CTRL }
+_mod_map = None
+
+
+def define_modmap(mod_remappings):
+    """Defines modmap (keycode translation)
+
+    Example:
+
+    define_modmap({
+    Key.CAPSLOCK: Key.LEFT_CTRL
+    })
+    """
+    global _mod_map
+    _mod_map = mod_remappings
+
 
 def on_event(event):
-    on_key(Key(event.code), Action(event.value))
+    key = Key(event.code)
+    # translate keycode (like xmodmap)
+    if _mod_map and key in _mod_map:
+        key = _mod_map[key]
+    on_key(key, Action(event.value))
 
 
 def on_key(key, action):
