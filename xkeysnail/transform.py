@@ -47,18 +47,6 @@ def get_pressed_modifiers():
     return {Modifier.from_key(key) for key in _pressed_modifier_keys}
 
 
-class Mode(Enum):
-
-    GLOBAL, CONTROL_X, CONTROL_Q = range(3)
-
-    def get_map(self):
-        return {
-            Mode.GLOBAL: _GLOBAL_MAP,
-            Mode.CONTROL_X: _CONTROL_X_MAP,
-            Mode.CONTROL_Q: _CONTROL_Q_MAP
-        }[self]
-
-
 # ============================================================ #
 # Mark
 # ============================================================ #
