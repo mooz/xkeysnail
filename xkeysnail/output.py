@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from evdev import ecodes
 from evdev.uinput import UInput
 from .key import Action, Combo, Modifier

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from evdev import ecodes, InputDevice, list_devices
 from select import select
 from sys import exit

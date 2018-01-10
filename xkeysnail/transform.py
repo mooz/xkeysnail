@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from enum import Enum
 from .key import Action, Combo, Key, Modifier
 from .output import send_combo, send_key_action, send_key
