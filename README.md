@@ -1,20 +1,6 @@
 # xkeysnail
 
-    ██╗  ██╗██╗  ██╗███████╗██╗   ██╗
-    ╚██╗██╔╝██║ ██╔╝██╔════╝╚██╗ ██╔╝
-     ╚███╔╝ █████╔╝ █████╗   ╚████╔╝
-     ██╔██╗ ██╔═██╗ ██╔══╝    ╚██╔╝
-    ██╔╝ ██╗██║  ██╗███████╗   ██║
-    ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝
-      ███████╗███╗   ██╗ █████╗ ██╗██╗
-      ██╔════╝████╗  ██║██╔══██╗██║██║
-      ███████╗██╔██╗ ██║███████║██║██║
-      ╚════██║██║╚██╗██║██╔══██║██║██║
-      ███████║██║ ╚████║██║  ██║██║███████╗
-      ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝╚══════╝
-
-
-`xkeysnail` is yet another keyboard remapping tool for X environment. It's like
+`xkeysnail` is yet another keyboard remapping tool for X environment written in Python. It's like
 `xmodmap` but allows more flexible remappings.
 
 ![screenshot](http://mooz.github.io/image/xkeysnail_screenshot.png)
