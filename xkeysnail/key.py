@@ -735,6 +735,9 @@ class Action(IntEnum):
     def is_pressed(self):
         return self == Action.PRESS or self == Action.REPEAT
 
+    def is_release(self):
+        return self == Action.RELEASE
+
 
 @unique
 class Modifier(Enum):

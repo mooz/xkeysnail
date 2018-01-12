@@ -2,7 +2,7 @@
 
 from evdev import ecodes
 from evdev.uinput import UInput
-from .key import Action, Combo, Modifier
+from .key import Action, Combo, Modifier, Key
 
 __author__ = 'zh'
 
@@ -11,6 +11,9 @@ _uinput = UInput()
 
 _pressed_modifier_keys = set()
 
+_alt_is_down = False
+
+_last_key = None
 
 def update_modifier_key_pressed(key, action):
     if key in Modifier.get_all_keys():
@@ -29,13 +32,46 @@ def send_event(event):
     send_sync()
 
 
+def send_write(key, action):
+        _uinput.write(ecodes.EV_KEY, key, action)
+        send_sync()
+
+
+def handle_alt(key, action):
+    global _alt_is_down, _last_key
+
+    if key == Key.LEFT_ALT:
+        if action.is_release():
+            if _alt_is_down:
+                send_write(key, action)
+                _alt_is_down = False
+            elif _last_key == key:
+                send_write(key, Action.PRESS)
+                send_write(key, action)
+
+    elif (Key.LEFT_ALT in _pressed_modifier_keys) and action.is_pressed():
+        if not _alt_is_down:
+            send_write(Key.LEFT_ALT, Action.PRESS)
+            _alt_is_down = True
+
+    if action == Action.PRESS:
+        _last_key = key
+
+
 def send_key_action(key, action):
     update_modifier_key_pressed(key, action)
-    _uinput.write(ecodes.EV_KEY, key, action)
-    send_sync()
+
+    handle_alt(key, action)
+    if key == Key.LEFT_ALT:
+        return
+
+    send_write(key, action)
 
 
 def send_combo(combo):
+    global _last_key
+
+    _last_key = None
 
     released_modifiers_keys = []
     for modifier in set(Modifier) - combo.modifiers:
@@ -61,6 +97,7 @@ def send_combo(combo):
     for modifier in reversed(released_modifiers_keys):
         send_key_action(modifier, Action.PRESS)
 
+    _last_key = None
 
 def send_key(key):
     send_combo(Combo(None, key))
