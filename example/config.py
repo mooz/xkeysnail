@@ -8,6 +8,11 @@ define_modmap({
     Key.CAPSLOCK: Key.LEFT_CTRL
 })
 
+# Change Caps to Escape in Emacs only
+define_conditional_modmap(re.compile(r'Emacs'), {
+    Key.CAPSLOCK: Key.ESC,
+})
+
 # Keybindings for Firefox/Chrome
 define_keymap(re.compile("Firefox|Google-chrome"), {
     # Ctrl+Alt+j/k to switch next/previous tab

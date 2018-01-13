@@ -26,6 +26,14 @@ Requires root privilege and **Python 3**.
     sudo apt install python3-pip
     sudo pip3 install xkeysnail
 
+### Fedora
+
+    sudo dnf install python3-pip
+    sudo pip3 install xkeysnail
+    # Add your user to input group if you don't want to run xkeysnail
+    # with sudo (log out and log in again to apply group change)
+    sudo usermod -a -G input $USER
+
 ### From source
 
     git clone --depth 1 https://github.com/mooz/xkeysnail.git

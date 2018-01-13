@@ -144,6 +144,7 @@ def define_keymap(condition, mappings, name="Anonymous keymap"):
 # keycode translation
 # e.g., { Key.CAPSLOCK: Key.LEFT_CTRL }
 _mod_map = None
+_conditional_mod_map = []
 
 
 def define_modmap(mod_remappings):
@@ -159,11 +160,34 @@ def define_modmap(mod_remappings):
     _mod_map = mod_remappings
 
 
+def define_conditional_modmap(condition, mod_remappings):
+    """Defines conditional modmap (keycode translation)
+
+    Example:
+
+    define_modmap(re.search(r'Emacs'), {
+    Key.CAPSLOCK: Key.LEFT_CTRL
+    })
+    """
+    if hasattr(condition, 'search'):
+        condition = condition.search
+    if not callable(condition):
+        raise ValueError('condition must be a function or compiled regexp')
+    _conditional_mod_map.append((condition, mod_remappings))
+
+
 def on_event(event):
     key = Key(event.code)
     # translate keycode (like xmodmap)
-    if _mod_map and key in _mod_map:
-        key = _mod_map[key]
+    active_mod_map = _mod_map
+    if _conditional_mod_map:
+        wm_class = get_active_window_wm_class()
+        for condition, mod_map in _conditional_mod_map:
+            if condition(wm_class):
+                active_mod_map = mod_map
+                break
+    if active_mod_map and key in active_mod_map:
+        key = active_mod_map[key]
     on_key(key, Action(event.value))
 
 
