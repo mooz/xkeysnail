@@ -178,6 +178,7 @@ def define_conditional_modmap(condition, mod_remappings):
 
 def on_event(event):
     key = Key(event.code)
+    wm_class = None
     # translate keycode (like xmodmap)
     active_mod_map = _mod_map
     if _conditional_mod_map:
@@ -188,20 +189,20 @@ def on_event(event):
                 break
     if active_mod_map and key in active_mod_map:
         key = active_mod_map[key]
-    on_key(key, Action(event.value))
+    on_key(key, Action(event.value), wm_class=wm_class)
 
 
-def on_key(key, action):
+def on_key(key, action, wm_class=None):
     if key in Modifier.get_all_keys():
         update_pressed_modifier_keys(key, action)
         send_key_action(key, action)
     elif not action.is_pressed():
         send_key_action(key, action)
     else:
-        transform_key(key, action)
+        transform_key(key, action, wm_class=wm_class)
 
 
-def transform_key(key, action):
+def transform_key(key, action, wm_class=None):
     global _mode_maps
     global _toplevel_keymaps
 
@@ -218,7 +219,8 @@ def transform_key(key, action):
         # Decide keymap(s)
         is_top_level =True
         _mode_maps = []
-        wm_class = get_active_window_wm_class()
+        if wm_class is None:
+            wm_class = get_active_window_wm_class()
         keymap_names = []
         for condition, mappings, name in _toplevel_keymaps:
             if (callable(condition) and condition(wm_class)) \
