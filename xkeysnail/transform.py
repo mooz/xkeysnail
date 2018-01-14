@@ -203,31 +203,39 @@ def define_multipurpose_modmap(multipurpose_remappings):
 
 def multipurpose_handler(key, action):
 
-    def maybe_press_modifier():
-        for real_key, (_, mod_key, action) in _multipurpose_map.items():
-            if action == Action.PRESS and \
-               mod_key not in _pressed_modifier_keys and \
-               real_key is not key:
+    def maybe_press_modifiers():
+        """Search the multipurpose map for keys that are pressed. If found and
+        we have not yet sent it's modifier translation we do so."""
+        for _, mod_key, state in _multipurpose_map.values():
+            if state == Action.PRESS and mod_key not in _pressed_modifier_keys:
                 on_key(mod_key, Action.PRESS)
 
+    # we need to register the last key presses so we know if a multipurpose key
+    # was a single press and release
     global _last_key_press
+
     if key in _multipurpose_map:
-        values = _multipurpose_map[key] # 0 = normal; 1 = modifier; 2 = action
-        if action == Action.PRESS:
-            values[2] = action
-        elif action == Action.REPEAT and \
-             values[1] in _pressed_modifier_keys:
-            on_key(values[1], action)
-        elif action == Action.RELEASE:
-            if _last_key_press == key:
-                maybe_press_modifier()
-                on_key(values[0], Action.PRESS)
-                on_key(values[0], action)
-            else:
-                on_key(values[1], action)
-            values[2] = action
+        single_key, mod_key, key_state = _multipurpose_map[key]
+        key_is_down = key_state == action.PRESS
+        mod_is_down = mod_key in _pressed_modifier_keys
+        key_was_last_press = key == _last_key_press
+        def set_key_state(x): _multipurpose_map[key][2] = x
+
+        if action == Action.RELEASE and key_is_down:
+            set_key_state(Action.RELEASE)
+            # it is a single press and release
+            if key_was_last_press:
+                maybe_press_modifiers() # maybe other multipurpose keys are down
+                on_key(single_key, Action.PRESS)
+                on_key(single_key, Action.RELEASE)
+            # it is the modifier in a combo
+            elif mod_is_down:
+                on_key(mod_key, Action.RELEASE)
+        elif action == Action.PRESS and not key_is_down:
+            set_key_state(Action.PRESS)
+    # if key is not a multipurpose key we want eventual modifiers down
     else:
-        maybe_press_modifier()
+        maybe_press_modifiers()
 
     if action == Action.PRESS:
         _last_key_press = key
