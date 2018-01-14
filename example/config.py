@@ -3,14 +3,14 @@
 import re
 from xkeysnail.transform import *
 
-# Change modifier using modmap feature
+# [Global modemap] Change modifier keys as in xmodmap
 define_modmap({
     Key.CAPSLOCK: Key.LEFT_CTRL
 })
 
-# Change Caps to Escape in Emacs only
+# [Conditional modmap] Change modifier keys in certain applications
 define_conditional_modmap(re.compile(r'Emacs'), {
-    Key.CAPSLOCK: Key.ESC,
+    Key.RIGHT_CTRL: Key.ESC,
 })
 
 # Keybindings for Firefox/Chrome
