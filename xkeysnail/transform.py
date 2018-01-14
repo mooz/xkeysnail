@@ -146,6 +146,12 @@ def define_keymap(condition, mappings, name="Anonymous keymap"):
 _mod_map = None
 _conditional_mod_map = []
 
+# multipurpose keys
+# e.g, {Key.LEFT_CTRL: [Key.ESC, Key.LEFT_CTRL, Action.RELEASE]}
+_multipurpose_map = None
+
+# last key that sent a Key.PRESS event
+_last_key_press = None
 
 def define_modmap(mod_remappings):
     """Defines modmap (keycode translation)
@@ -176,8 +182,60 @@ def define_conditional_modmap(condition, mod_remappings):
     _conditional_mod_map.append((condition, mod_remappings))
 
 
+def define_multipurpose_modmap(multipurpose_remappings):
+    """Defines multipurpose modmap (multi-key translations)
+
+    Give a key two different meanings. One when pressed and released alone and
+    one when it's held down together with another key (making it a modifier
+    key).
+
+    Example:
+
+    define_multipurpose_modmap(
+        {Key.CAPSLOCK: [Key.ESC, Key.LEFT_CTRL]
+    })
+    """
+    global _multipurpose_map
+    for key, value in multipurpose_remappings.items():
+        value.append(Action.RELEASE)
+    _multipurpose_map = multipurpose_remappings
+
+
+def multipurpose_handler(key, action):
+
+    def maybe_press_modifier():
+        for real_key, (_, mod_key, action) in _multipurpose_map.items():
+            if action == Action.PRESS and \
+               mod_key not in _pressed_modifier_keys and \
+               real_key is not key:
+                on_key(mod_key, Action.PRESS)
+
+    global _last_key_press
+    if key in _multipurpose_map:
+        values = _multipurpose_map[key] # 0 = normal; 1 = modifier; 2 = action
+        if action == Action.PRESS:
+            values[2] = action
+        elif action == Action.REPEAT and \
+             values[1] in _pressed_modifier_keys:
+            on_key(values[1], action)
+        elif action == Action.RELEASE:
+            if _last_key_press == key:
+                maybe_press_modifier()
+                on_key(values[0], Action.PRESS)
+                on_key(values[0], action)
+            else:
+                on_key(values[1], action)
+            values[2] = action
+    else:
+        maybe_press_modifier()
+
+    if action == Action.PRESS:
+        _last_key_press = key
+
+
 def on_event(event):
     key = Key(event.code)
+    action = Action(event.value)
     wm_class = None
     # translate keycode (like xmodmap)
     active_mod_map = _mod_map
@@ -189,7 +247,13 @@ def on_event(event):
                 break
     if active_mod_map and key in active_mod_map:
         key = active_mod_map[key]
-    on_key(key, Action(event.value), wm_class=wm_class)
+
+    if _multipurpose_map:
+        multipurpose_handler(key, action)
+        if key in _multipurpose_map:
+            return
+
+    on_key(key, action, wm_class=wm_class)
 
 
 def on_key(key, action, wm_class=None):
