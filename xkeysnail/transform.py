@@ -153,7 +153,7 @@ def define_modmap(mod_remappings):
     Example:
 
     define_modmap({
-    Key.CAPSLOCK: Key.LEFT_CTRL
+        Key.CAPSLOCK: Key.LEFT_CTRL
     })
     """
     global _mod_map
@@ -165,8 +165,8 @@ def define_conditional_modmap(condition, mod_remappings):
 
     Example:
 
-    define_modmap(re.search(r'Emacs'), {
-    Key.CAPSLOCK: Key.LEFT_CTRL
+    define_conditional_modmap(re.compile(r'Emacs'), {
+        Key.CAPSLOCK: Key.LEFT_CTRL
     })
     """
     if hasattr(condition, 'search'):
