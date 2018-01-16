@@ -146,6 +146,12 @@ def define_keymap(condition, mappings, name="Anonymous keymap"):
 _mod_map = None
 _conditional_mod_map = []
 
+# multipurpose keys
+# e.g, {Key.LEFT_CTRL: [Key.ESC, Key.LEFT_CTRL, Action.RELEASE]}
+_multipurpose_map = None
+
+# last key that sent a Key.PRESS event
+_last_key_press = None
 
 def define_modmap(mod_remappings):
     """Defines modmap (keycode translation)
@@ -176,8 +182,68 @@ def define_conditional_modmap(condition, mod_remappings):
     _conditional_mod_map.append((condition, mod_remappings))
 
 
+def define_multipurpose_modmap(multipurpose_remappings):
+    """Defines multipurpose modmap (multi-key translations)
+
+    Give a key two different meanings. One when pressed and released alone and
+    one when it's held down together with another key (making it a modifier
+    key).
+
+    Example:
+
+    define_multipurpose_modmap(
+        {Key.CAPSLOCK: [Key.ESC, Key.LEFT_CTRL]
+    })
+    """
+    global _multipurpose_map
+    for key, value in multipurpose_remappings.items():
+        value.append(Action.RELEASE)
+    _multipurpose_map = multipurpose_remappings
+
+
+def multipurpose_handler(key, action):
+
+    def maybe_press_modifiers():
+        """Search the multipurpose map for keys that are pressed. If found and
+        we have not yet sent it's modifier translation we do so."""
+        for _, mod_key, state in _multipurpose_map.values():
+            if state == Action.PRESS and mod_key not in _pressed_modifier_keys:
+                on_key(mod_key, Action.PRESS)
+
+    # we need to register the last key presses so we know if a multipurpose key
+    # was a single press and release
+    global _last_key_press
+
+    if key in _multipurpose_map:
+        single_key, mod_key, key_state = _multipurpose_map[key]
+        key_is_down = key_state == action.PRESS
+        mod_is_down = mod_key in _pressed_modifier_keys
+        key_was_last_press = key == _last_key_press
+        def set_key_state(x): _multipurpose_map[key][2] = x
+
+        if action == Action.RELEASE and key_is_down:
+            set_key_state(Action.RELEASE)
+            # it is a single press and release
+            if key_was_last_press:
+                maybe_press_modifiers() # maybe other multipurpose keys are down
+                on_key(single_key, Action.PRESS)
+                on_key(single_key, Action.RELEASE)
+            # it is the modifier in a combo
+            elif mod_is_down:
+                on_key(mod_key, Action.RELEASE)
+        elif action == Action.PRESS and not key_is_down:
+            set_key_state(Action.PRESS)
+    # if key is not a multipurpose key we want eventual modifiers down
+    else:
+        maybe_press_modifiers()
+
+    if action == Action.PRESS:
+        _last_key_press = key
+
+
 def on_event(event):
     key = Key(event.code)
+    action = Action(event.value)
     wm_class = None
     # translate keycode (like xmodmap)
     active_mod_map = _mod_map
@@ -189,7 +255,13 @@ def on_event(event):
                 break
     if active_mod_map and key in active_mod_map:
         key = active_mod_map[key]
-    on_key(key, Action(event.value), wm_class=wm_class)
+
+    if _multipurpose_map:
+        multipurpose_handler(key, action)
+        if key in _multipurpose_map:
+            return
+
+    on_key(key, action, wm_class=wm_class)
 
 
 def on_key(key, action, wm_class=None):
