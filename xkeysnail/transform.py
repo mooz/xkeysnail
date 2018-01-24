@@ -241,7 +241,7 @@ def multipurpose_handler(key, action):
         _last_key_press = key
 
 
-def on_event(event):
+def on_event(event, device_name):
     key = Key(event.code)
     action = Action(event.value)
     wm_class = None
