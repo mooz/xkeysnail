@@ -250,7 +250,7 @@ def on_event(event, device_name):
     if _conditional_mod_map:
         wm_class = get_active_window_wm_class()
         for condition, mod_map in _conditional_mod_map:
-            if condition(wm_class):
+            if condition(wm_class, device_name):
                 active_mod_map = mod_map
                 break
     if active_mod_map and key in active_mod_map:
