@@ -150,8 +150,9 @@ _conditional_mod_map = []
 # e.g, {Key.LEFT_CTRL: [Key.ESC, Key.LEFT_CTRL, Action.RELEASE]}
 _multipurpose_map = None
 
-# last key that sent a Key.PRESS event
-_last_key_press = None
+# last key that sent a PRESS event or a non-mod or non-multi key that sent a RELEASE
+# or REPEAT
+_last_key = None
 
 def define_modmap(mod_remappings):
     """Defines modmap (keycode translation)
@@ -212,13 +213,13 @@ def multipurpose_handler(key, action):
 
     # we need to register the last key presses so we know if a multipurpose key
     # was a single press and release
-    global _last_key_press
+    global _last_key
 
     if key in _multipurpose_map:
         single_key, mod_key, key_state = _multipurpose_map[key]
         key_is_down = key_state == action.PRESS
         mod_is_down = mod_key in _pressed_modifier_keys
-        key_was_last_press = key == _last_key_press
+        key_was_last_press = key == _last_key
         def set_key_state(x): _multipurpose_map[key][2] = x
 
         if action == Action.RELEASE and key_is_down:
@@ -233,12 +234,17 @@ def multipurpose_handler(key, action):
                 on_key(mod_key, Action.RELEASE)
         elif action == Action.PRESS and not key_is_down:
             set_key_state(Action.PRESS)
-    # if key is not a multipurpose key we want eventual modifiers down
-    else:
+    # if key is not a multipurpose or mod key we want eventual modifiers down
+    elif key not in Modifier.get_all_keys():
         maybe_press_modifiers()
 
+    # we want to register all key-presses
     if action == Action.PRESS:
-        _last_key_press = key
+        _last_key = key
+    # but register repeat and release only for non-mods and multies as they
+    # should not be able to disqualify a multipurpose single press and release
+    elif not (key in Modifier.get_all_keys() or key in _multipurpose_map):
+        _last_key = key
 
 
 def on_event(event):
