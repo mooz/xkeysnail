@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from enum import Enum
+from inspect import signature
 from .key import Action, Combo, Key, Modifier
 from .output import send_combo, send_key_action, send_key
 
@@ -247,7 +248,7 @@ def multipurpose_handler(key, action):
         _last_key = key
 
 
-def on_event(event):
+def on_event(event, device_name):
     key = Key(event.code)
     action = Action(event.value)
     wm_class = None
@@ -256,7 +257,11 @@ def on_event(event):
     if _conditional_mod_map:
         wm_class = get_active_window_wm_class()
         for condition, mod_map in _conditional_mod_map:
-            if condition(wm_class):
+            params = [wm_class]
+            if len(signature(condition).parameters) == 2:
+                params = [wm_class, device_name]
+
+            if condition(*params):
                 active_mod_map = mod_map
                 break
     if active_mod_map and key in active_mod_map:
