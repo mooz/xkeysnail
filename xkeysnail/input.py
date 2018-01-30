@@ -86,7 +86,7 @@ def loop(devices):
                     # device = devices[fd]
                     for event in device.read():
                         if event.type == ecodes.EV_KEY:
-                            on_event(event)
+                            on_event(event, device.name)
                         else:
                             send_event(event)
             except OSError as e:
