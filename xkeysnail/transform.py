@@ -309,31 +309,9 @@ def transform_key(key, action, wm_class=None):
         if combo not in mappings:
             continue
         # Found key in "mappings". Execute commands defined for the key.
-        commands = mappings[combo]
-        if not isinstance(commands, list):
-            commands = [commands]
-        # Execute commands
-        for command in commands:
-            # Function -> Use returned value as command
-            if callable(command):
-                command = command()
-            # Key
-            if isinstance(command, Key):
-                send_key(command)
-            # Combo
-            elif isinstance(command, Combo):
-                send_combo(command)
-            elif command is escape_next_key:
-                _mode_maps = escape_next_key
-                return
-            # Go to next keymap
-            elif isinstance(command, dict):
-                _mode_maps = [command]
-                return
-            elif command is pass_through_key:
-                send_key_action(key, action)
-                _mode_maps = None
-        _mode_maps = None
+        reset_mode = handle_commands(mappings[combo], key, action)
+        if reset_mode:
+            _mode_maps = None
         return
 
     # Not found in all keymaps
@@ -342,3 +320,37 @@ def transform_key(key, action, wm_class=None):
         send_key_action(key, action)
 
     _mode_maps = None
+
+
+def handle_commands(commands, key, action):
+    """
+    returns: reset_mode (True/False) if this is True, _mode_maps will be reset
+    """
+    global _mode_maps
+
+    if not isinstance(commands, list):
+        commands = [commands]
+
+    # Execute commands
+    for command in commands:
+        if callable(command):
+            reset_mode = handle_commands(command(), key, action)
+            if reset_mode:
+                return True
+
+        if isinstance(command, Key):
+            send_key(command)
+        elif isinstance(command, Combo):
+            send_combo(command)
+        elif command is escape_next_key:
+            _mode_maps = escape_next_key
+            return False
+        # Go to next keymap
+        elif isinstance(command, dict):
+            _mode_maps = [command]
+            return False
+        elif command is pass_through_key:
+            send_key_action(key, action)
+            return True
+    # Reset keymap in ordinary flow
+    return True
