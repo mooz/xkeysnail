@@ -2,7 +2,7 @@
 
 def eval_file(path):
     with open(path, "rb") as file:
-        exec(compile(file.read(), path, 'exec'))
+        exec(compile(file.read(), path, 'exec'), globals())
 
 
 def has_access_to_uinput():
