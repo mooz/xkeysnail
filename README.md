@@ -43,6 +43,12 @@ Requires root privilege and **Python 3**.
 ## Usage
 
     sudo xkeysnail config.py
+    
+When you encounter the errors like `Xlib.error.DisplayConnectionError: Can't connect to display ":0.0": b'No protocol specified\n'
+`, try
+
+    xhost +SI:localuser:root
+    sudo xkeysnail config.py
 
 If you want to specify keyboard devices, use `--devices` option:
 
