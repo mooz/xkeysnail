@@ -52,7 +52,7 @@ When you encounter the errors like `Xlib.error.DisplayConnectionError: Can't con
 
 If you want to specify keyboard devices, use `--devices` option:
 
-    sudo xkeysnail config.py --devices /dev/input/event3 /dev/input/event3
+    sudo xkeysnail config.py --devices /dev/input/event3 'Topre Corporation HHKB Professional'
 
 ## How to prepare `config.py`?
 
