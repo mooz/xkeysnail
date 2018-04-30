@@ -250,15 +250,11 @@ def multipurpose_handler(key, action):
         elif action == Action.PRESS and not key_is_down:
             set_key_state(Action.PRESS)
     # if key is not a multipurpose or mod key we want eventual modifiers down
-    elif key not in Modifier.get_all_keys():
+    elif (key not in Modifier.get_all_keys()) and action == Action.PRESS:
         maybe_press_modifiers()
 
     # we want to register all key-presses
     if action == Action.PRESS:
-        _last_key = key
-    # but register repeat and release only for non-mods and multies as they
-    # should not be able to disqualify a multipurpose single press and release
-    elif not (key in Modifier.get_all_keys() or key in _multipurpose_map):
         _last_key = key
 
 
