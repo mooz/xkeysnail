@@ -73,6 +73,20 @@ def set_mark(mark_set):
         _mark_set = mark_set
     return _set_mark
 
+
+def with_or_set_mark(combo):
+    if isinstance(combo, Key):
+        combo = Combo(None, combo)
+
+    def _with_or_set_mark():
+        global _mark_set
+        _mark_set = True
+        return combo.with_modifier(Modifier.SHIFT)
+
+    return _with_or_set_mark
+
+
+
 # ============================================================ #
 # Utility functions for keymap
 # ============================================================ #
