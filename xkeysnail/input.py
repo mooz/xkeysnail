@@ -45,21 +45,33 @@ def print_device_list(devices):
 def get_devices_from_paths(device_paths):
     return [InputDevice(device_fn) for device_fn in device_paths]
 
+class DeviceFilter(object):
+    def __init__(self, matches):
+        self.matches = matches
+    def __call__(self, device):
+        # Match by device path or name, if no keyboard devices specified, picks up keyboard-ish devices.
+        if self.matches:
+            for match in self.matches:
+                if device.fn == match or device.name == match:
+                    return True
+            return False
+        # Exclude none keyboard devices
+        if not is_keyboard_device(device):
+            return False
+        # Exclude evdev device, we use for output emulation, from input monitoring list
+        if device.name == "py-evdev-uinput":
+            return False
+        return True
 
-def select_device(device_paths=None):
+def select_device(device_matches=None):
     """Select a device from the list of accessible input devices."""
-    if not device_paths:
+    devices = get_devices_from_paths(reversed(list_devices()))
+    if not device_matches:
         print("""No keyboard devices specified via (--devices) option.
 xkeysnail picks up keyboard-ish devices from the list below:
 """)
-        devices = get_devices_from_paths(reversed(list_devices()))
         print_device_list(devices)
-        devices = list(filter(is_keyboard_device, devices))
-    else:
-        devices = get_devices_from_paths(device_paths)
-
-    # Exclude evdev device, we use for output emulation, from input monitoring list
-    devices = list(filter(lambda device: device.name != "py-evdev-uinput", devices))
+    devices = list(filter(DeviceFilter(device_matches), devices))
 
     if not devices:
         print('error: no input devices found (do you have rw permission on /dev/input/*?)')
