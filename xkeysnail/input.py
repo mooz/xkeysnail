@@ -46,12 +46,12 @@ def get_devices_from_paths(device_paths):
     return [InputDevice(device_fn) for device_fn in device_paths]
 
 class DeviceFilter(object):
-    def __init__(self, matchs):
-        self.matchs = matchs
+    def __init__(self, matches):
+        self.matches = matches
     def __call__(self, device):
         # Match by device path or name, if no keyboard devices specified, picks up keyboard-ish devices.
-        if self.matchs:
-            for match in self.matchs:
+        if self.matches:
+            for match in self.matches:
                 if device.fn == match or device.name == match:
                     return True
             return False
@@ -63,15 +63,15 @@ class DeviceFilter(object):
             return False
         return True
 
-def select_device(device_matchs=None):
+def select_device(device_matches=None):
     """Select a device from the list of accessible input devices."""
     devices = get_devices_from_paths(reversed(list_devices()))
-    if not device_matchs:
+    if not device_matches:
         print("""No keyboard devices specified via (--devices) option.
 xkeysnail picks up keyboard-ish devices from the list below:
 """)
         print_device_list(devices)
-    devices = list(filter(DeviceFilter(device_matchs), devices))
+    devices = list(filter(DeviceFilter(device_matches), devices))
 
     if not devices:
         print('error: no input devices found (do you have rw permission on /dev/input/*?)')
