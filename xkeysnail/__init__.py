@@ -28,6 +28,8 @@ def cli_main():
                         help='configuration file (See README.md for syntax)')
     parser.add_argument('--devices', dest="devices", metavar='device', type=str, nargs='+',
                         help='keyboard devices to remap (if omitted, xkeysnail choose proper keyboard devices)')
+    parser.add_argument('--watch', dest='watch', action='store_true',
+                        help='watch keyboard devices plug in ')
     args = parser.parse_args()
 
     # Make sure that user have root privilege
@@ -44,5 +46,5 @@ Make sure that you have executed xkeysnail with root privilege such as
     eval_file(args.config)
 
     # Enter event loop
-    from xkeysnail.input import loop, select_device
-    loop(select_device(args.devices))
+    from xkeysnail.input import loop
+    loop(args.devices, args.watch)
