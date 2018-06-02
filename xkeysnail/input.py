@@ -121,15 +121,16 @@ def loop(device_matches, device_watch):
                         for event in inotify.read():
                             pass
                         new_devices = get_new_devices(select_device(device_matches, False), devices)
-                        print("Okay, now enable remapping on the following new device(s):\n")
-                        print_device_list(new_devices)
-                        try:
-                            for new_device in new_devices:
-                                new_device.grab()
-                                devices.append(new_device)
-                        except IOError:
-                            # Ignore errors on new devices
-                            print("IOError when grabbing new device: " + str(new_device.name))
+                        if new_devices:
+                            print("Okay, now enable remapping on the following new device(s):\n")
+                            print_device_list(new_devices)
+                            try:
+                                for new_device in new_devices:
+                                    new_device.grab()
+                                    devices.append(new_device)
+                            except IOError:
+                                # Ignore errors on new devices
+                                print("IOError when grabbing new device: " + str(new_device.name))
             except OSError as e:
                 if isinstance(waitable, InputDevice):
                     print("Device removed: " + str(waitable.name))
