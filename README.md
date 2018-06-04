@@ -54,6 +54,8 @@ If you want to specify keyboard devices, use `--devices` option:
 
     sudo xkeysnail config.py --devices /dev/input/event3 'Topre Corporation HHKB Professional'
 
+If you have hot-plugging keyboards, use `--watch` option.
+
 ## How to prepare `config.py`?
 
 (**If you just need Emacs-like keybindings, consider to

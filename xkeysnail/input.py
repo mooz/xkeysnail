@@ -63,47 +63,84 @@ class DeviceFilter(object):
             return False
         return True
 
-def select_device(device_matches=None):
+def select_device(device_matches=None, interactive=True):
     """Select a device from the list of accessible input devices."""
     devices = get_devices_from_paths(reversed(list_devices()))
-    if not device_matches:
-        print("""No keyboard devices specified via (--devices) option.
+
+    if interactive:
+        if not device_matches:
+            print("""No keyboard devices specified via (--devices) option.
 xkeysnail picks up keyboard-ish devices from the list below:
 """)
         print_device_list(devices)
+
     devices = list(filter(DeviceFilter(device_matches), devices))
 
-    if not devices:
-        print('error: no input devices found (do you have rw permission on /dev/input/*?)')
-        exit(1)
+    if interactive:
+        if not devices:
+            print('error: no input devices found (do you have rw permission on /dev/input/*?)')
+            exit(1)
 
-    print("Okay, now enable remapping on the following device(s):\n")
-    print_device_list(devices)
+        print("Okay, now enable remapping on the following device(s):\n")
+        print_device_list(devices)
 
     return devices
 
+def in_device_list(fn, devices):
+    for device in devices:
+        if device.fn == fn:
+            return True
+    return False
 
-def loop(devices):
+def loop(device_matches, device_watch):
+    devices = select_device(device_matches, True)
     try:
         for device in devices:
             device.grab()
     except IOError:
         print("IOError when grabbing device")
         exit(1)
+    if device_watch:
+        from inotify_simple import INotify, flags
+        inotify = INotify()
+        inotify.add_watch("/dev/input", flags.CREATE)
+        print("Watching keyboard devices plug in")
+    device_filter = DeviceFilter(device_matches)
     try:
         while True:
             try:
-                r, w, x = select(devices, [], [])
-                for device in r:
-                    # device = devices[fd]
-                    for event in device.read():
-                        if event.type == ecodes.EV_KEY:
-                            on_event(event, device.name)
-                        else:
-                            send_event(event)
+                waitables = devices[:]
+                if device_watch:
+                    waitables.append(inotify.fd)
+                r, w, x = select(waitables, [], [])
+                for waitable in r:
+                    if isinstance(waitable, InputDevice):
+                        for event in waitable.read():
+                            if event.type == ecodes.EV_KEY:
+                                on_event(event, waitable.name)
+                            else:
+                                send_event(event)
+                    else:
+                        new_devices = []
+                        for event in inotify.read():
+                            new_device = InputDevice("/dev/input/" + event.name)
+                            if device_filter(new_device) and not in_device_list(new_device.fn, devices):
+                                try:
+                                    new_device.grab()
+                                    devices.append(new_device)
+                                    new_devices.append(new_device)
+                                except IOError:
+                                    # Ignore errors on new devices
+                                    print("IOError when grabbing new device: " + str(new_device.name))
+                        if new_devices:
+                            print("Okay, now enable remapping on the following new device(s):\n")
+                            print_device_list(new_devices)
             except OSError as e:
-                print("Device removed: " + str(device.name))
-                devices.remove(device)
+                if isinstance(waitable, InputDevice):
+                    print("Device removed: " + str(waitable.name))
+                    devices.remove(waitable)
     finally:
         for device in devices:
             device.ungrab()
+        if device_watch:
+            inotify.close()
