@@ -86,9 +86,11 @@ xkeysnail picks up keyboard-ish devices from the list below:
 
     return devices
 
-def get_new_devices(curr_devices, prev_devices):
-    prev_paths = [d.fn for d in prev_devices]
-    return [d for d in curr_devices if d.fn not in prev_paths]
+def in_device_list(fn, devices):
+    for device in devices:
+        if device.fn == fn:
+            return True
+    return False
 
 def loop(device_matches, device_watch):
     devices = select_device(device_matches, True)
@@ -103,6 +105,7 @@ def loop(device_matches, device_watch):
         inotify = INotify()
         inotify.add_watch("/dev/input", flags.CREATE)
         print("Watching keyboard devices plug in")
+    device_filter = DeviceFilter(device_matches)
     try:
         while True:
             try:
@@ -118,19 +121,20 @@ def loop(device_matches, device_watch):
                             else:
                                 send_event(event)
                     else:
+                        new_devices = []
                         for event in inotify.read():
-                            pass
-                        new_devices = get_new_devices(select_device(device_matches, False), devices)
+                            new_device = InputDevice("/dev/input/" + event.name)
+                            if device_filter(new_device) and not in_device_list(new_device.fn, devices):
+                                try:
+                                    new_device.grab()
+                                    devices.append(new_device)
+                                    new_devices.append(new_device)
+                                except IOError:
+                                    # Ignore errors on new devices
+                                    print("IOError when grabbing new device: " + str(new_device.name))
                         if new_devices:
                             print("Okay, now enable remapping on the following new device(s):\n")
                             print_device_list(new_devices)
-                            try:
-                                for new_device in new_devices:
-                                    new_device.grab()
-                                    devices.append(new_device)
-                            except IOError:
-                                # Ignore errors on new devices
-                                print("IOError when grabbing new device: " + str(new_device.name))
             except OSError as e:
                 if isinstance(waitable, InputDevice):
                     print("Device removed: " + str(waitable.name))
