@@ -92,7 +92,7 @@ def in_device_list(fn, devices):
             return True
     return False
 
-def loop(device_matches, device_watch):
+def loop(device_matches, device_watch, quiet):
     devices = select_device(device_matches, True)
     try:
         for device in devices:
@@ -106,6 +106,8 @@ def loop(device_matches, device_watch):
         inotify.add_watch("/dev/input", flags.CREATE)
         print("Watching keyboard devices plug in")
     device_filter = DeviceFilter(device_matches)
+    if quiet:
+        print("No key event will be output since quiet option was specified.")
     try:
         while True:
             try:
@@ -117,7 +119,7 @@ def loop(device_matches, device_watch):
                     if isinstance(waitable, InputDevice):
                         for event in waitable.read():
                             if event.type == ecodes.EV_KEY:
-                                on_event(event, waitable.name)
+                                on_event(event, waitable.name, quiet)
                             else:
                                 send_event(event)
                     else:

@@ -56,6 +56,8 @@ If you want to specify keyboard devices, use `--devices` option:
 
 If you have hot-plugging keyboards, use `--watch` option.
 
+If you want to suppress output of key events, use `-q` / `--quiet` option especially when running as a daemon.
+
 ## How to prepare `config.py`?
 
 (**If you just need Emacs-like keybindings, consider to
