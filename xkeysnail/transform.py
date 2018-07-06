@@ -258,7 +258,7 @@ def multipurpose_handler(key, action):
         _last_key = key
 
 
-def on_event(event, device_name):
+def on_event(event, device_name, quiet):
     key = Key(event.code)
     action = Action(event.value)
     wm_class = None
@@ -282,20 +282,20 @@ def on_event(event, device_name):
         if key in _multipurpose_map:
             return
 
-    on_key(key, action, wm_class=wm_class)
+    on_key(key, action, wm_class=wm_class, quiet=quiet)
 
 
-def on_key(key, action, wm_class=None):
+def on_key(key, action, wm_class=None, quiet=False):
     if key in Modifier.get_all_keys():
         update_pressed_modifier_keys(key, action)
         send_key_action(key, action)
     elif not action.is_pressed():
         send_key_action(key, action)
     else:
-        transform_key(key, action, wm_class=wm_class)
+        transform_key(key, action, wm_class=wm_class, quiet=quiet)
 
 
-def transform_key(key, action, wm_class=None):
+def transform_key(key, action, wm_class=None, quiet=False):
     global _mode_maps
     global _toplevel_keymaps
 
@@ -321,9 +321,11 @@ def transform_key(key, action, wm_class=None):
                or condition is None:
                 _mode_maps.append(mappings)
                 keymap_names.append(name)
-        print("WM_CLASS '{}' | active keymaps = [{}]".format(wm_class, ", ".join(keymap_names)))
+        if not quiet:
+            print("WM_CLASS '{}' | active keymaps = [{}]".format(wm_class, ", ".join(keymap_names)))
 
-    print(combo)
+    if not quiet:
+        print(combo)
 
     # _mode_maps: [global_map, local_1, local_2, ...]
     for mappings in _mode_maps:
