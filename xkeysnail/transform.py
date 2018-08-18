@@ -25,7 +25,9 @@ def get_class_name(window):
     try:
         wmname = window.get_wm_name()
         wmclass = window.get_wm_class()
-        if wmclass is None and wmname is None:
+        # workaround for Java app
+        # https://github.com/JetBrains/jdk8u_jdk/blob/master/src/solaris/classes/sun/awt/X11/XFocusProxyWindow.java#L35
+        if (wmclass is None and wmname is None) or "FocusProxy" in wmclass:
             parent_window = window.query_tree().parent
             if parent_window:
                 return get_class_name(parent_window)
