@@ -112,7 +112,7 @@ def K(exp):
     import re
     modifier_strs = []
     while True:
-        m = re.match(r"\A(C|Ctrl|M|Alt|Shift|Super|Win)-", exp)
+        m = re.match(r"\A(C|Ctrl|M|Alt|Shift|Super|Win|Caps)-", exp)
         if m is None:
             break
         modifier = m.group(1)
@@ -134,6 +134,8 @@ def create_modifiers_from_strings(modifier_strs):
             pass
         elif modifier_str == 'Shift':
             modifiers.add(Modifier.SHIFT)
+        elif modifier_str == 'Caps':
+            modifiers.add(Modifier.CAPS)
     return modifiers
 
 # ============================================================

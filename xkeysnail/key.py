@@ -739,7 +739,7 @@ class Action(IntEnum):
 @unique
 class Modifier(Enum):
 
-    CONTROL, ALT, SHIFT, SUPER = range(4)
+    CONTROL, ALT, SHIFT, SUPER, CAPS = range(5)
 
     @classmethod
     def _get_modifier_map(cls):
@@ -747,7 +747,8 @@ class Modifier(Enum):
             cls.CONTROL: {Key.LEFT_CTRL, Key.RIGHT_CTRL},
             cls.ALT: {Key.LEFT_ALT, Key.RIGHT_ALT},
             cls.SHIFT: {Key.LEFT_SHIFT, Key.RIGHT_SHIFT},
-            cls.SUPER: {Key.LEFT_META, Key.RIGHT_META}
+            cls.SUPER: {Key.LEFT_META, Key.RIGHT_META},
+            cls.CAPS: {Key.CAPSLOCK}
         }
 
     def __str__(self):
@@ -755,6 +756,7 @@ class Modifier(Enum):
         if self.value == self.ALT.value: return "M"
         if self.value == self.SHIFT.value: return "Shift"
         if self.value == self.SUPER.value: return "Super"
+        if self.value == self.CAPS.value: return "Caps"
         return None
 
     def get_keys(self):

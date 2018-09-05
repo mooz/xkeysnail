@@ -105,6 +105,7 @@ Key specification in a keymap is in a form of `K("(<Modifier>-)*<Key>")` where
 - `M` or `Alt` -> Alt key
 - `Shift` -> Shift key
 - `Super` or `Win` -> Super/Windows key
+- `Caps` -> Capslock key
 
 and `<Key>` is a key whose name is defined
 in [`key.py`](https://github.com/mooz/xkeysnail/blob/master/xkeysnail/key.py).
