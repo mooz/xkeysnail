@@ -739,23 +739,72 @@ class Action(IntEnum):
 @unique
 class Modifier(Enum):
 
-    CONTROL, ALT, SHIFT, SUPER = range(4)
+    L_CONTROL, R_CONTROL, CONTROL, \
+    L_ALT, R_ALT, ALT, \
+    L_SHIFT, R_SHIFT, SHIFT, \
+    L_SUPER, R_SUPER, SUPER = range(12)
 
     @classmethod
     def _get_modifier_map(cls):
         return {
+            cls.L_CONTROL: {Key.LEFT_CTRL},
+            cls.R_CONTROL: {Key.RIGHT_CTRL},
             cls.CONTROL: {Key.LEFT_CTRL, Key.RIGHT_CTRL},
+            cls.L_ALT: {Key.LEFT_ALT},
+            cls.R_ALT: {Key.RIGHT_ALT},
             cls.ALT: {Key.LEFT_ALT, Key.RIGHT_ALT},
+            cls.L_SHIFT: {Key.LEFT_SHIFT},
+            cls.R_SHIFT: {Key.RIGHT_SHIFT},
             cls.SHIFT: {Key.LEFT_SHIFT, Key.RIGHT_SHIFT},
+            cls.L_SUPER: {Key.LEFT_META},
+            cls.R_SUPER: {Key.RIGHT_META},
             cls.SUPER: {Key.LEFT_META, Key.RIGHT_META}
         }
 
     def __str__(self):
+        if self.value == self.L_CONTROL.value: return "LC"
+        if self.value == self.R_CONTROL.value: return "RC"
         if self.value == self.CONTROL.value: return "C"
+        if self.value == self.L_ALT.value: return "LM"
+        if self.value == self.R_ALT.value: return "RM"
         if self.value == self.ALT.value: return "M"
+        if self.value == self.L_SHIFT.value: return "LShift"
+        if self.value == self.R_SHIFT.value: return "RShift"
         if self.value == self.SHIFT.value: return "Shift"
+        if self.value == self.L_SUPER.value: return "LSuper"
+        if self.value == self.R_SUPER.value: return "RSuper"
         if self.value == self.SUPER.value: return "Super"
         return None
+
+    def is_specified(self):
+        return self.value == self.L_CONTROL.value or \
+                self.value == self.R_CONTROL.value or \
+                self.value == self.L_ALT.value or \
+                self.value == self.R_ALT.value or \
+                self.value == self.L_SHIFT.value or \
+                self.value == self.R_SHIFT.value or \
+                self.value == self.L_SUPER.value or \
+                self.value == self.R_SUPER.value
+
+    def to_left(self):
+        if self.value == self.CONTROL.value:
+            return self.L_CONTROL
+        elif self.value == self.ALT.value:
+            return self.L_CONTROL
+        elif self.value == self.SHIFT.value:
+            return self.L_SHIFT
+        elif self.value == self.SUPER.value:
+            return self.L_SUPER
+
+    def to_right(self):
+        if self.value == self.CONTROL.value:
+            return self.R_CONTROL
+        elif self.value == self.ALT.value:
+            return self.R_CONTROL
+        elif self.value == self.SHIFT.value:
+            return self.R_SHIFT
+        elif self.value == self.SUPER.value:
+            return self.R_SUPER
 
     def get_keys(self):
         return self._get_modifier_map()[self]

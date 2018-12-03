@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import itertools
 from enum import Enum
 from inspect import signature
 from .key import Action, Combo, Key, Modifier
@@ -112,7 +113,7 @@ def K(exp):
     import re
     modifier_strs = []
     while True:
-        m = re.match(r"\A(C|Ctrl|M|Alt|Shift|Super|Win)-", exp)
+        m = re.match(r"\A(LC|LCtrl|RC|RCtrl|C|Ctrl|LM|LAlt|RM|RAlt|M|Alt|LShift|RShift|Shift|LSuper|LWin|RSuper|RWin|Super|Win)-", exp)
         if m is None:
             break
         modifier = m.group(1)
@@ -125,13 +126,31 @@ def K(exp):
 def create_modifiers_from_strings(modifier_strs):
     modifiers = set()
     for modifier_str in modifier_strs:
-        if modifier_str == 'C' or modifier_str == 'Ctrl':
+        if modifier_str == 'LC' or modifier_str == 'LCtrl':
+            modifiers.add(Modifier.L_CONTROL)
+        elif modifier_str == 'RC' or modifier_str == 'RCtrl':
+            modifiers.add(Modifier.R_CONTROL)
+        elif modifier_str == 'C' or modifier_str == 'Ctrl':
             modifiers.add(Modifier.CONTROL)
+        elif modifier_str == 'LM' or modifier_str == 'LAlt':
+            modifiers.add(Modifier.L_ALT)
+        elif modifier_str == 'RM' or modifier_str == 'RAlt':
+            modifiers.add(Modifier.R_ALT)
         elif modifier_str == 'M' or modifier_str == 'Alt':
             modifiers.add(Modifier.ALT)
+        elif modifier_str == 'LSuper' or modifier_str == 'LWin':
+            modifiers.add(Modifier.L_SUPER)
+            pass
+        elif modifier_str == 'RSuper' or modifier_str == 'RWin':
+            modifiers.add(Modifier.R_SUPER)
+            pass
         elif modifier_str == 'Super' or modifier_str == 'Win':
             modifiers.add(Modifier.SUPER)
             pass
+        elif modifier_str == 'LShift':
+            modifiers.add(Modifier.L_SHIFT)
+        elif modifier_str == 'RShift':
+            modifiers.add(Modifier.R_SHIFT)
         elif modifier_str == 'Shift':
             modifiers.add(Modifier.SHIFT)
     return modifiers
@@ -148,6 +167,54 @@ pass_through_key = {}
 
 def define_keymap(condition, mappings, name="Anonymous keymap"):
     global _toplevel_keymaps
+
+    # Expand not L/R-specified modifiers
+    # Suppose a nesting is not so deep
+    # {K("C-a"): Key.A,
+    #  K("C-b"): {
+    #      K("LC-c"): Key.B,
+    #      K("C-d"): Key.C}}
+    # ->
+    # {K("LC-a"): Key.A, K("RC-a"): Key.A,
+    #  K("LC-b"): {
+    #      K("LC-c"): Key.B,
+    #      K("LC-d"): Key.C,
+    #      K("RC-d"): Key.C},
+    #  K("RC-b"): {
+    #      K("LC-c"): Key.B,
+    #      K("LC-d"): Key.C,
+    #      K("RC-d"): Key.C}}
+    def expand(target):
+        if isinstance(target, dict):
+            expanded_mappings = {}
+            keys_for_deletion = []
+            for k, v in target.items():
+                # Expand children
+                expand(v)
+
+                if isinstance(k, Combo):
+                    expanded_modifiers = []
+                    for modifier in k.modifiers:
+                        if not modifier.is_specified():
+                            expanded_modifiers.append([modifier.to_left(), modifier.to_right()])
+                        else:
+                            expanded_modifiers.append([modifier])
+
+                    # Create a Cartesian product of expanded modifiers
+                    expanded_modifier_lists = itertools.product(*expanded_modifiers)
+                    # Create expanded mappings
+                    for modifiers in expanded_modifier_lists:
+                        expanded_mappings[Combo(set(modifiers), k.key)] = v
+                    keys_for_deletion.append(k)
+
+            # Delete original mappings whose key was expanded into expanded_mappings
+            for key in keys_for_deletion:
+                del target[key]
+            # Merge expanded mappings into original mappings
+            target.update(expanded_mappings)
+
+    expand(mappings)
+
     _toplevel_keymaps.append((condition, mappings, name))
     return mappings
 

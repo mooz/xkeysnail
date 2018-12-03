@@ -100,13 +100,15 @@ Argument `name` specifies the keymap name. This is an optional argument.
 
 Key specification in a keymap is in a form of `K("(<Modifier>-)*<Key>")` where
 
-`<Modifier>` is mone of the followings
+`<Modifier>` is one of the followings
 - `C` or `Ctrl` -> Control key
 - `M` or `Alt` -> Alt key
 - `Shift` -> Shift key
 - `Super` or `Win` -> Super/Windows key
 
-and `<Key>` is a key whose name is defined
+You can specify left/right modifiers by adding any one of prefixes `L`/`R`.
+
+And `<Key>` is a key whose name is defined
 in [`key.py`](https://github.com/mooz/xkeysnail/blob/master/xkeysnail/key.py).
 
 Here is a list of key specification examples:
