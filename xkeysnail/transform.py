@@ -169,31 +169,51 @@ def define_keymap(condition, mappings, name="Anonymous keymap"):
     global _toplevel_keymaps
 
     # Expand not L/R-specified modifiers
+    # Suppose a nesting is not so deep
     # {K("C-a"): Key.A,
-    #  K("LC-b"): Key.B}
+    #  K("C-b"): {
+    #      K("LC-c"): Key.B,
+    #      K("C-d"): Key.C}}
     # ->
     # {K("LC-a"): Key.A, K("RC-a"): Key.A,
-    #  K("LC-b"): Key.B}
-    additional_mappings = {}
-    keys_for_deletion = []
-    for k, v in mappings.items():
-        if isinstance(k, Combo):
-            expanded_modifiers = []
-            for modifier in k.modifiers:
-                if not modifier.is_specified():
-                    expanded_modifiers.append([modifier.to_left(), modifier.to_right()])
-                else:
-                    expanded_modifiers.append([modifier])
+    #  K("LC-b"): {
+    #      K("LC-c"): Key.B,
+    #      K("LC-d"): Key.C,
+    #      K("RC-d"): Key.C},
+    #  K("RC-b"): {
+    #      K("LC-c"): Key.B,
+    #      K("LC-d"): Key.C,
+    #      K("RC-d"): Key.C}}
+    def expand(target):
+        if isinstance(target, dict):
+            expanded_mappings = {}
+            keys_for_deletion = []
+            for k, v in target.items():
+                # Expand children
+                expand(v)
 
-            expanded_modifier_lists = itertools.product(*expanded_modifiers)
-            expanded_modifier_sets = [set(modifiers) for modifiers in expanded_modifier_lists]
-            for modifiers in expanded_modifier_sets:
-                additional_mappings[Combo(modifiers, k.key)] = v
-            keys_for_deletion.append(k)
+                if isinstance(k, Combo):
+                    expanded_modifiers = []
+                    for modifier in k.modifiers:
+                        if not modifier.is_specified():
+                            expanded_modifiers.append([modifier.to_left(), modifier.to_right()])
+                        else:
+                            expanded_modifiers.append([modifier])
 
-    for key in keys_for_deletion:
-        del mappings[key]
-    mappings.update(additional_mappings)
+                    # Create a Cartesian product of expanded modifiers
+                    expanded_modifier_lists = itertools.product(*expanded_modifiers)
+                    # Create expanded mappings
+                    for modifiers in expanded_modifier_lists:
+                        expanded_mappings[Combo(set(modifiers), k.key)] = v
+                    keys_for_deletion.append(k)
+
+            # Delete original mappings whose key was expanded into expanded_mappings
+            for key in keys_for_deletion:
+                del target[key]
+            # Merge expanded mappings into original mappings
+            target.update(expanded_mappings)
+
+    expand(mappings)
 
     _toplevel_keymaps.append((condition, mappings, name))
     return mappings
