@@ -790,7 +790,7 @@ class Modifier(Enum):
         if self.value == self.CONTROL.value:
             return self.L_CONTROL
         elif self.value == self.ALT.value:
-            return self.L_CONTROL
+            return self.L_ALT
         elif self.value == self.SHIFT.value:
             return self.L_SHIFT
         elif self.value == self.SUPER.value:
@@ -800,7 +800,7 @@ class Modifier(Enum):
         if self.value == self.CONTROL.value:
             return self.R_CONTROL
         elif self.value == self.ALT.value:
-            return self.R_CONTROL
+            return self.R_ALT
         elif self.value == self.SHIFT.value:
             return self.R_SHIFT
         elif self.value == self.SUPER.value:
