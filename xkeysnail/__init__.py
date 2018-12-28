@@ -4,6 +4,10 @@ def eval_file(path):
     with open(path, "rb") as file:
         exec(compile(file.read(), path, 'exec'), globals())
 
+def uinput_device_exists():
+    from os.path import exists
+    return exists('/dev/uinput')
+
 
 def has_access_to_uinput():
     from evdev.uinput import UInputError
@@ -33,6 +37,13 @@ def cli_main():
     parser.add_argument('-q', '--quiet', dest='quiet', action='store_true',
                         help='suppress output of key events')
     args = parser.parse_args()
+
+    # Make sure that the /dev/uinput device exists
+    if not uinput_device_exists():
+        print("""The '/dev/uinput' device does not exist.
+Please check your kernel configuration.""")
+        import sys
+        sys.exit(1)
 
     # Make sure that user have root privilege
     if not has_access_to_uinput():
