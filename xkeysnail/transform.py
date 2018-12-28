@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import itertools
-from enum import Enum
 from inspect import signature
 from .key import Action, Combo, Key, Modifier
 from .output import send_combo, send_key_action, send_key
@@ -11,6 +10,8 @@ __author__ = 'zh'
 # ============================================================ #
 
 import Xlib.display
+
+
 def get_active_window_wm_class(display=Xlib.display.Display()):
     """Get active window's WM_CLASS"""
     current_window = display.get_input_focus().focus
@@ -20,6 +21,7 @@ def get_active_window_wm_class(display=Xlib.display.Display()):
         return str(pair[1])
     else:
         return ""
+
 
 def get_class_name(window):
     """Get window's class name (recursively checks parents)"""
@@ -36,6 +38,7 @@ def get_class_name(window):
         return None
 
 # ============================================================ #
+
 
 _pressed_modifier_keys = set()
 
@@ -87,10 +90,10 @@ def with_or_set_mark(combo):
     return _with_or_set_mark
 
 
-
 # ============================================================ #
 # Utility functions for keymap
 # ============================================================ #
+
 
 def launch(command):
     """Launch command"""
@@ -98,6 +101,7 @@ def launch(command):
         from subprocess import Popen
         Popen(command)
     return launcher
+
 
 def sleep(sec):
     """Sleep sec in commands"""
@@ -107,6 +111,7 @@ def sleep(sec):
     return sleeper
 
 # ============================================================ #
+
 
 def K(exp):
     "Helper function to specify keymap"
@@ -122,6 +127,7 @@ def K(exp):
     key_str = exp.upper()
     key = getattr(Key, key_str)
     return Combo(create_modifiers_from_strings(modifier_strs), key)
+
 
 def create_modifiers_from_strings(modifier_strs):
     modifiers = set()
@@ -159,11 +165,13 @@ def create_modifiers_from_strings(modifier_strs):
 # Keymap
 # ============================================================
 
+
 _toplevel_keymaps = []
 _mode_maps = None
 
 escape_next_key = {}
 pass_through_key = {}
+
 
 def define_keymap(condition, mappings, name="Anonymous keymap"):
     global _toplevel_keymaps
@@ -236,6 +244,7 @@ _multipurpose_map = None
 # or REPEAT
 _last_key = None
 
+
 def define_modmap(mod_remappings):
     """Defines modmap (keycode translation)
 
@@ -302,13 +311,14 @@ def multipurpose_handler(key, action):
         key_is_down = key_state == action.PRESS
         mod_is_down = mod_key in _pressed_modifier_keys
         key_was_last_press = key == _last_key
+
         def set_key_state(x): _multipurpose_map[key][2] = x
 
         if action == Action.RELEASE and key_is_down:
             set_key_state(Action.RELEASE)
             # it is a single press and release
             if key_was_last_press:
-                maybe_press_modifiers() # maybe other multipurpose keys are down
+                maybe_press_modifiers()  # maybe other multipurpose keys are down
                 on_key(single_key, Action.PRESS)
                 on_key(single_key, Action.RELEASE)
             # it is the modifier in a combo
@@ -377,7 +387,7 @@ def transform_key(key, action, wm_class=None, quiet=False):
     is_top_level = False
     if _mode_maps is None:
         # Decide keymap(s)
-        is_top_level =True
+        is_top_level = True
         _mode_maps = []
         if wm_class is None:
             wm_class = get_active_window_wm_class()

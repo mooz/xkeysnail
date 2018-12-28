@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 def eval_file(path):
     with open(path, "rb") as file:
         exec(compile(file.read(), path, 'exec'), globals())
@@ -8,9 +9,9 @@ def eval_file(path):
 def has_access_to_uinput():
     from evdev.uinput import UInputError
     try:
-        from xkeysnail.output import _uinput
+        from xkeysnail.output import _uinput  # noqa: F401
         return True
-    except UInputError as ex:
+    except UInputError:
         return False
 
 
