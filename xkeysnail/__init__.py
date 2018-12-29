@@ -5,6 +5,7 @@ def eval_file(path):
     with open(path, "rb") as file:
         exec(compile(file.read(), path, 'exec'), globals())
 
+
 def uinput_device_exists():
     from os.path import exists
     return exists('/dev/uinput')
