@@ -740,9 +740,9 @@ class Action(IntEnum):
 class Modifier(Enum):
 
     L_CONTROL, R_CONTROL, CONTROL, \
-    L_ALT, R_ALT, ALT, \
-    L_SHIFT, R_SHIFT, SHIFT, \
-    L_SUPER, R_SUPER, SUPER = range(12)
+        L_ALT, R_ALT, ALT, \
+        L_SHIFT, R_SHIFT, SHIFT, \
+        L_SUPER, R_SUPER, SUPER = range(12)
 
     @classmethod
     def _get_modifier_map(cls):

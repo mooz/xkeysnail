@@ -45,9 +45,11 @@ def print_device_list(devices):
 def get_devices_from_paths(device_paths):
     return [InputDevice(device_fn) for device_fn in device_paths]
 
+
 class DeviceFilter(object):
     def __init__(self, matches):
         self.matches = matches
+
     def __call__(self, device):
         # Match by device path or name, if no keyboard devices specified, picks up keyboard-ish devices.
         if self.matches:
@@ -62,6 +64,7 @@ class DeviceFilter(object):
         if device.name == "py-evdev-uinput":
             return False
         return True
+
 
 def select_device(device_matches=None, interactive=True):
     """Select a device from the list of accessible input devices."""
@@ -86,11 +89,13 @@ xkeysnail picks up keyboard-ish devices from the list below:
 
     return devices
 
+
 def in_device_list(fn, devices):
     for device in devices:
         if device.fn == fn:
             return True
     return False
+
 
 def loop(device_matches, device_watch, quiet):
     devices = select_device(device_matches, True)
@@ -137,7 +142,7 @@ def loop(device_matches, device_watch, quiet):
                         if new_devices:
                             print("Okay, now enable remapping on the following new device(s):\n")
                             print_device_list(new_devices)
-            except OSError as e:
+            except OSError:
                 if isinstance(waitable, InputDevice):
                     print("Device removed: " + str(waitable.name))
                     devices.remove(waitable)
