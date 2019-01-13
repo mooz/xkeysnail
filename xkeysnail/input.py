@@ -105,14 +105,17 @@ def loop(device_matches, device_watch, quiet):
     except IOError:
         print("IOError when grabbing device. Maybe, another xkeysnail instance is running?")
         exit(1)
+
     if device_watch:
         from inotify_simple import INotify, flags
         inotify = INotify()
         inotify.add_watch("/dev/input", flags.CREATE)
         print("Watching keyboard devices plug in")
     device_filter = DeviceFilter(device_matches)
+
     if quiet:
         print("No key event will be output since quiet option was specified.")
+
     try:
         while True:
             try:
@@ -120,6 +123,7 @@ def loop(device_matches, device_watch, quiet):
                 if device_watch:
                     waitables.append(inotify.fd)
                 r, w, x = select(waitables, [], [])
+
                 for waitable in r:
                     if isinstance(waitable, InputDevice):
                         for event in waitable.read():
