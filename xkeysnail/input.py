@@ -103,7 +103,7 @@ def loop(device_matches, device_watch, quiet):
         for device in devices:
             device.grab()
     except IOError:
-        print("IOError when grabbing device")
+        print("IOError when grabbing device. Maybe, another xkeysnail instance is running?")
         exit(1)
     if device_watch:
         from inotify_simple import INotify, flags
