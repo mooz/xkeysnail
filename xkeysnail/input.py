@@ -151,6 +151,9 @@ def loop(device_matches, device_watch, quiet):
                 break
     finally:
         for device in devices:
-            device.ungrab()
+            try:
+                device.ungrab()
+            except OSError as e:
+                pass
         if device_watch:
             inotify.close()
