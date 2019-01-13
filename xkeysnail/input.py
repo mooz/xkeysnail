@@ -150,6 +150,10 @@ def loop(device_matches, device_watch, quiet):
                 if isinstance(waitable, InputDevice):
                     print("Device removed: " + str(waitable.name))
                     devices.remove(waitable)
+                    try:
+                        device.ungrab()
+                    except OSError as e:
+                        pass
             except KeyboardInterrupt:
                 print("Received an interrupt, exiting.")
                 break
