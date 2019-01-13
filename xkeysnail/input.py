@@ -132,28 +132,16 @@ def loop(device_matches, device_watch, quiet):
                             else:
                                 send_event(event)
                     else:
-                        new_devices = []
-                        for event in inotify.read():
-                            new_device = InputDevice("/dev/input/" + event.name)
-                            if device_filter(new_device) and not in_device_list(new_device.fn, devices):
-                                try:
-                                    new_device.grab()
-                                    devices.append(new_device)
-                                    new_devices.append(new_device)
-                                except IOError:
-                                    # Ignore errors on new devices
-                                    print("IOError when grabbing new device: " + str(new_device.name))
+                        new_devices = add_new_device(devices, device_filter, inotify)
                         if new_devices:
                             print("Okay, now enable remapping on the following new device(s):\n")
                             print_device_list(new_devices)
             except OSError:
                 if isinstance(waitable, InputDevice):
-                    print("Device removed: " + str(waitable.name))
-                    devices.remove(waitable)
-                    try:
-                        device.ungrab()
-                    except OSError as e:
-                        pass
+                    remove_device(devices, waitable)
+                    print("Device removed: " + str(device.name))
+                    if not len(devices):
+                        break
             except KeyboardInterrupt:
                 print("Received an interrupt, exiting.")
                 break
@@ -165,3 +153,28 @@ def loop(device_matches, device_watch, quiet):
                 pass
         if device_watch:
             inotify.close()
+
+
+def add_new_device(devices, device_filter, inotify):
+    new_devices = []
+    for event in inotify.read():
+        new_device = InputDevice("/dev/input/" + event.name)
+        if device_filter(new_device) and not in_device_list(new_device.fn, devices):
+            try:
+                new_device.grab()
+            except IOError:
+                # Ignore errors on new devices
+                print("IOError when grabbing new device: " + str(new_device.name))
+                continue
+            devices.append(new_device)
+            new_devices.append(new_device)
+    return new_devices
+
+
+def remove_device(devices, device):
+    devices.remove(device)
+    try:
+        device.ungrab()
+    except OSError as e:
+        pass
+
