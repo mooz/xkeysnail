@@ -38,18 +38,24 @@ def send_key_action(key, action):
 def send_combo(combo):
 
     released_modifiers_keys = []
-    for modifier in set(Modifier) - combo.modifiers:
-        for modifier_key in modifier.get_keys():
-            if modifier_key in _pressed_modifier_keys:
-                send_key_action(modifier_key, Action.RELEASE)
-                released_modifiers_keys.append(modifier_key)
+
+    extra_modifier_keys = _pressed_modifier_keys.copy()
+    missing_modifiers = combo.modifiers.copy()
+    for pressed_key in _pressed_modifier_keys:
+        for modifier in combo.modifiers:
+            if pressed_key in modifier.get_keys():
+                extra_modifier_keys.remove(pressed_key)
+                missing_modifiers.remove(modifier)
+
+    for modifier_key in extra_modifier_keys:
+        send_key_action(modifier_key, Action.RELEASE)
+        released_modifiers_keys.append(modifier_key)
 
     pressed_modifier_keys = []
-    for modifier in combo.modifiers:
-        if not any(modifier_key in _pressed_modifier_keys for modifier_key in modifier.get_keys()):
-            modifier_key = modifier.get_key()
-            send_key_action(modifier_key, Action.PRESS)
-            pressed_modifier_keys.append(modifier_key)
+    for modifier in missing_modifiers:
+        modifier_key = modifier.get_key()
+        send_key_action(modifier_key, Action.PRESS)
+        pressed_modifier_keys.append(modifier_key)
 
     send_key_action(combo.key, Action.PRESS)
 
