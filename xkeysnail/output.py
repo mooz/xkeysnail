@@ -10,7 +10,7 @@ __author__ = 'zh'
 _uinput = UInput()
 
 _pressed_modifier_keys = set()
-
+_pressed_keys = set()
 
 def update_modifier_key_pressed(key, action):
     if key in Modifier.get_all_keys():
@@ -19,6 +19,14 @@ def update_modifier_key_pressed(key, action):
         else:
             _pressed_modifier_keys.discard(key)
 
+def update_pressed_keys(key, action):
+    if action.is_pressed():
+        _pressed_keys.add(key)
+    else:
+        _pressed_keys.discard(key)
+
+def is_pressed(key):
+    return key in _pressed_keys
 
 def send_sync():
     _uinput.syn()
@@ -31,6 +39,7 @@ def send_event(event):
 
 def send_key_action(key, action):
     update_modifier_key_pressed(key, action)
+    update_pressed_keys(key, action)
     _uinput.write(ecodes.EV_KEY, key, action)
     send_sync()
 
