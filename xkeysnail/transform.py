@@ -3,7 +3,7 @@
 import itertools
 from inspect import signature
 from .key import Action, Combo, Key, Modifier
-from .output import send_combo, send_key_action, send_key
+from .output import send_combo, send_key_action, send_key, is_pressed
 
 __author__ = 'zh'
 
@@ -369,7 +369,8 @@ def on_key(key, action, wm_class=None, quiet=False):
         update_pressed_modifier_keys(key, action)
         send_key_action(key, action)
     elif not action.is_pressed():
-        send_key_action(key, action)
+        if is_pressed(key):
+            send_key_action(key, action)
     else:
         transform_key(key, action, wm_class=wm_class, quiet=quiet)
 
