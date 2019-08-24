@@ -25,6 +25,18 @@ define_multipurpose_modmap(
     # To use this example, you can't remap capslock with define_modmap.
 )
 
+# [Conditional multipurpose modmap] Multipurpose modmap in certain conditions,
+# such as for a particular device.
+define_conditional_multipurpose_modmap(lambda wm_class, device_name: device_name.startswith("Microsoft"), {
+   # Left shift is open paren when pressed and released.
+   # Left shift when held down.
+   Key.LEFT_SHIFT: [Key.KPLEFTPAREN, Key.LEFT_SHIFT],
+
+   # Right shift is close paren when pressed and released.
+   # Right shift when held down.
+   Key.RIGHT_SHIFT: [Key.KPRIGHTPAREN, Key.RIGHT_SHIFT]
+})
+
 
 # Keybindings for Firefox/Chrome
 define_keymap(re.compile("Firefox|Google-chrome"), {

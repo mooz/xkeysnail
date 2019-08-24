@@ -241,6 +241,7 @@ _conditional_mod_map = []
 # multipurpose keys
 # e.g, {Key.LEFT_CTRL: [Key.ESC, Key.LEFT_CTRL, Action.RELEASE]}
 _multipurpose_map = None
+_conditional_multipurpose_map = []
 
 # last key that sent a PRESS event or a non-mod or non-multi key that sent a RELEASE
 # or REPEAT
@@ -295,12 +296,30 @@ def define_multipurpose_modmap(multipurpose_remappings):
     _multipurpose_map = multipurpose_remappings
 
 
-def multipurpose_handler(key, action):
+def define_conditional_multipurpose_modmap(condition, multipurpose_remappings):
+    """Defines conditional multipurpose modmap (multi-key translation)
 
-    def maybe_press_modifiers():
+    Example:
+
+    define_conditional_multipurpose_modmap(lambda wm_class, device_name: device_name.startswith("Microsoft"), {
+        {Key.CAPSLOCK: [Key.ESC, Key.LEFT_CTRL]
+    })
+    """
+    if hasattr(condition, 'search'):
+        condition = condition.search
+    if not callable(condition):
+        raise ValueError('condition must be a function or compiled regexp')
+    for key, value in multipurpose_remappings.items():
+        value.append(Action.RELEASE)
+    _conditional_multipurpose_map.append((condition, multipurpose_remappings))
+
+
+def multipurpose_handler(multipurpose_map, key, action):
+
+    def maybe_press_modifiers(multipurpose_map):
         """Search the multipurpose map for keys that are pressed. If found and
         we have not yet sent it's modifier translation we do so."""
-        for _, mod_key, state in _multipurpose_map.values():
+        for _, mod_key, state in multipurpose_map.values():
             if state == Action.PRESS and mod_key not in _pressed_modifier_keys:
                 on_key(mod_key, Action.PRESS)
 
@@ -308,19 +327,19 @@ def multipurpose_handler(key, action):
     # was a single press and release
     global _last_key
 
-    if key in _multipurpose_map:
-        single_key, mod_key, key_state = _multipurpose_map[key]
+    if key in multipurpose_map:
+        single_key, mod_key, key_state = multipurpose_map[key]
         key_is_down = key_state == action.PRESS
         mod_is_down = mod_key in _pressed_modifier_keys
         key_was_last_press = key == _last_key
 
-        def set_key_state(x): _multipurpose_map[key][2] = x
+        def set_key_state(x): multipurpose_map[key][2] = x
 
         if action == Action.RELEASE and key_is_down:
             set_key_state(Action.RELEASE)
             # it is a single press and release
             if key_was_last_press:
-                maybe_press_modifiers()  # maybe other multipurpose keys are down
+                maybe_press_modifiers(multipurpose_map)  # maybe other multipurpose keys are down
                 on_key(single_key, Action.PRESS)
                 on_key(single_key, Action.RELEASE)
             # it is the modifier in a combo
@@ -330,7 +349,7 @@ def multipurpose_handler(key, action):
             set_key_state(Action.PRESS)
     # if key is not a multipurpose or mod key we want eventual modifiers down
     elif (key not in Modifier.get_all_keys()) and action == Action.PRESS:
-        maybe_press_modifiers()
+        maybe_press_modifiers(multipurpose_map)
 
     # we want to register all key-presses
     if action == Action.PRESS:
@@ -356,9 +375,20 @@ def on_event(event, device_name, quiet):
     if active_mod_map and key in active_mod_map:
         key = active_mod_map[key]
 
-    if _multipurpose_map:
-        multipurpose_handler(key, action)
-        if key in _multipurpose_map:
+    active_multipurpose_map = _multipurpose_map
+    if _conditional_multipurpose_map:
+        wm_class = get_active_window_wm_class()
+        for condition, mod_map in _conditional_multipurpose_map:
+            params = [wm_class]
+            if len(signature(condition).parameters) == 2:
+                params = [wm_class, device_name]
+
+            if condition(*params):
+                active_multipurpose_map = mod_map
+                break
+    if active_multipurpose_map:
+        multipurpose_handler(active_multipurpose_map, key, action)
+        if key in active_multipurpose_map:
             return
 
     on_key(key, action, wm_class=wm_class, quiet=quiet)
