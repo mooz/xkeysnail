@@ -191,6 +191,13 @@ define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
 }, "Emacs-like keys")
 ```
 
+## FAQ
+
+### How do I fix Firefox capturing Alt before xkeysnail?
+
+In the Firefox location bar, go to `about:config`, search for `ui.key.menuAcessKeyFocuses`, and set the Value to `false`.
+
+
 ## License
 
 `xkeysnail` is distributed under GPL.
