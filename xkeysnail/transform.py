@@ -347,6 +347,9 @@ def multipurpose_handler(multipurpose_map, key, action):
                 on_key(mod_key, Action.RELEASE)
         elif action == Action.PRESS and not key_is_down:
             set_key_state(Action.PRESS)
+        elif action == Action.RELEASE:
+            update_pressed_modifier_keys(key, action)
+            send_key_action(key, action)
     # if key is not a multipurpose or mod key we want eventual modifiers down
     elif (key not in Modifier.get_all_keys()) and action == Action.PRESS:
         maybe_press_modifiers(multipurpose_map)
