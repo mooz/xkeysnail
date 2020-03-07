@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import itertools
+from time import time
 from inspect import signature
 from .key import Action, Combo, Key, Modifier
 from .output import send_combo, send_key_action, send_key, is_pressed
@@ -260,6 +261,14 @@ _conditional_multipurpose_map = []
 # or REPEAT
 _last_key = None
 
+# last key time record time when execute multi press
+_last_key_time = time()
+_timeout = 1
+def define_timeout(seconds=1):
+    global _timeout
+    _timeout = seconds
+
+
 
 def define_modmap(mod_remappings):
     """Defines modmap (keycode translation)
@@ -339,6 +348,7 @@ def multipurpose_handler(multipurpose_map, key, action):
     # we need to register the last key presses so we know if a multipurpose key
     # was a single press and release
     global _last_key
+    global _last_key_time
 
     if key in multipurpose_map:
         single_key, mod_key, key_state = multipurpose_map[key]
@@ -349,13 +359,15 @@ def multipurpose_handler(multipurpose_map, key, action):
         update_pressed_keys(key, action)
         if action == Action.RELEASE and key_is_down:
             # it is a single press and release
-            if key_was_last_press:
+            if key_was_last_press and _last_key_time + _timeout > time():
                 maybe_press_modifiers(multipurpose_map)  # maybe other multipurpose keys are down
                 on_key(single_key, Action.PRESS)
                 on_key(single_key, Action.RELEASE)
             # it is the modifier in a combo
             elif mod_is_down:
                 on_key(mod_key, Action.RELEASE)
+        elif action == Action.PRESS and not key_is_down:
+            _last_key_time = time()
     # if key is not a multipurpose or mod key we want eventual modifiers down
     elif (key not in Modifier.get_all_keys()) and action == Action.PRESS:
         maybe_press_modifiers(multipurpose_map)
