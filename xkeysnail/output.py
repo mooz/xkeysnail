@@ -62,9 +62,10 @@ def send_combo(combo):
     for modifier_key in extra_modifier_keys:
         # Do not release new modifier
         # until original modifier is released
-        if modifier_key != str(modifier.get_key()):
-            send_key_action(modifier_key, Action.RELEASE)
-            released_modifiers_keys.append(modifier_key)
+        for modifier in combo.modifiers:
+            if modifier_key != str(modifier.get_key()):
+                send_key_action(modifier_key, Action.RELEASE)
+                released_modifiers_keys.append(modifier_key)
 
     pressed_modifier_keys = []
     for modifier in missing_modifiers:
