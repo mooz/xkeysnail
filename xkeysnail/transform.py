@@ -3,7 +3,7 @@
 import itertools
 from inspect import signature
 from .key import Action, Combo, Key, Modifier
-from .output import send_combo, send_key_action, send_key, is_pressed
+from .output import send_combo, send_key_action, send_key, is_pressed, output_modifier_key
 
 __author__ = 'zh'
 
@@ -365,9 +365,15 @@ def on_event(event, device_name, quiet):
 
 
 def on_key(key, action, wm_class=None, quiet=False):
+    output_mods = output_modifier_key().copy()
     if key in Modifier.get_all_keys():
         update_pressed_modifier_keys(key, action)
         send_key_action(key, action)
+        # Release mapped modifier only when physical mod
+        # is released
+        for output_key in output_mods:
+            update_pressed_modifier_keys(output_key, action)
+            send_key_action(output_key, action)
     elif not action.is_pressed():
         if is_pressed(key):
             send_key_action(key, action)
