@@ -11,6 +11,7 @@ __author__ = 'zh'
 
 import Xlib.display
 
+_release_combo = False
 
 def get_active_window_wm_class(display=Xlib.display.Display()):
     """Get active window's WM_CLASS"""
@@ -365,6 +366,7 @@ def on_event(event, device_name, quiet):
 
 
 def on_key(key, action, wm_class=None, quiet=False):
+    global _release_combo
     output_mods = output_modifier_key().copy()
     if key in Modifier.get_all_keys():
         update_pressed_modifier_keys(key, action)
@@ -378,8 +380,19 @@ def on_key(key, action, wm_class=None, quiet=False):
     elif not action.is_pressed():
         if is_pressed(key):
             send_key_action(key, action)
+        # Unset modifiers used in nested mode_maps
+        elif _release_combo and len(output_mods) > 0:
+            print("len(output_mods)")
+            print(len(output_mods))
+            _release_combo = False
+            for output_key in output_mods:
+                update_pressed_modifier_keys(output_key, action)
+                send_key_action(output_key, action)
     else:
         transform_key(key, action, wm_class=wm_class, quiet=quiet)
+    # Will unset mode maps modifiers on next combo
+    if _mode_maps != None:
+        _release_combo = True
 
 
 def transform_key(key, action, wm_class=None, quiet=False):
