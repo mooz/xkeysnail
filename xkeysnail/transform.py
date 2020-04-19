@@ -371,9 +371,10 @@ def on_key(key, action, wm_class=None, quiet=False):
         send_key_action(key, action)
         # Release mapped modifier only when physical mod
         # is released
-        for output_key in output_mods:
-            update_pressed_modifier_keys(output_key, action)
-            send_key_action(output_key, action)
+        if str(key) != "Key.LEFT_SHIFT" and str(key) != "Key.RIGHT_SHIFT":
+            for output_key in output_mods:
+                update_pressed_modifier_keys(output_key, action)
+                send_key_action(output_key, action)
     elif not action.is_pressed():
         if is_pressed(key):
             send_key_action(key, action)
