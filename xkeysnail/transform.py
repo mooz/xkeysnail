@@ -382,8 +382,6 @@ def on_key(key, action, wm_class=None, quiet=False):
             send_key_action(key, action)
         # Unset modifiers used in nested mode_maps
         elif _release_combo and len(output_mods) > 0:
-            print("len(output_mods)")
-            print(len(output_mods))
             _release_combo = False
             for output_key in output_mods:
                 update_pressed_modifier_keys(output_key, action)
