@@ -12,6 +12,9 @@ _uinput = UInput()
 _pressed_modifier_keys = set()
 _pressed_keys = set()
 
+def output_modifier_key():
+    return _pressed_modifier_keys
+
 def update_modifier_key_pressed(key, action):
     if key in Modifier.get_all_keys():
         if action.is_pressed():
@@ -57,8 +60,17 @@ def send_combo(combo):
                 missing_modifiers.remove(modifier)
 
     for modifier_key in extra_modifier_keys:
-        send_key_action(modifier_key, Action.RELEASE)
-        released_modifiers_keys.append(modifier_key)
+        # Do not release new modifier
+        # until original modifier is released
+        # unless no modifier is the new mapping
+        if len(combo.modifiers) > 0:
+            for modifier in combo.modifiers:
+                if modifier_key != str(modifier.get_key()):
+                    send_key_action(modifier_key, Action.RELEASE)
+                    released_modifiers_keys.append(modifier_key)
+        else:
+            send_key_action(modifier_key, Action.RELEASE)
+            released_modifiers_keys.append(modifier_key)
 
     pressed_modifier_keys = []
     for modifier in missing_modifiers:
@@ -69,9 +81,6 @@ def send_combo(combo):
     send_key_action(combo.key, Action.PRESS)
 
     send_key_action(combo.key, Action.RELEASE)
-
-    for modifier in reversed(pressed_modifier_keys):
-        send_key_action(modifier, Action.RELEASE)
 
     for modifier in reversed(released_modifiers_keys):
         send_key_action(modifier, Action.PRESS)
