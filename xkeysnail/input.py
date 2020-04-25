@@ -109,7 +109,7 @@ def loop(device_matches, device_watch, quiet):
     if device_watch:
         from inotify_simple import INotify, flags
         inotify = INotify()
-        inotify.add_watch("/dev/input", flags.CREATE)
+        inotify.add_watch("/dev/input", flags.CREATE | flags.ATTRIB)
         print("Watching keyboard devices plug in")
     device_filter = DeviceFilter(device_matches)
 
