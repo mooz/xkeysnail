@@ -3,6 +3,9 @@
 import re
 from xkeysnail.transform import *
 
+# define timeout for multipurpose_modmap
+define_timeout(1)
+
 # [Global modemap] Change modifier keys as in xmodmap
 define_modmap({
     Key.CAPSLOCK: Key.LEFT_CTRL

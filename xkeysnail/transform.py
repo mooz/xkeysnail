@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import itertools
+from time import time
 from inspect import signature
 from .key import Action, Combo, Key, Modifier
 from .output import send_combo, send_key_action, send_key, is_pressed
@@ -54,6 +55,19 @@ def update_pressed_modifier_keys(key, action):
 
 def get_pressed_modifiers():
     return {Modifier.from_key(key) for key in _pressed_modifier_keys}
+
+
+# ============================================================ #
+
+
+_pressed_keys = set()
+
+
+def update_pressed_keys(key, action):
+    if action.is_pressed():
+        _pressed_keys.add(key)
+    else:
+        _pressed_keys.discard(key)
 
 
 # ============================================================ #
@@ -247,6 +261,14 @@ _conditional_multipurpose_map = []
 # or REPEAT
 _last_key = None
 
+# last key time record time when execute multi press
+_last_key_time = time()
+_timeout = 1
+def define_timeout(seconds=1):
+    global _timeout
+    _timeout = seconds
+
+
 
 def define_modmap(mod_remappings):
     """Defines modmap (keycode translation)
@@ -319,26 +341,25 @@ def multipurpose_handler(multipurpose_map, key, action):
     def maybe_press_modifiers(multipurpose_map):
         """Search the multipurpose map for keys that are pressed. If found and
         we have not yet sent it's modifier translation we do so."""
-        for _, mod_key, state in multipurpose_map.values():
-            if state == Action.PRESS and mod_key not in _pressed_modifier_keys:
+        for k, [ _, mod_key, state ] in multipurpose_map.items():
+            if k in _pressed_keys and mod_key not in _pressed_modifier_keys:
                 on_key(mod_key, Action.PRESS)
 
     # we need to register the last key presses so we know if a multipurpose key
     # was a single press and release
     global _last_key
+    global _last_key_time
 
     if key in multipurpose_map:
         single_key, mod_key, key_state = multipurpose_map[key]
-        key_is_down = key_state == action.PRESS
+        key_is_down = key in _pressed_keys
         mod_is_down = mod_key in _pressed_modifier_keys
         key_was_last_press = key == _last_key
 
-        def set_key_state(x): multipurpose_map[key][2] = x
-
+        update_pressed_keys(key, action)
         if action == Action.RELEASE and key_is_down:
-            set_key_state(Action.RELEASE)
             # it is a single press and release
-            if key_was_last_press:
+            if key_was_last_press and _last_key_time + _timeout > time():
                 maybe_press_modifiers(multipurpose_map)  # maybe other multipurpose keys are down
                 on_key(single_key, Action.PRESS)
                 on_key(single_key, Action.RELEASE)
@@ -346,7 +367,7 @@ def multipurpose_handler(multipurpose_map, key, action):
             elif mod_is_down:
                 on_key(mod_key, Action.RELEASE)
         elif action == Action.PRESS and not key_is_down:
-            set_key_state(Action.PRESS)
+            _last_key_time = time()
     # if key is not a multipurpose or mod key we want eventual modifiers down
     elif (key not in Modifier.get_all_keys()) and action == Action.PRESS:
         maybe_press_modifiers(multipurpose_map)
@@ -392,6 +413,7 @@ def on_event(event, device_name, quiet):
             return
 
     on_key(key, action, wm_class=wm_class, quiet=quiet)
+    update_pressed_keys(key, action)
 
 
 def on_key(key, action, wm_class=None, quiet=False):
