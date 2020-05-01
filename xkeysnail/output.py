@@ -76,11 +76,15 @@ def send_combo(combo):
     for modifier in missing_modifiers:
         modifier_key = modifier.get_key()
         send_key_action(modifier_key, Action.PRESS)
-        pressed_modifier_keys.append(modifier_key)
 
     send_key_action(combo.key, Action.PRESS)
 
     send_key_action(combo.key, Action.RELEASE)
+
+    # Release modifiers that are not physically held - ONLY
+    for modifier in missing_modifiers:
+        modifier_key = modifier.get_key()
+        send_key_action(modifier_key, Action.RELEASE)
 
     for modifier in reversed(released_modifiers_keys):
         send_key_action(modifier, Action.PRESS)
