@@ -191,6 +191,37 @@ define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
 }, "Emacs-like keys")
 ```
 
+### Example of Case Insensitivity Matching
+
+```
+terminals = ["gnome-terminal","konsole","io.elementary.terminal","sakura"]
+terminals = [term.casefold() for term in terminals]
+termStr = "|".join(str(x) for x in terminals)
+
+# [Conditional modmap] Change modifier keys in certain applications
+define_conditional_modmap(lambda wm_class: wm_class.casefold() not in terminals,{
+    # Default Mac/Win
+    Key.LEFT_ALT: Key.RIGHT_CTRL,   # WinMac
+    Key.LEFT_META: Key.LEFT_ALT,    # WinMac
+    Key.LEFT_CTRL: Key.LEFT_META,   # WinMac
+    Key.RIGHT_ALT: Key.RIGHT_CTRL,  # WinMac
+    Key.RIGHT_META: Key.RIGHT_ALT,  # WinMac
+    Key.RIGHT_CTRL: Key.RIGHT_META, # WinMac
+})
+
+# [Conditional modmap] Change modifier keys in certain applications
+define_conditional_modmap(re.compile(termStr, re.IGNORECASE), {
+
+    # Default Mac/Win
+    Key.LEFT_ALT: Key.RIGHT_CTRL,   # WinMac
+    Key.LEFT_META: Key.LEFT_ALT,    # WinMac
+    Key.LEFT_CTRL: Key.LEFT_CTRL,   # WinMac
+    Key.RIGHT_ALT: Key.RIGHT_CTRL,  # WinMac
+    Key.RIGHT_META: Key.RIGHT_ALT,  # WinMac
+    Key.RIGHT_CTRL: Key.LEFT_CTRL,  # WinMac
+})
+```
+
 ## FAQ
 
 ### How do I fix Firefox capturing Alt before xkeysnail?
