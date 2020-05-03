@@ -83,8 +83,10 @@ Argument `condition` specifies the condition of activating the `mappings` on an
 application and takes one of the following forms:
 - Regular expression (e.g., `re.compile("YYY")`)
     - Activates the `mappings` if the pattern `YYY` matches the `WM_CLASS` of the application.
+    - Case Insensitivity matching against `WM_CLASS` via `re.IGNORECASE` (e.g. `re.compile('Gnome-terminal', re.IGNORECASE)`)
 - `lambda wm_class: some_condition(wm_class)`
     - Activates the `mappings` if the `WM_CLASS` of the application satisfies the condition specified by the `lambda` function.
+    - Case Insensitivity matching via `casefold()` or `lambda wm_class: wm_class.casefold()` (see example below to see how to compare to a list of names)
 - `None`: Refers to no condition. `None`-specified keymap will be a global keymap and is always enabled.
 
 Argument `mappings` is a dictionary in the form of `{key: command, key2:
