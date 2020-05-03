@@ -25,6 +25,9 @@ Requires root privilege and **Python 3**.
 
     sudo apt install python3-pip
     sudo pip3 install xkeysnail
+    
+    # If you plan to compile from source
+    sudo apt install python3-dev
 
 ### Fedora
 
@@ -33,6 +36,9 @@ Requires root privilege and **Python 3**.
     # Add your user to input group if you don't want to run xkeysnail
     # with sudo (log out and log in again to apply group change)
     sudo usermod -a -G input $USER
+    
+    # If you plan to compile from source
+    sudo dnf install python3-devel
 
 ### From source
 
