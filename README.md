@@ -39,6 +39,13 @@ Requires root privilege and **Python 3**.
     
     # If you plan to compile from source
     sudo dnf install python3-devel
+    
+### Manjaro/Arch
+
+    # Some distros will need to compile evdev components 
+    # and may fail to do so if gcc is not installed.
+    sudo pacman -Syy
+    sudo pacman -S gcc
 
 ### From source
 
