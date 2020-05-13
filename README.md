@@ -46,6 +46,13 @@ Requires root privilege and **Python 3**.
     # and may fail to do so if gcc is not installed.
     sudo pacman -Syy
     sudo pacman -S gcc
+    
+### Solus
+
+    # Some distros will need to compile evdev components 
+    # and may fail to do so if gcc is not installed.
+    sudo eopkg install gcc
+    sudo eopkg install -c system.devel
 
 ### From source
 
