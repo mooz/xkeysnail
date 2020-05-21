@@ -179,4 +179,3 @@ def remove_device(devices, device):
         device.ungrab()
     except OSError as e:
         pass
-
