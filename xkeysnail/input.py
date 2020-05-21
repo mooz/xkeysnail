@@ -140,7 +140,7 @@ def loop(device_matches, device_watch, quiet, interrupt):
                 if isinstance(waitable, InputDevice):
                     remove_device(devices, waitable)
                     print("Device removed: " + str(device.name))
-                    if interrupt:
+                    if not device_watch:
                         if not len(devices):
                             break
                         pass
@@ -179,4 +179,3 @@ def remove_device(devices, device):
         device.ungrab()
     except OSError as e:
         pass
-
