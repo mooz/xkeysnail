@@ -97,7 +97,7 @@ def in_device_list(fn, devices):
     return False
 
 
-def loop(device_matches, device_watch, quiet):
+def loop(device_matches, device_watch, quiet, interrupt):
     devices = select_device(device_matches, True)
     try:
         for device in devices:
@@ -140,6 +140,10 @@ def loop(device_matches, device_watch, quiet):
                 if isinstance(waitable, InputDevice):
                     remove_device(devices, waitable)
                     print("Device removed: " + str(device.name))
+                    if interrupt:
+                        if not len(devices):
+                            break
+                        pass
             except KeyboardInterrupt:
                 print("Received an interrupt, exiting.")
                 break

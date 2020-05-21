@@ -38,6 +38,8 @@ def cli_main():
                         help='watch keyboard devices plug in ')
     parser.add_argument('-q', '--quiet', dest='quiet', action='store_true',
                         help='suppress output of key events')
+    parser.add_argument('-i', '--interrupt', dest='interrupt', action='store_true',
+                        help='interrupt xkeysnail if device is disconected')   
     args = parser.parse_args()
 
     # Make sure that the /dev/uinput device exists
@@ -62,4 +64,4 @@ Make sure that you have executed xkeysnail with root privilege such as
 
     # Enter event loop
     from xkeysnail.input import loop
-    loop(args.devices, args.watch, args.quiet)
+    loop(args.devices, args.watch, args.quiet, args.interrupt)
