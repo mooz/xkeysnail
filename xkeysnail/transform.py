@@ -106,6 +106,27 @@ def with_or_set_mark(combo):
 
     return _with_or_set_mark
 
+# ============================================================ #
+# Variable functions
+# ============================================================ #
+_var_dict = {};
+
+def set_var(k,v,ms=None):
+    def _set_var():
+        global _mark_set; global _var_dict
+        if ms != None: _mark_set=ms
+        _var_dict[k]=v
+    return _set_var
+
+def if_var(k,a,b,ms=None,v=False):
+    def _if_var():
+        global _mark_set; global _var_dict
+        if ms != None: _mark_set=ms
+        if _var_dict.get(k):
+            _var_dict[k]=v
+            return a
+        return b
+    return _if_var
 
 # ============================================================ #
 # Utility functions for keymap
