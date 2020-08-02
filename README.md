@@ -58,6 +58,8 @@ If you have hot-plugging keyboards, use `--watch` option.
 
 If you want to suppress output of key events, use `-q` / `--quiet` option especially when running as a daemon.
 
+Remapping `BTN_` events (such as mouse clicks) is not supported with wayland compositors.
+
 ## How to prepare `config.py`?
 
 (**If you just need Emacs-like keybindings, consider to

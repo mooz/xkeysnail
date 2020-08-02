@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 from evdev import ecodes
 from evdev.uinput import UInput
 from .key import Action, Combo, Modifier
@@ -7,7 +8,11 @@ from .key import Action, Combo, Modifier
 __author__ = 'zh'
 
 
-_uinput = UInput()
+if 'WAYLAND_DISPLAY' in os.environ:
+    _keyboard_codes = ecodes.keys.keys() - ecodes.BTN
+    _uinput = UInput(events={ecodes.EV_KEY: _keyboard_codes})
+else:
+    _uinput = UInput()
 
 _pressed_modifier_keys = set()
 _pressed_keys = set()
