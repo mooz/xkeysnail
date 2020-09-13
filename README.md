@@ -43,7 +43,7 @@ Requires root privilege and **Python 3**.
 ## Usage
 
     sudo xkeysnail config.py
-    
+
 When you encounter the errors like `Xlib.error.DisplayConnectionError: Can't connect to display ":0.0": b'No protocol specified\n'
 `, try
 
@@ -195,7 +195,7 @@ define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
 
 ### How do I fix Firefox capturing Alt before xkeysnail?
 
-In the Firefox location bar, go to `about:config`, search for `ui.key.menuAcessKeyFocuses`, and set the Value to `false`.
+In the Firefox location bar, go to `about:config`, search for `ui.key.menuAccessKeyFocuses`, and set the Value to `false`.
 
 
 ## License
