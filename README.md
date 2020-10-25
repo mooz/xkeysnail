@@ -25,6 +25,9 @@ Requires root privilege and **Python 3**.
 
     sudo apt install python3-pip
     sudo pip3 install xkeysnail
+    
+    # If you plan to compile from source
+    sudo apt install python3-dev
 
 ### Fedora
 
@@ -33,6 +36,23 @@ Requires root privilege and **Python 3**.
     # Add your user to input group if you don't want to run xkeysnail
     # with sudo (log out and log in again to apply group change)
     sudo usermod -a -G input $USER
+    
+    # If you plan to compile from source
+    sudo dnf install python3-devel
+    
+### Manjaro/Arch
+
+    # Some distros will need to compile evdev components 
+    # and may fail to do so if gcc is not installed.
+    sudo pacman -Syy
+    sudo pacman -S gcc
+    
+### Solus
+
+    # Some distros will need to compile evdev components 
+    # and may fail to do so if gcc is not installed.
+    sudo eopkg install gcc
+    sudo eopkg install -c system.devel
 
 ### From source
 
@@ -77,8 +97,10 @@ Argument `condition` specifies the condition of activating the `mappings` on an
 application and takes one of the following forms:
 - Regular expression (e.g., `re.compile("YYY")`)
     - Activates the `mappings` if the pattern `YYY` matches the `WM_CLASS` of the application.
+    - Case Insensitivity matching against `WM_CLASS` via `re.IGNORECASE` (e.g. `re.compile('Gnome-terminal', re.IGNORECASE)`)
 - `lambda wm_class: some_condition(wm_class)`
     - Activates the `mappings` if the `WM_CLASS` of the application satisfies the condition specified by the `lambda` function.
+    - Case Insensitivity matching via `casefold()` or `lambda wm_class: wm_class.casefold()` (see example below to see how to compare to a list of names)
 - `None`: Refers to no condition. `None`-specified keymap will be a global keymap and is always enabled.
 
 Argument `mappings` is a dictionary in the form of `{key: command, key2:
@@ -189,6 +211,37 @@ define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
         K("u"): [K("C-z"), set_mark(False)],
     }
 }, "Emacs-like keys")
+```
+
+### Example of Case Insensitivity Matching
+
+```
+terminals = ["gnome-terminal","konsole","io.elementary.terminal","sakura"]
+terminals = [term.casefold() for term in terminals]
+termStr = "|".join(str(x) for x in terminals)
+
+# [Conditional modmap] Change modifier keys in certain applications
+define_conditional_modmap(lambda wm_class: wm_class.casefold() not in terminals,{
+    # Default Mac/Win
+    Key.LEFT_ALT: Key.RIGHT_CTRL,   # WinMac
+    Key.LEFT_META: Key.LEFT_ALT,    # WinMac
+    Key.LEFT_CTRL: Key.LEFT_META,   # WinMac
+    Key.RIGHT_ALT: Key.RIGHT_CTRL,  # WinMac
+    Key.RIGHT_META: Key.RIGHT_ALT,  # WinMac
+    Key.RIGHT_CTRL: Key.RIGHT_META, # WinMac
+})
+
+# [Conditional modmap] Change modifier keys in certain applications
+define_conditional_modmap(re.compile(termStr, re.IGNORECASE), {
+
+    # Default Mac/Win
+    Key.LEFT_ALT: Key.RIGHT_CTRL,   # WinMac
+    Key.LEFT_META: Key.LEFT_ALT,    # WinMac
+    Key.LEFT_CTRL: Key.LEFT_CTRL,   # WinMac
+    Key.RIGHT_ALT: Key.RIGHT_CTRL,  # WinMac
+    Key.RIGHT_META: Key.RIGHT_ALT,  # WinMac
+    Key.RIGHT_CTRL: Key.LEFT_CTRL,  # WinMac
+})
 ```
 
 ## FAQ
