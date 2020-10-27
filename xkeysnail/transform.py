@@ -430,6 +430,7 @@ def on_key(key, action, wm_class=None, quiet=False):
 def transform_key(key, action, wm_class=None, quiet=False):
     global _mode_maps
     global _toplevel_keymaps
+    transformed = False
 
     combo = Combo(get_pressed_modifiers(), key)
 
@@ -456,18 +457,21 @@ def transform_key(key, action, wm_class=None, quiet=False):
         if not quiet:
             print("WM_CLASS '{}' | active keymaps = [{}]".format(wm_class, ", ".join(keymap_names)))
 
-    if not quiet:
-        print(combo)
-
     # _mode_maps: [global_map, local_1, local_2, ...]
     for mappings in _mode_maps:
         if combo not in mappings:
             continue
         # Found key in "mappings". Execute commands defined for the key.
         reset_mode = handle_commands(mappings[combo], key, action)
+        if not quiet:
+            print("{} => {}".format(combo,mappings[combo]))
+            transformed = True
         if reset_mode:
             _mode_maps = None
         return
+
+    if not quiet and not transformed:
+        print(combo)
 
     # Not found in all keymaps
     if is_top_level:
