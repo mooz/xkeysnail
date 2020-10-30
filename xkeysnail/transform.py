@@ -228,7 +228,7 @@ def define_keymap(condition, mappings, name="Anonymous keymap"):
                     expanded_modifier_lists = itertools.product(*expanded_modifiers)
                     # Create expanded mappings
                     for modifiers in expanded_modifier_lists:
-                        expanded_mappings[Combo(set(modifiers), k.key)] = v
+                        expanded_mappings[Combo(set(modifiers), k.scancode)] = v
                     keys_for_deletion.append(k)
 
             # Delete original mappings whose key was expanded into expanded_mappings

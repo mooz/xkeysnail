@@ -88,9 +88,9 @@ def send_combo(combo):
         send_key_action(modifier_key, Action.PRESS)
         pressed_modifier_keys.append(modifier_key)
 
-    send_key_action(combo.key, Action.PRESS)
+    send_key_action(combo.scancode, Action.PRESS)
 
-    send_key_action(combo.key, Action.RELEASE)
+    send_key_action(combo.scancode, Action.RELEASE)
 
     for modifier in reversed(pressed_modifier_keys):
         send_key_action(modifier, Action.RELEASE)

@@ -822,10 +822,9 @@ class Modifier(Enum):
             if key in modifier.get_keys():
                 return modifier
 
-
 class Combo:
 
-    def __init__(self, modifiers, key):
+    def __init__(self, modifiers, scancode):
 
         if isinstance(modifiers, list):
             raise ValueError("modifiers should be a set instead of a list")
@@ -836,25 +835,25 @@ class Combo:
         elif not isinstance(modifiers, set):
             raise ValueError("modifiers should be a set")
 
-        if not isinstance(key, Key):
+        if not isinstance(scancode, Key):
             raise ValueError("key should be a Key")
 
         self.modifiers = modifiers
-        self.key = key
+        self.scancode  = scancode
 
     def __eq__(self, other):
         if isinstance(other, Combo):
-            return self.modifiers == other.modifiers and self.key == other.key
+            return self.modifiers == other.modifiers and self.scancode == other.scancode
         else:
             return NotImplemented
 
     def __hash__(self):
-        return hash((frozenset(self.modifiers), self.key))
+        return hash((frozenset(self.modifiers), self.scancode))
 
     def __str__(self):
-        return "-".join([str(mod) for mod in self.modifiers] + [self.key.name])
+        return "-".join([str(mod) for mod in self.modifiers] + [self.scancode.name])
 
     def with_modifier(self, modifiers):
         if isinstance(modifiers, Modifier):
             modifiers = {modifiers}
-        return Combo(self.modifiers | modifiers, self.key)
+        return Combo(self.modifiers | modifiers, self.scancode)
