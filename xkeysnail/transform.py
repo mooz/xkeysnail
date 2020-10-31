@@ -142,7 +142,7 @@ def K(exp):
         exp = re.sub(r"\A{}-".format(modifier), "", exp)
     key_str = exp.upper()
     key = getattr(Key, key_str)
-    return Combo(create_modifiers_from_strings(modifier_strs), key)
+    return Combo(create_modifiers_from_strings(modifier_strs), key, perfer_scancode=False)
 
 
 def create_modifiers_from_strings(modifier_strs):
@@ -241,6 +241,25 @@ def define_keymap(condition, mappings, name="Anonymous keymap"):
 
     _toplevel_keymaps.append((condition, mappings, name))
     return mappings
+
+
+# ============================================================
+# Keyboard Layout
+# ============================================================
+
+_current_layout = None
+_k_to_s = {}
+_s_to_k = {}
+
+def define_layout(layout_name, keycode_to_scancode):
+    """Define Keyboard layout dictionay"""
+    if isinstance(keycode_to_scancode, dict):
+        global _current_layout, _k_to_s, _s_to_k
+        _current_layout = layout_name
+        _k_to_s = keycode_to_scancode.copy()
+        _s_to_k = {s: k for k, s in keycode_to_scancode.items()}
+
+    return layout_name
 
 
 # ============================================================

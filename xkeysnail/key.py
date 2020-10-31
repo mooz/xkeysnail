@@ -824,7 +824,7 @@ class Modifier(Enum):
 
 class Combo:
 
-    def __init__(self, modifiers, scancode):
+    def __init__(self, modifiers, scancode, perfer_scancode=True):
 
         if isinstance(modifiers, list):
             raise ValueError("modifiers should be a set instead of a list")
@@ -839,7 +839,24 @@ class Combo:
             raise ValueError("key should be a Key")
 
         self.modifiers = modifiers
-        self.scancode  = scancode
+        from .transform import _current_layout
+        if _current_layout is None:
+            # Normal use QWERTY layout. scancode = keycode
+            self.scancode = scancode
+            self.keycode  = scancode
+        else:
+            self.layout_scancode_keycode(scancode, perfer_scancode)
+
+
+    def layout_scancode_keycode(self, scancode, perfer_scancode):
+        from .transform import _k_to_s, _s_to_k
+        if perfer_scancode:
+            self.scancode = scancode
+            self.keycode  = _s_to_k[self.scancode] if self.scancode in _s_to_k else self.scancode
+        else:
+            self.keycode  = scancode
+            self.scancode = _k_to_s[self.keycode] if self.keycode in _k_to_s else self.keycode
+
 
     def __eq__(self, other):
         if isinstance(other, Combo):
@@ -851,7 +868,7 @@ class Combo:
         return hash((frozenset(self.modifiers), self.scancode))
 
     def __str__(self):
-        return "-".join([str(mod) for mod in self.modifiers] + [self.scancode.name])
+        return "-".join([str(mod) for mod in self.modifiers] + [self.keycode.name])
 
     def with_modifier(self, modifiers):
         if isinstance(modifiers, Modifier):
