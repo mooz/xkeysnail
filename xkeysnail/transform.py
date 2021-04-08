@@ -13,15 +13,32 @@ __author__ = 'zh'
 import Xlib.display
 
 
-def get_active_window_wm_class(display=Xlib.display.Display()):
-    """Get active window's WM_CLASS"""
+def get_active_window_wm_info(display=Xlib.display.Display()):
+    """Get active window's WM_CLASS, WM_NAME"""
     current_window = display.get_input_focus().focus
     pair = get_class_name(current_window)
+    wmname = get_window_name(current_window, display)
     if pair:
-        # (process name, class name)
-        return str(pair[1])
+        return str(pair[1]), str(wmname)
     else:
-        return ""
+        return "", ""
+
+
+def get_window_name(window, display):
+    """Get window's name (recursively checks parents)"""
+    try:
+        wmname = window.get_full_text_property(
+            display.intern_atom('_NET_WM_NAME'),
+            display.get_atom('UTF8_STRING'))
+
+        if (wmname is None):
+            parent_window = window.query_tree().parent
+            if parent_window:
+                return get_window_name(parent_window, display)
+            return None
+        return wmname
+    except:
+        return None
 
 
 def get_class_name(window):
@@ -377,20 +394,30 @@ def multipurpose_handler(multipurpose_map, key, action):
         _last_key = key
 
 
+def test_condition(condition, device_name=None, wm_class=None, wm_name=None):
+    # This is a little ugly, but backward compatible
+    params = [wm_class]
+    if len(signature(condition).parameters) == 2:
+        params = [wm_class, device_name]
+    if len(signature(condition).parameters) == 3:
+        params = [wm_class, device_name, wm_name]
+    if condition(*params):
+        # print(f'tested {params}')
+        return True
+    return False
+
+
 def on_event(event, device_name, quiet):
     key = Key(event.code)
     action = Action(event.value)
     wm_class = None
+    wm_name = None
     # translate keycode (like xmodmap)
     active_mod_map = _mod_map
     if _conditional_mod_map:
-        wm_class = get_active_window_wm_class()
+        wm_class, wm_name = get_active_window_wm_info()
         for condition, mod_map in _conditional_mod_map:
-            params = [wm_class]
-            if len(signature(condition).parameters) == 2:
-                params = [wm_class, device_name]
-
-            if condition(*params):
+            if test_condition(condition, device_name, wm_class, wm_name):
                 active_mod_map = mod_map
                 break
     if active_mod_map and key in active_mod_map:
@@ -398,13 +425,9 @@ def on_event(event, device_name, quiet):
 
     active_multipurpose_map = _multipurpose_map
     if _conditional_multipurpose_map:
-        wm_class = get_active_window_wm_class()
+        wm_class, wm_name = get_active_window_wm_info()
         for condition, mod_map in _conditional_multipurpose_map:
-            params = [wm_class]
-            if len(signature(condition).parameters) == 2:
-                params = [wm_class, device_name]
-
-            if condition(*params):
+            if test_condition(condition, device_name, wm_class, wm_name):
                 active_multipurpose_map = mod_map
                 break
     if active_multipurpose_map:
@@ -412,11 +435,11 @@ def on_event(event, device_name, quiet):
         if key in active_multipurpose_map:
             return
 
-    on_key(key, action, wm_class=wm_class, quiet=quiet)
+    on_key(key, action, device_name=device_name, wm_class=wm_class, wm_name=wm_name, quiet=quiet)
     update_pressed_keys(key, action)
 
 
-def on_key(key, action, wm_class=None, quiet=False):
+def on_key(key, action, device_name=None, wm_class=None, wm_name=None, quiet=False):
     if key in Modifier.get_all_keys():
         update_pressed_modifier_keys(key, action)
         send_key_action(key, action)
@@ -424,10 +447,10 @@ def on_key(key, action, wm_class=None, quiet=False):
         if is_pressed(key):
             send_key_action(key, action)
     else:
-        transform_key(key, action, wm_class=wm_class, quiet=quiet)
+        transform_key(key, action, device_name=device_name, wm_class=wm_class, wm_name=wm_name, quiet=quiet)
 
 
-def transform_key(key, action, wm_class=None, quiet=False):
+def transform_key(key, action, device_name=None, wm_class=None, wm_name=None, quiet=False):
     global _mode_maps
     global _toplevel_keymaps
 
@@ -445,16 +468,16 @@ def transform_key(key, action, wm_class=None, quiet=False):
         is_top_level = True
         _mode_maps = []
         if wm_class is None:
-            wm_class = get_active_window_wm_class()
+            wm_class, wm_name = get_active_window_wm_info()
         keymap_names = []
         for condition, mappings, name in _toplevel_keymaps:
-            if (callable(condition) and condition(wm_class)) \
+            if (callable(condition) and test_condition(condition, device_name, wm_class, wm_name)) \
                or (hasattr(condition, "search") and condition.search(wm_class)) \
                or condition is None:
                 _mode_maps.append(mappings)
                 keymap_names.append(name)
         if not quiet:
-            print("WM_CLASS '{}' | active keymaps = [{}]".format(wm_class, ", ".join(keymap_names)))
+            print("WM_CLASS '{}' WM_NAME '{}' | active keymaps = [{}]".format(wm_class, wm_name, ", ".join(keymap_names)))
 
     if not quiet:
         print(combo)

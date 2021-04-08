@@ -98,9 +98,12 @@ application and takes one of the following forms:
 - Regular expression (e.g., `re.compile("YYY")`)
     - Activates the `mappings` if the pattern `YYY` matches the `WM_CLASS` of the application.
     - Case Insensitivity matching against `WM_CLASS` via `re.IGNORECASE` (e.g. `re.compile('Gnome-terminal', re.IGNORECASE)`)
-- `lambda wm_class: some_condition(wm_class)`
-    - Activates the `mappings` if the `WM_CLASS` of the application satisfies the condition specified by the `lambda` function.
-    - Case Insensitivity matching via `casefold()` or `lambda wm_class: wm_class.casefold()` (see example below to see how to compare to a list of names)
+- Lambda based condition utilizing `WM_CLASS`, device name, and `WM_NAME`. The lambda may have 1, 2, or 3 arguments, e.g:
+    - `lambda wm_class: some_condition(...)`
+    - `lambda wm_class, device_name : some_condition(...)`
+    - `lambda wm_class, device_name, wm_name: some_condition(...)`
+    - Activates the `mappings` if the specified by the `lambda` function is satisfied.
+    - For example: case-insensitivity matching via `lambda wm_class: wm_class.casefold()` (see example below to see how to compare to a list of names)
 - `None`: Refers to no condition. `None`-specified keymap will be a global keymap and is always enabled.
 
 Argument `mappings` is a dictionary in the form of `{key: command, key2:
