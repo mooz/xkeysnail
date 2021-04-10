@@ -40,6 +40,13 @@ define_conditional_multipurpose_modmap(lambda wm_class, device_name: device_name
    Key.RIGHT_SHIFT: [Key.KPRIGHTPAREN, Key.RIGHT_SHIFT]
 })
 
+# Example keymap conditional on window name.
+# Google Docs / Sheets browser applications use M-slash as an execute-extended-command binding
+# Let's make it more emacsish
+define_keymap(lambda wm_class, device_name, wm_name: any(app in wm_name for app in ["Google Docs", "Google Sheets"]), {
+    K("M-x"): K("M-slash")
+}, "Google Suite")
+
 
 # Keybindings for Firefox/Chrome
 define_keymap(re.compile("Firefox|Google-chrome"), {
