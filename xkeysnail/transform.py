@@ -477,7 +477,7 @@ def transform_key(key, action, device_name=None, wm_class=None, wm_name=None, qu
                 _mode_maps.append(mappings)
                 keymap_names.append(name)
         if not quiet:
-            print("WM_CLASS '{}' WM_NAME '{}' | active keymaps = [{}]".format(wm_class, wm_name, ", ".join(keymap_names)))
+            print("WM_CLASS '{}' WM_NAME '{}' DEVICE_NAME '{}'| active keymaps = [{}]".format(wm_class, wm_name, device_name, ", ".join(keymap_names)))
 
     if not quiet:
         print(combo)
