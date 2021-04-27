@@ -135,31 +135,34 @@ def loop(device_matches, device_watch, quiet):
                 if device_watch:
                     waitables.append(inotify.fd)
                 r, w, x = select(waitables, [], [])
-
-                for waitable in r:
+                try:
+                    for waitable in r:
+                        if isinstance(waitable, InputDevice):
+                            for event in waitable.read():
+                                if event.type == ecodes.EV_KEY:
+                                    on_event(event, waitable.name, quiet)
+                                else:
+                                    send_event(event)
+                        else:
+                            new_devices = add_new_device(devices, device_filter, inotify)
+                            if new_devices:
+                                if start_flag is None:
+                                    print("Okay, now enable remapping on the following new device(s):\n")
+                                print_device_list(devices=new_devices, flag=start_flag)
+                except OSError:
                     if isinstance(waitable, InputDevice):
-                        for event in waitable.read():
-                            if event.type == ecodes.EV_KEY:
-                                on_event(event, waitable.name, quiet)
-                            else:
-                                send_event(event)
-                    else:
-                        new_devices = add_new_device(devices, device_filter, inotify)
-                        if new_devices:
-                            print("Okay, now enable remapping on the following new device(s):\n")
-                            print_device_list(new_devices)
-            except OSError:
-                if isinstance(waitable, InputDevice):
-                    remove_device(devices, waitable)
-                    print("Device removed: " + str(device.name))
+                        remove_device(devices, waitable)
+                        if not device_watch:
+                            if not len(devices):
+                                break
             except KeyboardInterrupt:
-                print("Received an interrupt, exiting.")
+                print("\nReceived an interrupt, exiting.")
                 break
     finally:
         for device in devices:
             try:
                 device.ungrab()
-            except OSError as e:
+            except OSError:
                 pass
         if device_watch:
             inotify.close()
@@ -183,8 +186,8 @@ def add_new_device(devices, device_filter, inotify):
 
 def remove_device(devices, device):
     devices.remove(device)
+    print("\nDevice removed: %s" % device.name)
     try:
         device.ungrab()
-    except OSError as e:
+    except OSError:
         pass
-
