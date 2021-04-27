@@ -3,12 +3,13 @@
 from evdev import ecodes, InputDevice, list_devices
 from select import select
 from sys import exit
-from .transform import on_event
+from .transform import on_event, cfg_device
 from .output import send_event
 from .key import Key
 
 __author__ = 'zh'
 
+start_flag = None
 
 def get_devices_list():
     return [InputDevice(device_fn) for device_fn in reversed(list_devices())]
@@ -44,14 +45,18 @@ def is_keyboard_device(device):
     return True
 
 
-def print_device_list(devices):
+def print_device_list(devices, flag=None):
     device_format = '{1.fn:<20} {1.name:<35} {1.phys}'
     device_lines = [device_format.format(n, d) for n, d in enumerate(devices)]
-    print('-' * len(max(device_lines, key=len)))
-    print('{:<20} {:<35} {}'.format('Device', 'Name', 'Phys'))
-    print('-' * len(max(device_lines, key=len)))
-    print('\n'.join(device_lines))
-    print('')
+
+    if flag:
+        print("\nDevice Added: %s" % device_lines)
+    else:
+        print('-' * len(max(device_lines, key=len)))
+        print('{:<20} {:<35} {}'.format('Device', 'Name', 'Phys'))
+        print('-' * len(max(device_lines, key=len)))
+        print('\n'.join(device_lines))
+        print('')
 
 
 def get_devices_from_paths(device_paths):
@@ -59,12 +64,17 @@ def get_devices_from_paths(device_paths):
 
 
 class DeviceFilter(object):
-    def __init__(self, matches):
+    def __init__(self, matches, device_watch):
         self.matches = matches
+        self.watch = device_watch
 
     def __call__(self, device):
         # Match by device path or name, if no keyboard devices specified, picks up keyboard-ish devices.
-        if self.matches:
+        if self.watch:
+            if any(k == device.name for k in cfg_device):
+                return True
+            return False
+        elif self.matches:
             for match in self.matches:
                 if device.fn == match or device.name == match:
                     return True
@@ -78,7 +88,7 @@ class DeviceFilter(object):
         return True
 
 
-def select_device(device_matches=None, interactive=True):
+def select_device(device_matches=None, device_watch="global", interactive=True, ):
     """Select a device from the list of accessible input devices."""
     devices = get_devices_from_paths(reversed(list_devices()))
 
@@ -87,9 +97,9 @@ def select_device(device_matches=None, interactive=True):
             print("""No keyboard devices specified via (--devices) option.
 xkeysnail picks up keyboard-ish devices from the list below:
 """)
-        print_device_list(devices)
+        print_device_list(devices=devices, flag=None)
 
-    devices = list(filter(DeviceFilter(device_matches), devices))
+    devices = list(filter(DeviceFilter(device_matches, device_watch), devices))
 
     if interactive:
         if not devices:
@@ -97,7 +107,7 @@ xkeysnail picks up keyboard-ish devices from the list below:
             exit(1)
 
         print("Okay, now enable remapping on the following device(s):\n")
-        print_device_list(devices)
+        print_device_list(devices=devices, flag=None)
 
     return devices
 
@@ -110,7 +120,8 @@ def in_device_list(fn, devices):
 
 
 def loop(device_matches, device_watch, quiet):
-    devices = select_device(device_matches, True)
+    global start_flag
+    devices = select_device(device_matches, device_watch, True)
     try:
         for device in devices:
             device.grab()
@@ -119,11 +130,12 @@ def loop(device_matches, device_watch, quiet):
         exit(1)
 
     if device_watch:
+        start_flag = True
         from inotify_simple import INotify, flags
         inotify = INotify()
         inotify.add_watch("/dev/input", flags.CREATE | flags.ATTRIB)
         print("Watching keyboard devices plug in")
-    device_filter = DeviceFilter(device_matches)
+    device_filter = DeviceFilter(device_matches, device_watch)
 
     if quiet:
         print("No key event will be output since quiet option was specified.")

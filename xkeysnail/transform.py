@@ -188,9 +188,14 @@ _mode_maps = None
 escape_next_key = {}
 pass_through_key = {}
 
+cfg_device = list()
 
-def define_keymap(condition, mappings, name="Anonymous keymap"):
+def define_keymap(dvc_name, condition, mappings, name="Anonymous keymap"):
     global _toplevel_keymaps
+    global cfg_device
+
+    if not dvc_name in cfg_device:
+        cfg_device.append(dvc_name)
 
     # Expand not L/R-specified modifiers
     # Suppose a nesting is not so deep
@@ -239,7 +244,7 @@ def define_keymap(condition, mappings, name="Anonymous keymap"):
 
     expand(mappings)
 
-    _toplevel_keymaps.append((condition, mappings, name))
+    _toplevel_keymaps.append((dvc_name, condition, mappings, name))
     return mappings
 
 
@@ -412,11 +417,10 @@ def on_event(event, device_name, quiet):
         if key in active_multipurpose_map:
             return
 
-    on_key(key, action, wm_class=wm_class, quiet=quiet)
+    on_key(device_name, key, action, wm_class=wm_class, quiet=quiet)
     update_pressed_keys(key, action)
 
-
-def on_key(key, action, wm_class=None, quiet=False):
+def on_key(device_name, key, action, wm_class=None, quiet=False):
     if key in Modifier.get_all_keys():
         update_pressed_modifier_keys(key, action)
         send_key_action(key, action)
@@ -424,13 +428,12 @@ def on_key(key, action, wm_class=None, quiet=False):
         if is_pressed(key):
             send_key_action(key, action)
     else:
-        transform_key(key, action, wm_class=wm_class, quiet=quiet)
+        transform_key(device_name, key, action, wm_class=wm_class, quiet=quiet)
 
 
-def transform_key(key, action, wm_class=None, quiet=False):
+def transform_key(device_name, key, action, wm_class=None, quiet=False):
     global _mode_maps
     global _toplevel_keymaps
-
     combo = Combo(get_pressed_modifiers(), key)
 
     if _mode_maps is escape_next_key:
@@ -447,17 +450,15 @@ def transform_key(key, action, wm_class=None, quiet=False):
         if wm_class is None:
             wm_class = get_active_window_wm_class()
         keymap_names = []
-        for condition, mappings, name in _toplevel_keymaps:
+        for dev_name, condition, mappings, name in _toplevel_keymaps:
             if (callable(condition) and condition(wm_class)) \
                or (hasattr(condition, "search") and condition.search(wm_class)) \
                or condition is None:
-                _mode_maps.append(mappings)
-                keymap_names.append(name)
+                if dev_name == device_name:
+                    _mode_maps.append(mappings)
+                    keymap_names.append(name)
         if not quiet:
-            print("WM_CLASS '{}' | active keymaps = [{}]".format(wm_class, ", ".join(keymap_names)))
-
-    if not quiet:
-        print(combo)
+            print("\nDevice: {}\nWM_CLASS '{}' | active keymaps = [{}] | Pressed Key: %s".format(device_name, wm_class, ", ".join(keymap_names)) % (combo), end="\r\n")
 
     # _mode_maps: [global_map, local_1, local_2, ...]
     for mappings in _mode_maps:
