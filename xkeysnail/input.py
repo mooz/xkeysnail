@@ -17,12 +17,24 @@ def get_devices_list():
 def is_keyboard_device(device):
     """Guess the device is a keyboard or not"""
     capabilities = device.capabilities(verbose=False)
+    _KEYS = [
+                Key.SPACE,
+                Key.ENTER,
+                Key.KEY_0,
+                Key.KEY_5,
+                Key.KEY_9,
+                Key.ESC,
+                Key.UP,
+                Key.LEFT,
+                Key.RIGHT,
+                Key.DOWN
+            ]
+
     if 1 not in capabilities:
         return False
     supported_keys = capabilities[1]
-    if Key.SPACE not in supported_keys or \
-       Key.A not in supported_keys or \
-       Key.Z not in supported_keys:
+
+    if not any(k in supported_keys for k in _KEYS):
         # Not support common keys. Not keyboard.
         return False
     if Key.BTN_MOUSE in supported_keys:
