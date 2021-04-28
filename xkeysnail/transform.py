@@ -459,7 +459,15 @@ def transform_key(device_name, key, action, wm_class=None, quiet=False):
                     _mode_maps.append(mappings)
                     keymap_names.append(name)
         if not quiet:
-            print("\nDevice: {}\nWM_CLASS '{}' | active keymaps = [{}] | Pressed Key: %s".format(device_name, wm_class, ", ".join(keymap_names)) % (combo), end="\r\n")
+            print("\nDevice: {}\nWM_CLASS '{}' | active keymaps = [{}] | %s => %s".format(
+                    device_name,
+                    wm_class,
+                    ", ".join(keymap_names
+                    )
+                ) % (
+                    combo,
+                    mappings[combo] if combo in mappings else combo
+                ), end="\r\n")
 
     # _mode_maps: [global_map, local_1, local_2, ...]
     for mappings in _mode_maps:
@@ -475,7 +483,6 @@ def transform_key(device_name, key, action, wm_class=None, quiet=False):
     if is_top_level:
         # If it's top-level, pass through keys
         send_key_action(key, action)
-
     _mode_maps = None
 
 
