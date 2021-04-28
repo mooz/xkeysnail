@@ -116,7 +116,7 @@ def launch(command):
     def launcher():
         from subprocess import Popen
         Popen(command)
-    return launcher
+    return launcher, 'command(%s)' % command[0]
 
 
 def sleep(sec):
@@ -124,7 +124,7 @@ def sleep(sec):
     def sleeper():
         import time
         time.sleep(sec)
-    return sleeper
+    return sleeper, 'sleep(%s)' % sec
 
 # ============================================================ #
 
@@ -443,6 +443,18 @@ def transform_key(device_name, key, action, wm_class=None, quiet=False):
         _mode_maps = None
         return
 
+    def convertcombo(combos):
+        command_list = list()
+        if isinstance(combos, list):
+            for x in combos:
+                if isinstance(x, tuple):
+                    command_list.append(x[1])
+                else:
+                    command_list.append(x)
+            return '[%s]' % ', '.join([str(x) for x in command_list])
+        else:
+            return combos
+
     is_top_level = False
     if _mode_maps is None:
         # Decide keymap(s)
@@ -466,7 +478,9 @@ def transform_key(device_name, key, action, wm_class=None, quiet=False):
                     )
                 ) % (
                     combo,
-                    mappings[combo] if combo in mappings else combo
+                    convertcombo(
+                        mappings[combo]
+                        ) if combo in mappings else combo
                 ), end="\r\n")
 
     # _mode_maps: [global_map, local_1, local_2, ...]
@@ -492,11 +506,20 @@ def handle_commands(commands, key, action):
     """
     global _mode_maps
 
+    command_list = list()
+
     if not isinstance(commands, list):
-        commands = [commands]
+        command_list = [commands] 
+    else:
+        for item in commands:
+            try:
+                command_list.append(item[0])
+            except TypeError:
+                command_list.append(item)
+
 
     # Execute commands
-    for command in commands:
+    for command in command_list:
         if callable(command):
             reset_mode = handle_commands(command(), key, action)
             if reset_mode:
