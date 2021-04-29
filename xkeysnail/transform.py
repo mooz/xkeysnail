@@ -109,15 +109,44 @@ def with_or_set_mark(combo):
 # ============================================================ #
 # Utility functions for keymap
 # ============================================================ #
+__user__ = None
 
+def runner_user(ruser):
+    global __user__
+    __user__ = ruser
+    return ruser
 
-def launch(command):
+def launch(command, multplier=None):
     """Launch command"""
-    def launcher():
-        from subprocess import Popen
-        Popen(command)
-    return launcher, 'command(%s)' % command[0]
+    from shutil import which
+    from subprocess import Popen
+    from os.path import isfile
 
+    if multplier:
+        command = ([command] * multplier)
+
+    def notinpath(args):
+        if not any(which(k) for k in args):
+            print()
+            print("Commands not found in $ PATH, enter the absolute path.")
+            print()
+            return
+        Popen(args, start_new_session=True)
+
+    def launcher():
+        if multplier:
+            for cmd_block in command:
+                args = cmd_block if len(cmd_block) > 1 else cmd_block[0].split(' ')
+                notinpath(args)
+        else:
+            args = command if len(command) > 1 else command[0].split(' ')
+            notinpath(args)
+
+    if multplier:
+        # for list in 
+        return launcher, 'command(%s, x%s)' % (command[0], multplier)
+    else:
+        return launcher, 'command(%s)' % command
 
 def sleep(sec):
     """Sleep sec in commands"""
