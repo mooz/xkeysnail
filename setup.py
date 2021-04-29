@@ -12,5 +12,5 @@ setup(name             = "xkeysnail",
       packages         = ["xkeysnail"],
       scripts          = ["bin/xkeysnail"],
       license          = "GPL",
-      install_requires = ["evdev", "python-xlib", "inotify_simple", "appdirs", "shutil"]
+      install_requires = ["evdev", "python-xlib", "inotify_simple", "appdirs"]
       )
