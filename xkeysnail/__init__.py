@@ -2,9 +2,12 @@
 
 
 def eval_file(path):
-    with open(path, "rb") as file:
-        exec(compile(file.read(), path, 'exec'), globals())
-
+    try:
+        with open(path, "rb") as file:
+            exec(compile(file.read(), path, 'exec'), globals())
+    except FileNotFoundError:
+        print('Config.py not found, fix this!')        
+        exit(1)
 
 def uinput_device_exists():
     from os.path import exists
@@ -22,10 +25,6 @@ def has_access_to_uinput():
 
 def cli_main():
     from .info import __logo__, __version__
-    print("")
-    print(__logo__.strip())
-    print("                             v{}".format(__version__))
-    print("")
 
     # Parse args
     import argparse
@@ -40,6 +39,14 @@ def cli_main():
     parser.add_argument('-q', '--quiet', dest='quiet', action='store_true',
                         help='suppress output of key events')
     args = parser.parse_args()
+
+    # Load configuration file
+    eval_file(args.config)
+
+    print("")
+    print(__logo__.strip())
+    print("                             v{}".format(__version__))
+    print("")
 
     # Make sure that the /dev/uinput device exists
     if not uinput_device_exists():
@@ -57,9 +64,6 @@ Make sure that you have executed xkeysnail with root privilege such as
 """)
         import sys
         sys.exit(1)
-
-    # Load configuration file
-    eval_file(args.config)
 
     # Enter event loop
     from xkeysnail.input import loop
