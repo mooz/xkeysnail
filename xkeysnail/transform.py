@@ -143,7 +143,6 @@ def launch(command, multplier=None):
             notinpath(args)
 
     if multplier:
-        # for list in 
         return launcher, 'command(%s, x%s)' % (command[0], multplier)
     else:
         return launcher, 'command(%s)' % command
