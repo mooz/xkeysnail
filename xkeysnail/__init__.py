@@ -30,11 +30,11 @@ def cli_main():
     import argparse
     from appdirs import user_config_dir
     parser = argparse.ArgumentParser(description='Yet another keyboard remapping tool for X environment.')
-    parser.add_argument('config', metavar='config.py', type=str, default=user_config_dir('xkeysnail/config.py'), nargs='?',
+    parser.add_argument('-c', '--config', dest="config", metavar='config.py', type=str, default=user_config_dir('xkeysnail/config.py'), nargs='?',
                         help='configuration file (See README.md for syntax)')
-    parser.add_argument('--devices', dest="devices", metavar='device', type=str, nargs='+',
+    parser.add_argument('-d', '--devices', dest="devices", metavar='device', type=str, nargs='+',
                         help='keyboard devices to remap (if omitted, xkeysnail choose proper keyboard devices)')
-    parser.add_argument('--watch', dest='watch', action='store_true',
+    parser.add_argument('-w', '--watch', dest='watch', action='store_true',
                         help='watch keyboard devices plug in ')
     parser.add_argument('-q', '--quiet', dest='quiet', action='store_true',
                         help='suppress output of key events')
