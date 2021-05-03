@@ -3,7 +3,7 @@
 from evdev import ecodes, InputDevice, list_devices
 from select import select
 from sys import exit
-from .transform import on_event, cfg_device
+from .transform import on_event, device_in_config
 from .output import send_event
 from .key import Key
 
@@ -46,14 +46,16 @@ def is_keyboard_device(device):
 
 
 def print_device_list(devices, flag=None):
-    device_format = '{1.fn:<20} {1.name:<35} {1.phys}'
-    device_lines = [device_format.format(n, d) for n, d in enumerate(devices)]
-
+    device_format = '{1.fn:<20} {1.phys:<30} {1.name}'
     if flag:
-        print("\nDevice Added: %s" % device_lines)
+        try:
+            print("\nDevice Added: %s\n" % devices[0].name)
+        except Exception as e:
+            raise e
     else:
+        device_lines = [device_format.format(n, d) for n, d in enumerate(devices)]
         print('-' * len(max(device_lines, key=len)))
-        print('{:<20} {:<35} {}'.format('Device', 'Name', 'Phys'))
+        print('{:<20} {:<35} {}'.format('Device', 'Phys', 'Name'))
         print('-' * len(max(device_lines, key=len)))
         print('\n'.join(device_lines))
         print('')
@@ -71,10 +73,20 @@ class DeviceFilter(object):
     def __call__(self, device):
         # Match by device path or name, if no keyboard devices specified, picks up keyboard-ish devices.
         if self.watch:
-            if any(k == device.name for k in cfg_device):
+            if any(k == device.name for k in device_in_config):
                 return True
-            return False
         elif self.matches:
+            try:
+                check_device = InputDevice(self.matches[0])
+                if check_device.name == "py-evdev-uinput":
+                    # Exclude evdev device, we use for output emulation, from input monitoring list
+                    print("""The device:\nPATH: %s\nNAME: %s\ncannot be used as it is the Xkeysnail output device, provide the correct device!!""" % (
+                        check_device.fn, check_device.name))
+                    exit(1)
+            except FileNotFoundError:
+                print('Device %s, not found!' % self.matches[0])
+                exit(1)
+
             for match in self.matches:
                 if device.fn == match or device.name == match:
                     return True
@@ -82,33 +94,29 @@ class DeviceFilter(object):
         # Exclude none keyboard devices
         if not is_keyboard_device(device):
             return False
-        # Exclude evdev device, we use for output emulation, from input monitoring list
-        if device.name == "py-evdev-uinput":
-            return False
-        return True
 
 
-def select_device(device_matches=None, device_watch="global", interactive=True, ):
+def select_device(device_matches=None, device_watch="global", interactive=True):
     """Select a device from the list of accessible input devices."""
     devices = get_devices_from_paths(reversed(list_devices()))
 
     if interactive:
-        if not device_matches:
-            print("""No keyboard devices specified via (--devices) option.
-xkeysnail picks up keyboard-ish devices from the list below:
-""")
         print_device_list(devices=devices, flag=None)
+        if not device_matches:
+            print("""\n\nXkeysnail picks up keyboard devices in config.py!""")
 
     devices = list(filter(DeviceFilter(device_matches, device_watch), devices))
-
     if interactive:
-        if not devices:
+        if not devices and device_watch:
+            pass # will continue to watch for device add/remove
+        elif devices:
+            print("Okay, now enabling remapping for the following pre-configured device(s):\n")
+        elif not devices and device_watch:
             print('error: no input devices found (do you have rw permission on /dev/input/*?)')
             exit(1)
 
-        print("Okay, now enable remapping on the following device(s):\n")
-        print_device_list(devices=devices, flag=None)
-
+        if devices:
+            print_device_list(devices=devices, flag=None)
     return devices
 
 
@@ -134,9 +142,8 @@ def loop(device_matches, device_watch, quiet):
         from inotify_simple import INotify, flags
         inotify = INotify()
         inotify.add_watch("/dev/input", flags.CREATE | flags.ATTRIB)
-        print("Watching keyboard devices plug in")
+        print('Option --watch enable, waiting for devices')
     device_filter = DeviceFilter(device_matches, device_watch)
-
     if quiet:
         print("No key event will be output since quiet option was specified.")
 
@@ -159,7 +166,7 @@ def loop(device_matches, device_watch, quiet):
                             new_devices = add_new_device(devices, device_filter, inotify)
                             if new_devices:
                                 if start_flag is None:
-                                    print("Okay, now enable remapping on the following new device(s):\n")
+                                    print("Okay, now enable remapping on the following devices founded:\n")
                                 print_device_list(devices=new_devices, flag=start_flag)
                 except OSError:
                     if isinstance(waitable, InputDevice):

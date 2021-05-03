@@ -217,14 +217,14 @@ _mode_maps = None
 escape_next_key = {}
 pass_through_key = {}
 
-cfg_device = list()
+device_in_config = list()
 
-def define_keymap(dvc_name, condition, mappings, name="Anonymous keymap"):
+def define_keymap(event_device_name, condition, mappings, name="Anonymous keymap"):
     global _toplevel_keymaps
-    global cfg_device
+    global device_in_config
 
-    if not dvc_name in cfg_device:
-        cfg_device.append(dvc_name)
+    if not event_device_name in device_in_config:
+        device_in_config.append(event_device_name)
 
     # Expand not L/R-specified modifiers
     # Suppose a nesting is not so deep
@@ -273,7 +273,7 @@ def define_keymap(dvc_name, condition, mappings, name="Anonymous keymap"):
 
     expand(mappings)
 
-    _toplevel_keymaps.append((dvc_name, condition, mappings, name))
+    _toplevel_keymaps.append((event_device_name, condition, mappings, name))
     return mappings
 
 
@@ -492,11 +492,11 @@ def transform_key(device_name, key, action, wm_class=None, quiet=False):
         if wm_class is None:
             wm_class = get_active_window_wm_class()
         keymap_names = []
-        for dev_name, condition, mappings, name in _toplevel_keymaps:
+        for event_device_name, condition, mappings, name in _toplevel_keymaps:
             if (callable(condition) and condition(wm_class)) \
                or (hasattr(condition, "search") and condition.search(wm_class)) \
                or condition is None:
-                if dev_name == device_name:
+                if event_device_name == device_name:
                     _mode_maps.append(mappings)
                     keymap_names.append(name)
         if not quiet:
