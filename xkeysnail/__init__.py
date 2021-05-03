@@ -6,7 +6,7 @@ def eval_file(path):
         with open(path, "rb") as file:
             exec(compile(file.read(), path, 'exec'), globals())
     except FileNotFoundError:
-        print('Config.py not found, fix this!')        
+        print('Config.py not found, use --config or place config.py in %s' % path)
         exit(1)
 
 def uinput_device_exists():
