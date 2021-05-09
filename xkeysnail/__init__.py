@@ -44,7 +44,12 @@ def config_search(path, user):
         return path
 
 def eval_file(path, startup_delay, user):
-def eval_file(path):
+    if startup_delay:
+        from time import sleep
+        print('Startup delay enable, wait for %s' % startup_delay)
+        sleep(startup_delay)
+        
+    path = config_search(path, user)
     try:
         with open(path, "rb") as file:
             exec(compile(file.read(), path, 'exec'), globals())
@@ -82,6 +87,8 @@ def cli_main():
                         help='watch keyboard devices plug in ')
     parser.add_argument('-q', '--quiet', dest='quiet', action='store_true',
                         help='suppress output of key events')
+    parser.add_argument('-b', '--boot', dest='boot', metavar='boot', type=int,
+                        help='startup delay to wait config file with systemd')
     parser.add_argument('-k', '--kill', dest='kill', action='store_true',
                         help='kill other xkeysnail instancies')
     args = parser.parse_args()
