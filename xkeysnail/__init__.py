@@ -18,11 +18,37 @@ def killxkeysnail(process):
     except psutil.AccessDenied:
         print("Xkeysnail: AccessDenied, try again with --> 'sudo xkeysnail -k'.")
 
+def config_search(path, user):
+    import os
+    from os.path import expanduser, join
+    from os.path import isfile
+
+    EXPANDEDUSER = expanduser('~')
+    USERHOME = EXPANDEDUSER.replace(
+        '/root', '/home/%s' % user
+        ) if user else EXPANDEDUSER
+    POSSIBLE_CONFIG_DIRS = [
+        join(USERHOME, path) for path in [
+            '.xkeysnail/config.py',
+            '.config/xkeysnail/config.py'
+        ]
+    ]
+
+    if not path:
+        for filepath in POSSIBLE_CONFIG_DIRS:
+            if isfile(filepath):
+                print("Config file: %s" % filepath)
+                return filepath
+        return ', '.join(POSSIBLE_CONFIG_DIRS)
+    else:
+        return path
+
+def eval_file(path, startup_delay, user):
 def eval_file(path):
     try:
         with open(path, "rb") as file:
             exec(compile(file.read(), path, 'exec'), globals())
-    except FileNotFoundError:
+    except (FileNotFoundError, TypeError):
         print('Config.py not found, use --config or place config.py in %s' % path)
         exit(1)
 
@@ -45,10 +71,11 @@ def cli_main():
 
     # Parse args
     import argparse
-    from appdirs import user_config_dir
     parser = argparse.ArgumentParser(description='Yet another keyboard remapping tool for X environment.')
-    parser.add_argument('-c', '--config', dest="config", metavar='config.py', type=str, default=user_config_dir('xkeysnail/config.py'), nargs='?',
+    parser.add_argument('-c', '--config', dest="config", metavar='config.py', type=str, nargs='?',
                         help='configuration file (See README.md for syntax)')
+    parser.add_argument('-u', '--user', dest="user", metavar='username', type=str, nargs='?',
+                        help='your usarname')
     parser.add_argument('-d', '--devices', dest="devices", metavar='device', type=str, nargs='+',
                         help='keyboard devices to remap (if omitted, xkeysnail choose proper keyboard devices)')
     parser.add_argument('-w', '--watch', dest='watch', action='store_true',

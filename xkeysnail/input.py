@@ -47,19 +47,22 @@ def is_keyboard_device(device):
 
 def print_device_list(devices, flag=None):
     device_format = '{1.fn:<20} {1.phys:<30} {1.name}'
-    if flag:
-        try:
-            print("\nDevice Added: %s\n" % devices[0].name)
-        except Exception as e:
-            raise e
-    else:
-        device_lines = [device_format.format(n, d) for n, d in enumerate(devices)]
-        print('-' * len(max(device_lines, key=len)))
-        print('{:<20} {:<35} {}'.format('Device', 'Phys', 'Name'))
-        print('-' * len(max(device_lines, key=len)))
-        print('\n'.join(device_lines))
-        print('')
-
+    try:
+        if flag:
+            try:
+                print("\nDevice Added: %s\n" % devices[0].name)
+            except Exception as e:
+                raise e
+        else:
+            device_lines = [device_format.format(n, d) for n, d in enumerate(devices)]
+            print('-' * len(max(device_lines, key=len)))
+            print('{:<20} {:<35} {}'.format('Device', 'Phys', 'Name'))
+            print('-' * len(max(device_lines, key=len)))
+            print('\n'.join(device_lines))
+            print('')
+    except ValueError:
+        print('error: no input devices found (do you have rw permission on /dev/input/*?)')
+        exit(1)
 
 def get_devices_from_paths(device_paths):
     return [InputDevice(device_fn) for device_fn in device_paths]
