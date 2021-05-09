@@ -156,7 +156,7 @@ def loop(device_matches, device_watch, quiet):
                 waitables = devices[:]
                 if device_watch:
                     waitables.append(inotify.fd)
-                r, w, x = select(waitables, [], [])
+                r, _, _ = select(waitables, [], [])
                 try:
                     for waitable in r:
                         if isinstance(waitable, InputDevice):
