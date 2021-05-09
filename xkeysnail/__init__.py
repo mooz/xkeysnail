@@ -1,5 +1,22 @@
 # -*- coding: utf-8 -*-
 
+def killxkeysnail(process):
+    from os import getpid
+    import re
+    import psutil
+
+    killed = None
+    try:
+        for proc in psutil.process_iter():
+            if re.search(process, ' '.join(proc.cmdline()), re.I) and proc.pid != getpid():
+                    proc.kill()
+                    killed = True
+        if killed:
+            print("Xkeysnail: terminated by user.")
+        else:
+            print("Xkeysnail: no instancies to terminate.")
+    except psutil.AccessDenied:
+        print("Xkeysnail: AccessDenied, try again with --> 'sudo xkeysnail -k'.")
 
 def eval_file(path):
     try:
@@ -38,10 +55,16 @@ def cli_main():
                         help='watch keyboard devices plug in ')
     parser.add_argument('-q', '--quiet', dest='quiet', action='store_true',
                         help='suppress output of key events')
+    parser.add_argument('-k', '--kill', dest='kill', action='store_true',
+                        help='kill other xkeysnail instancies')
     args = parser.parse_args()
 
+    if args.kill:
+        killxkeysnail('/bin/xkeysnail')
+        exit(1)
+
     # Load configuration file
-    eval_file(args.config)
+    eval_file(args.config, args.boot, args.user)
 
     print("")
     print(__logo__.strip())
