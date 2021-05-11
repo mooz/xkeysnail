@@ -80,7 +80,7 @@ def cli_main():
     parser.add_argument('-c', '--config', dest="config", metavar='config.py', type=str, nargs='?',
                         help='configuration file (See README.md for syntax)')
     parser.add_argument('-u', '--user', dest="user", metavar='username', type=str, nargs='?',
-                        help='your usarname')
+                        help='your username to help xkeysnail find homedirs')
     parser.add_argument('-d', '--devices', dest="devices", metavar='device', type=str, nargs='+',
                         help='keyboard devices to remap (if omitted, xkeysnail choose proper keyboard devices)')
     parser.add_argument('-w', '--watch', dest='watch', action='store_true',
