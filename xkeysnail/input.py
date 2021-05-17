@@ -67,6 +67,8 @@ def print_device_list(devices, flag=None):
 def get_devices_from_paths(device_paths):
     return [InputDevice(device_fn) for device_fn in device_paths]
 
+def is_device_name_in_config(device):
+    return any(k == device.name for k in device_in_config)
 
 class DeviceFilter(object):
     def __init__(self, matches, device_watch):
@@ -76,7 +78,7 @@ class DeviceFilter(object):
     def __call__(self, device):
         # Match by device path or name, if no keyboard devices specified, picks up keyboard-ish devices.
         if self.watch:
-            if any(k == device.name for k in device_in_config):
+            if is_device_name_in_config(device):
                 return True
         elif self.matches:
             try:
