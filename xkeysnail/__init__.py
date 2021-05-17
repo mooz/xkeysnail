@@ -1,21 +1,17 @@
 # -*- coding: utf-8 -*-
 import sys
+import psutil
 
-def killxkeysnail(process):
-    from os import getpid
+
+def has_another_instace():
+    process = '/bin/xkeysnail'
     import re
-    import psutil
+    from os import getpid
 
-    killed = None
-    try:
-        for proc in psutil.process_iter():
-            if re.search(process, ' '.join(proc.cmdline()), re.I) and proc.pid != getpid():
-                    proc.kill()
-                    killed = True
-        if killed:
-            print("Xkeysnail: terminated by user.")
-        else:
-            print("Xkeysnail: no instancies to terminate.")
+    for proc in psutil.process_iter():
+        if re.search(process, ' '.join(proc.cmdline()), re.I) and proc.pid != getpid():
+            yield proc
+
     except psutil.AccessDenied:
         print("Xkeysnail: AccessDenied, try again with --> 'sudo xkeysnail -k'.")
 
@@ -94,10 +90,14 @@ def cli_main():
                         help='kill other xkeysnail instancies')
     args = parser.parse_args()
 
+    isruning = list(has_another_instace())
     if args.kill:
         killxkeysnail('/bin/xkeysnail')
         exit(1)
 
+    if isruning:
+        print('Another instance of keysnail is running, exiting.')
+        exit(1)
     # Load configuration file
     eval_file(args.config, args.boot, args.user)
 
