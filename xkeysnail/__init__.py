@@ -96,6 +96,11 @@ def cli_main():
     if isruning:
         print('Another instance of keysnail is running, exiting.')
         exit(1)
+
+    if not args.devices and not args.watch:
+        print("Use --watch or --devices, more info with: xkeysnail --help.")
+        sys.exit(1)
+
     # Load configuration file
     eval_file(args.config, args.boot)
 
