@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 
 def killxkeysnail(process):
     from os import getpid
@@ -109,7 +110,6 @@ def cli_main():
     if not uinput_device_exists():
         print("""The '/dev/uinput' device does not exist.
 Please check your kernel configuration.""")
-        import sys
         sys.exit(1)
 
     # Make sure that user have root privilege
@@ -119,7 +119,6 @@ Make sure that you have executed xkeysnail with root privilege such as
 
     $ sudo xkeysnail config.py
 """)
-        import sys
         sys.exit(1)
 
     # Enter event loop
