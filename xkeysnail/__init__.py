@@ -16,15 +16,14 @@ def has_another_instace():
     except psutil.AccessDenied:
         print("Xkeysnail: AccessDenied, try again with --> 'sudo xkeysnail -k'.")
 
-def config_search(path, user):
+def config_search(path):
     import os
     from os.path import expanduser, join
     from os.path import isfile
 
-    EXPANDEDUSER = expanduser('~')
-    USERHOME = EXPANDEDUSER.replace(
-        '/root', '/home/%s' % user
-        ) if user else EXPANDEDUSER
+    expandeduser = expanduser('~')
+    USERHOME = expandeduser.replace(
+        '/root', '/home/%s' % os.environ.get('SUDO_USER'))
     POSSIBLE_CONFIG_DIRS = [
         join(USERHOME, path) for path in [
             '.xkeysnail/config.py',
@@ -41,13 +40,13 @@ def config_search(path, user):
     else:
         return path
 
-def eval_file(path, startup_delay, user):
+def eval_file(path, startup_delay):
     if startup_delay:
         from time import sleep
         print('Startup delay enable, wait for %s' % startup_delay)
         sleep(startup_delay)
         
-    path = config_search(path, user)
+    path = config_search(path)
     try:
         with open(path, "rb") as file:
             exec(compile(file.read(), path, 'exec'), globals())
@@ -77,8 +76,6 @@ def cli_main():
     parser = argparse.ArgumentParser(description='Yet another keyboard remapping tool for X environment.')
     parser.add_argument('-c', '--config', dest="config", metavar='config.py', type=str, nargs='?',
                         help='configuration file (See README.md for syntax)')
-    parser.add_argument('-u', '--user', dest="user", metavar='username', type=str, nargs='?',
-                        help='your username to help xkeysnail find homedirs')
     parser.add_argument('-d', '--devices', dest="devices", metavar='device', type=str, nargs='+',
                         help='keyboard devices to remap (if omitted, xkeysnail choose proper keyboard devices)')
     parser.add_argument('-w', '--watch', dest='watch', action='store_true',
@@ -100,7 +97,7 @@ def cli_main():
         print('Another instance of keysnail is running, exiting.')
         exit(1)
     # Load configuration file
-    eval_file(args.config, args.boot, args.user)
+    eval_file(args.config, args.boot)
 
     print("")
     print(__logo__.strip())
