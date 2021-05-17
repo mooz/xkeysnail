@@ -6,3 +6,6 @@ xkeysnail.egg-info/requires.txt
 xkeysnail.egg-info/SOURCES.txt
 xkeysnail.egg-info/top_level.txt
 *.code-workspace
+dist
+build
+.vscode
