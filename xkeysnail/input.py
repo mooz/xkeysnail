@@ -45,21 +45,16 @@ def is_keyboard_device(device):
     return True
 
 
-def print_device_list(devices, flag=None):
-    device_format = '{1.fn:<20} {1.phys:<30} {1.name}'
+def print_device_list(devices):
+    device_format = '{1.fn:<20} {1.phys:<35} {1.name}'
     try:
-        if flag:
-            try:
-                print("\nDevice Added: %s\n" % devices[0].name)
-            except Exception as e:
-                raise e
-        else:
-            device_lines = [device_format.format(n, d) for n, d in enumerate(devices)]
-            print('-' * len(max(device_lines, key=len)))
-            print('{:<20} {:<35} {}'.format('Device', 'Phys', 'Name'))
-            print('-' * len(max(device_lines, key=len)))
-            print('\n'.join(device_lines))
-            print('')
+        device_lines = [device_format.format(n, d) for n, d in enumerate(devices)]
+        print('-' * len(max(device_lines, key=len)))
+        print('{:<20} {:<35} {}'.format('Device', 'Phys', 'Name'))
+        print('-' * len(max(device_lines, key=len)))
+        print('\n'.join(device_lines))
+        print('')
+
     except ValueError:
         print('error: no input devices found (do you have rw permission on /dev/input/*?)')
         exit(1)
@@ -106,7 +101,7 @@ def select_device(device_matches=None, device_watch="global", interactive=True):
     devices = get_devices_from_paths(reversed(list_devices()))
 
     if interactive:
-        print_device_list(devices=devices, flag=None)
+        print_device_list(devices=devices)
         if not device_matches:
             print("""\n\nXkeysnail picks up keyboard devices in config.py!""")
 
@@ -121,7 +116,7 @@ def select_device(device_matches=None, device_watch="global", interactive=True):
             exit(1)
 
         if devices:
-            print_device_list(devices=devices, flag=None)
+            print_device_list(devices=devices)
     return devices
 
 
@@ -172,7 +167,7 @@ def loop(device_matches, device_watch, quiet):
                             if new_devices:
                                 if start_flag is None:
                                     print("Okay, now enable remapping on the following devices founded:\n")
-                                print_device_list(devices=new_devices, flag=start_flag)
+                                print("\nDevice Added: %s\n" % devices[0].name)
                 except OSError:
                     if isinstance(waitable, InputDevice):
                         remove_device(devices, waitable)
