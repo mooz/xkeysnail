@@ -13,6 +13,14 @@ def has_another_instace():
         if re.search(process, ' '.join(proc.cmdline()), re.I) and proc.pid != getpid():
             yield proc
 
+def kill_xkeysnail(instancieslist):
+    if not instancieslist:
+        print("Xkeysnail: no instancies to terminate.")
+        exit(1)
+    try:
+        for pid in instancieslist:
+            pid.kill()
+        print("Xkeysnail: terminated by user.")
     except psutil.AccessDenied:
         print("Xkeysnail: AccessDenied, try again with --> 'sudo xkeysnail -k'.")
 
@@ -90,7 +98,7 @@ def cli_main():
 
     isruning = list(has_another_instace())
     if args.kill:
-        killxkeysnail('/bin/xkeysnail')
+        kill_xkeysnail(isruning)
         exit(1)
 
     if isruning:
