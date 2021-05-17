@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import sys
 import psutil
 
@@ -113,7 +114,7 @@ Please check your kernel configuration.""")
         sys.exit(1)
 
     # Make sure that user have root privilege
-    if not has_access_to_uinput():
+    if not has_access_to_uinput() or os.getuid() != 0:
         print("""Failed to open `uinput` in write mode.
 Make sure that you have executed xkeysnail with root privilege such as
 
