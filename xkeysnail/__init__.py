@@ -29,24 +29,24 @@ def config_search(path):
     from os.path import expanduser, join
     from os.path import isfile
 
-    expandeduser = expanduser('~')
-    USERHOME = expandeduser.replace(
+def config_dir_search(path):
+    USERHOME = expanduser('~').replace(
         '/root', '/home/%s' % os.environ.get('SUDO_USER'))
     POSSIBLE_CONFIG_DIRS = [
         join(USERHOME, path) for path in [
-            '.xkeysnail/config.py',
-            '.config/xkeysnail/config.py'
+            '.xkeysnail/',
+            '.config/xkeysnail/'
         ]
     ]
 
     if not path:
         for filepath in POSSIBLE_CONFIG_DIRS:
-            if isfile(filepath):
-                print("Config file: %s" % filepath)
+            if isdir(filepath):
                 return filepath
         return ', '.join(POSSIBLE_CONFIG_DIRS)
     else:
         return path
+
 
 def eval_file(path, startup_delay):
     if startup_delay:
@@ -96,10 +96,8 @@ def cli_main():
                         help='kill other xkeysnail instancies')
     args = parser.parse_args()
 
-    isruning = list(has_another_instace())
-    if args.kill:
-        kill_xkeysnail(isruning)
-        exit(1)
+    config_diretory = config_dir_search(args.config)
+    config_file = join(config_diretory, 'config.py')
 
     if isruning:
         print('Another instance of keysnail is running, exiting.')
