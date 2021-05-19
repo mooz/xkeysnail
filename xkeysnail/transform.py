@@ -109,12 +109,6 @@ def with_or_set_mark(combo):
 # ============================================================ #
 # Utility functions for keymap
 # ============================================================ #
-__user__ = None
-
-def runner_user(ruser):
-    global __user__
-    __user__ = ruser
-    return ruser
 
 def launch(command, multplier=None):
     """Launch command"""
