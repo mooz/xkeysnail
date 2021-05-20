@@ -1,5 +1,19 @@
 # xkeysnail
 
+In this repo i tryed to add more functions to the original [xkeysnail](https://github.com/mooz/xkeysnail):
+What i added?
+- A device name argument explicit in ```define keymap``` to inform connecting X configuration to X or Y device.
+- Now any device can have its specific kemap configuration, connected with the item above, solving the problem of X configuration aftar Y device.
+- Update on how a keyboard is detected, now, keyboards plus keyboards must be known, such as unconventional technologies, example: PS3 BD Remote.
+- Modifications to the --watch mechanism, devices will now be detected when they are added or removed.
+- Xkeysnail now searches different directories for the configuration file.
+- ```launch ()``` can multiply commands by executing several at once.
+- ```launch()``` will detach the command from xkeysnail.
+- Updates in how xkeysnail will detect multple instancies.
+- ```-K``` options to kill other instances, making booting via systemd more practical.
+- Bootup delay in secs to help xkeysnail if config is stored in other filesystem, and xkeysnail is started on boot by ```.service```.
+- Other little changes.
+
 `xkeysnail` is yet another keyboard remapping tool for X environment written in Python. It's like
 `xmodmap` but allows more flexible remappings.
 
