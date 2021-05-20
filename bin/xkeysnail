@@ -4,6 +4,7 @@ import os
 import sys
 import signal
 import argparse
+from time import sleep
 from os.path import join
 from xkeysnail import cli_main
 
@@ -72,6 +73,22 @@ def config_dir_search(path):
         return path
 
 
+def wait_config(file_path, wait_time):
+    if not os.path.isfile(file_path):
+        if wait_time:
+            print('Startup delay enable, wait for %s' % wait_time)
+            for _ in range(wait_time):
+                sleep(1)
+                if os.path.isfile(file_path):
+                    print("Config file founded: %s" % file_path)
+                    return file_path
+            print('Config.py not found, use --config or place config.py in %s'
+                  % file_path)
+            exit(1)
+    else:
+        return file_path
+
+
 def receiveSignal(signalNumber, frame):
     os.remove(lockfile)
     try:
@@ -90,11 +107,10 @@ def stored_pid(lockfile):
     return int(pid)
 
 config_diretory = config_dir_search(args.config)
-config_file = join(config_diretory, 'config.py')
+config_file = wait_config(join(config_diretory, 'config.py'), int(args.boot))
 lockfile = join(config_diretory, 'lockfile')
 
 if not args.kill:
-    print("Config file: %s" % config_file)
     if has_another_instace(lockfile):
         print('Another instance of keysnail is running, exiting.')
         exit(1)

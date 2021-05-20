@@ -2,19 +2,13 @@
 import os
 import sys
 
-
-def eval_file(path, startup_delay):
-    if startup_delay:
-        from time import sleep
-        print('Startup delay enable, wait for %s' % startup_delay)
-        sleep(startup_delay)
-
+def eval_file(config_file_path):
     try:
-        with open(path, "rb") as file:
-            exec(compile(file.read(), path, 'exec'), globals())
+        with open(config_file_path, "rb") as file:
+            exec(compile(file.read(), config_file_path, 'exec'), globals())
     except (FileNotFoundError, TypeError):
-        print('Config.py not found, use --config or place config.py in %s' % path)
-        exit(1)
+        pass
+
 
 
 def uinput_device_exists():
@@ -34,7 +28,7 @@ def has_access_to_uinput():
 def cli_main(config_file, args):
     from .info import __logo__, __version__
     # Load configuration file
-    eval_file(config_file, args.boot)
+    eval_file(config_file)
     print("")
     print(__logo__.strip())
     print("                             v{}".format(__version__))
