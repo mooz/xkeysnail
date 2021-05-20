@@ -1,6 +1,7 @@
 # xkeysnail
 
 In this repo i tryed to add more functions to the original [xkeysnail](https://github.com/mooz/xkeysnail):
+
 What i added?
 - A device name argument explicit in ```define keymap``` to inform connecting X configuration to X or Y device.
 - Now any device can have its specific kemap configuration, connected with the item above, solving the problem of X configuration aftar Y device.
