@@ -101,12 +101,18 @@ def receiveSignal(signalNumber, frame):
 
 
 def stored_pid(lockfile):
+    pid = None
     try:
         lockfile = open(lockfile, 'r')
         pid = lockfile.read()
+    except FileNotFoundError:
+        pass
     finally:
-        lockfile.close()
-    return int(pid)
+        try:
+            lockfile.close()
+        except AttributeError:
+            pass
+    return int(pid) if pid else None
 
 config_diretory = config_dir_search(args.config)
 config_file = wait_config(join(config_diretory, 'config.py'), args.boot)
@@ -127,9 +133,9 @@ if args.kill:
     try:
         os.kill(pid, signal.SIGUSR1)
         print("Xkeysnail, PID: %s, terminated by user." % pid)
-        exit(1)
-    except Exception as e:
-        raise e
+    except (ProcessLookupError, TypeError):
+        print("PID process not found, xkeysnail is probably not running!")
+    exit(1)
 
 if __name__ == '__main__':
     signal.signal(signal.SIGUSR1, receiveSignal)
