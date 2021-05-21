@@ -10,7 +10,6 @@ def eval_file(config_file_path):
         pass
 
 
-
 def uinput_device_exists():
     from os.path import exists
     return exists('/dev/uinput')

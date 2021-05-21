@@ -74,18 +74,20 @@ def config_dir_search(path):
 
 
 def wait_config(file_path, wait_time):
+    founded_messege = "Config file founded: %s" % file_path
     if not os.path.isfile(file_path):
         if wait_time:
             print('Startup delay enable, wait for %s' % wait_time)
-            for _ in range(wait_time):
-                sleep(1)
-                if os.path.isfile(file_path):
-                    print("Config file founded: %s" % file_path)
-                    return file_path
-            print('Config.py not found, use --config or place config.py in %s'
-                  % file_path)
-            exit(1)
+        for _ in range(wait_time if wait_time else 0):
+            sleep(1)
+            if os.path.isfile(file_path):
+                print(founded_messege)
+                return file_path
+        print('Config.py not found, use --config or place config.py in %s'
+                % file_path)
+        exit(1)
     else:
+        print(founded_messege)
         return file_path
 
 
@@ -107,7 +109,7 @@ def stored_pid(lockfile):
     return int(pid)
 
 config_diretory = config_dir_search(args.config)
-config_file = wait_config(join(config_diretory, 'config.py'), int(args.boot))
+config_file = wait_config(join(config_diretory, 'config.py'), args.boot)
 lockfile = join(config_diretory, 'lockfile')
 
 if not args.kill:
