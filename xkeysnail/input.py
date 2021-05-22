@@ -158,7 +158,7 @@ def loop(device_matches, device_watch, quiet):
                     for waitable in r:
                         if isinstance(waitable, InputDevice):
                             for event in waitable.read():
-                                if event.type == ecodes.EV_KEY:
+                                if event.type == ecodes.EV_KEY:  # pylint: disable=no-member
                                     on_event(event, waitable.name, quiet)
                                 else:
                                     send_event(event)

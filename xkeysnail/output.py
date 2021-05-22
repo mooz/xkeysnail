@@ -8,7 +8,7 @@ __author__ = 'zh'
 
 
 # Remove all buttons so udev doesn't think xkeysnail is a joystick
-_keyboard_codes = ecodes.keys.keys() - ecodes.BTN
+_keyboard_codes = ecodes.keys.keys() - ecodes.BTN  # pylint: disable=no-member
 
 # But we want mouse buttons, so let's enumerate those and add them
 # back into the set of buttons we'll watch and use
@@ -27,8 +27,8 @@ mouse_btns = {256: ['BTN_0', 'BTN_MISC'],
               273: 'BTN_RIGHT'}
 _keyboard_codes.update(mouse_btns)
 
-_uinput = UInput(events={ecodes.EV_KEY: _keyboard_codes,
-                         ecodes.EV_REL: set([0,1,6,8,9]),
+_uinput = UInput(events={ecodes.EV_KEY: _keyboard_codes,  # pylint: disable=no-member
+                         ecodes.EV_REL: set([0, 1, 6, 8, 9]),  # pylint: disable=no-member
                          })
 
 _pressed_modifier_keys = set()
