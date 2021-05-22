@@ -340,7 +340,7 @@ def define_multipurpose_modmap(multipurpose_remappings):
     })
     """
     global _multipurpose_map
-    for key, value in multipurpose_remappings.items():
+    for _, value in multipurpose_remappings.items():
         value.append(Action.RELEASE)
     _multipurpose_map = multipurpose_remappings
 
@@ -358,7 +358,7 @@ def define_conditional_multipurpose_modmap(condition, multipurpose_remappings):
         condition = condition.search
     if not callable(condition):
         raise ValueError('condition must be a function or compiled regexp')
-    for key, value in multipurpose_remappings.items():
+    for _, value in multipurpose_remappings.items():
         value.append(Action.RELEASE)
     _conditional_multipurpose_map.append((condition, multipurpose_remappings))
 
@@ -368,7 +368,7 @@ def multipurpose_handler(multipurpose_map, device_name, key, action):
     def maybe_press_modifiers(multipurpose_map):
         """Search the multipurpose map for keys that are pressed. If found and
         we have not yet sent it's modifier translation we do so."""
-        for k, [ _, mod_key, state ] in multipurpose_map.items():
+        for k, [ _, mod_key, _ ] in multipurpose_map.items():
             if k in _pressed_keys and mod_key not in _pressed_modifier_keys:
                 on_key(device_name, mod_key, Action.PRESS)
 
@@ -378,7 +378,7 @@ def multipurpose_handler(multipurpose_map, device_name, key, action):
     global _last_key_time
 
     if key in multipurpose_map:
-        single_key, mod_key, key_state = multipurpose_map[key]
+        single_key, mod_key, _ = multipurpose_map[key]
         key_is_down = key in _pressed_keys
         mod_is_down = mod_key in _pressed_modifier_keys
         key_was_last_press = key == _last_key
