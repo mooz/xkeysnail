@@ -7,6 +7,7 @@ import argparse
 from time import sleep
 from os.path import join
 from xkeysnail import cli_main
+import psutil
 
 
 parser = argparse.ArgumentParser(
@@ -37,14 +38,39 @@ parser.add_argument(
     help='kill other xkeysnail instancies')
 args = parser.parse_args()
 
+
 def current_pid():
     from os import getpid
     return getpid()
 
 
-def has_another_instace(lockfile):
+def checkpid(pid):
+    return True if pid in psutil.pids() else False
+
+
+def has_another_instace(lockfile, pid=None):
     if os.path.isfile(lockfile):
-        return True
+        if checkpid(pid):
+            return True
+        else:
+            return False
+
+
+def shutdown(pid, lockfile, sigtype=None):
+    if os.path.isfile(lockfile):
+        if not checkpid(pid) :
+            os.remove(lockfile)
+
+    if sigtype:
+        try:
+            os.kill(pid, sigtype)
+            print("Process PID %s, finalized by user." % pid)
+        except PermissionError:
+            print("Xkeysnail: AccessDenied, try again with --> 'sudo xkeysnail -k'")
+            exit(0)
+        except Exception as e:
+            raise e
+    exit(0)
 
 
 def startup_lock(lockfile, pid):
@@ -85,20 +111,16 @@ def wait_config(file_path, wait_time):
                 return file_path
         print('Config.py not found, use --config or place config.py in %s'
                 % file_path)
-        exit(1)
+        exit(0)
     else:
         print(founded_messege)
         return file_path
 
 
 def receiveSignal(signalNumber, frame):
-    os.remove(lockfile)
-    try:
-        os.kill(pid, signal.SIGKILL)
-    except Exception as e:
-        print("Xkeysnail: AccessDenied, try again with --> 'sudo xkeysnail -k'.")
-        print(e)
-
+    shutdown(pid, lockfile, sigtype=None)
+    exit(0)
+    
 
 def stored_pid(lockfile):
     pid = None
@@ -118,26 +140,32 @@ config_diretory = config_dir_search(args.config)
 config_file = wait_config(join(config_diretory, 'config.py'), args.boot)
 lockfile = join(config_diretory, 'lockfile')
 
+pid = stored_pid(lockfile)
+
 if not args.kill:
-    if has_another_instace(lockfile):
+    if has_another_instace(lockfile, pid=pid):
         print('Another instance of keysnail is running, exiting.')
-        exit(1)
+        exit(0)
     else:
         startup_lock(lockfile, current_pid())
+        
     if not args.devices and not args.watch:
         print("Use --watch or --devices, more info with: xkeysnail --help.")
-        sys.exit(1)
+        exit(0)
 
-pid = stored_pid(lockfile)
 if args.kill:
     try:
-        os.kill(pid, signal.SIGUSR1)
-        print("Xkeysnail, PID: %s, terminated by user." % pid)
+        shutdown(pid, lockfile, signal.SIGTERM)
     except (ProcessLookupError, TypeError):
         print("PID process not found, xkeysnail is probably not running!")
-    exit(1)
+        shutdown(pid, lockfile)
+    exit(0)
+
 
 if __name__ == '__main__':
-    signal.signal(signal.SIGUSR1, receiveSignal)
+    signal.signal(signal.SIGTERM, receiveSignal)
     signal.signal(signal.SIGINT, receiveSignal)
-    cli_main(config_file, args)
+    try:
+        cli_main(config_file, args)
+    except:
+        shutdown(pid, lockfile, sigtype=None)

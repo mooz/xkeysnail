@@ -43,7 +43,7 @@ Please check your kernel configuration.""")
         print("""Failed to open `uinput` in write mode.
 Make sure that you have executed xkeysnail with root privilege such as
 
-    $ sudo xkeysnail config.py
+    $ sudo xkeysnail -c config.py
 """)
         sys.exit(1)
 
