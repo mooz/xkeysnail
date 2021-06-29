@@ -4,7 +4,7 @@ import itertools
 from time import time
 from inspect import signature
 from .key import Action, Combo, Key, Modifier
-from .output import send_combo, send_key_action, send_key, is_pressed
+from .output import send_combo, send_key_action, send_key, is_pressed, set_key_delay
 
 __author__ = 'zh'
 
@@ -268,6 +268,11 @@ def define_timeout(seconds=1):
     global _timeout
     _timeout = seconds
 
+
+def define_key_delay(seconds):
+  """Defines a custom delay between each key event.
+  The argument is a floating point number for subsecond precision."""
+  set_key_delay(seconds)
 
 
 def define_modmap(mod_remappings):

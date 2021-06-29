@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import time
 from evdev import ecodes
 from evdev.uinput import UInput
 from .key import Action, Combo, Modifier
@@ -34,6 +35,12 @@ _uinput = UInput(events={ecodes.EV_KEY: _keyboard_codes,
 _pressed_modifier_keys = set()
 _pressed_keys = set()
 
+_key_delay_seconds = 0
+
+def set_key_delay(seconds):
+    global _key_delay_seconds
+    _key_delay_seconds = seconds
+
 def update_modifier_key_pressed(key, action):
     if key in Modifier.get_all_keys():
         if action.is_pressed():
@@ -64,6 +71,8 @@ def send_key_action(key, action):
     update_pressed_keys(key, action)
     _uinput.write(ecodes.EV_KEY, key, action)
     send_sync()
+    if _key_delay_seconds > 0:
+        time.sleep(_key_delay_seconds)
 
 
 def send_combo(combo):
