@@ -244,13 +244,6 @@ define_conditional_modmap(re.compile(termStr, re.IGNORECASE), {
 })
 ```
 
-## FAQ
-
-### How do I fix Firefox capturing Alt before xkeysnail?
-
-In the Firefox location bar, go to `about:config`, search for `ui.key.menuAccessKeyFocuses`, and set the Value to `false`.
-
-
 ## License
 
 `xkeysnail` is distributed under GPL.
