@@ -336,14 +336,14 @@ def define_conditional_multipurpose_modmap(condition, multipurpose_remappings):
     _conditional_multipurpose_map.append((condition, multipurpose_remappings))
 
 
-def multipurpose_handler(multipurpose_map, key, action):
+def multipurpose_handler(multipurpose_map, key, action, quiet=False):
 
     def maybe_press_modifiers(multipurpose_map):
         """Search the multipurpose map for keys that are pressed. If found and
         we have not yet sent it's modifier translation we do so."""
         for k, [ _, mod_key, state ] in multipurpose_map.items():
             if k in _pressed_keys and mod_key not in _pressed_modifier_keys:
-                on_key(mod_key, Action.PRESS)
+                on_key(mod_key, Action.PRESS, quiet=quiet)
 
     # we need to register the last key presses so we know if a multipurpose key
     # was a single press and release
@@ -361,11 +361,11 @@ def multipurpose_handler(multipurpose_map, key, action):
             # it is a single press and release
             if key_was_last_press and _last_key_time + _timeout > time():
                 maybe_press_modifiers(multipurpose_map)  # maybe other multipurpose keys are down
-                on_key(single_key, Action.PRESS)
-                on_key(single_key, Action.RELEASE)
+                on_key(single_key, Action.PRESS, quiet=quiet)
+                on_key(single_key, Action.RELEASE, quiet=quiet)
             # it is the modifier in a combo
             elif mod_is_down:
-                on_key(mod_key, Action.RELEASE)
+                on_key(mod_key, Action.RELEASE, quiet=quiet)
         elif action == Action.PRESS and not key_is_down:
             _last_key_time = time()
     # if key is not a multipurpose or mod key we want eventual modifiers down
@@ -408,7 +408,7 @@ def on_event(event, device_name, quiet):
                 active_multipurpose_map = mod_map
                 break
     if active_multipurpose_map:
-        multipurpose_handler(active_multipurpose_map, key, action)
+        multipurpose_handler(active_multipurpose_map, key, action, quiet=quiet)
         if key in active_multipurpose_map:
             return
 
