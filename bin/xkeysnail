@@ -1,13 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
-import os
-import sys
-import signal
+
 import argparse
-from time import sleep
-from os.path import join
-from xkeysnail import cli_main
-import psutil
+
+from xkeysnail import XkeySnail
 
 
 parser = argparse.ArgumentParser(
@@ -39,133 +35,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-def current_pid():
-    from os import getpid
-    return getpid()
-
-
-def checkpid(pid):
-    return True if pid in psutil.pids() else False
-
-
-def has_another_instace(lockfile, pid=None):
-    if os.path.isfile(lockfile):
-        if checkpid(pid):
-            return True
-        else:
-            return False
-
-
-def shutdown(pid, lockfile, sigtype=None):
-    if os.path.isfile(lockfile):
-        if not checkpid(pid) :
-            os.remove(lockfile)
-
-    if sigtype:
-        try:
-            os.kill(pid, sigtype)
-            print("Process PID %s, finalized by user." % pid)
-        except PermissionError:
-            print("Xkeysnail: AccessDenied, try again with --> 'sudo xkeysnail -k'")
-            exit(0)
-        except Exception as e:
-            raise e
-    exit(0)
-
-
-def startup_lock(lockfile, pid):
-    try:
-        lockfile = open(lockfile, 'w+')
-        lockfile.write(str(pid))
-    finally:
-        lockfile.close()
-
-
-def config_dir_search(path):
-    USERHOME = os.path.expanduser('~').replace(
-        '/root', '/home/%s' % os.environ.get('SUDO_USER'))
-    POSSIBLE_CONFIG_DIRS = [
-        join(USERHOME, path) for path in [
-            '.xkeysnail/',
-            '.config/xkeysnail/'
-        ]
-    ]
-    if not path:
-        for filepath in POSSIBLE_CONFIG_DIRS:
-            if os.path.isdir(filepath):
-                return filepath
-        return ', '.join(POSSIBLE_CONFIG_DIRS)
-    else:
-        return path
-
-
-def wait_config(file_path, wait_time):
-    founded_messege = "Config file founded: %s" % file_path
-    if not os.path.isfile(file_path):
-        if wait_time:
-            print('Startup delay enable, wait for %s' % wait_time)
-        for _ in range(wait_time if wait_time else 0):
-            sleep(1)
-            if os.path.isfile(file_path):
-                print(founded_messege)
-                return file_path
-        print('Config.py not found, use --config or place config.py in %s'
-                % file_path)
-        exit(0)
-    else:
-        print(founded_messege)
-        return file_path
-
-
-def receiveSignal(signalNumber, frame):
-    shutdown(pid, lockfile, sigtype=None)
-    exit(0)
-    
-
-def stored_pid(lockfile):
-    pid = None
-    try:
-        lockfile = open(lockfile, 'r')
-        pid = lockfile.read()
-    except FileNotFoundError:
-        pass
-    finally:
-        try:
-            lockfile.close()
-        except AttributeError:
-            pass
-    return int(pid) if pid else None
-
-config_diretory = config_dir_search(args.config)
-config_file = wait_config(join(config_diretory, 'config.py'), args.boot)
-lockfile = join(config_diretory, 'lockfile')
-
-pid = stored_pid(lockfile)
-
-if not args.kill:
-    if has_another_instace(lockfile, pid=pid):
-        print('Another instance of keysnail is running, exiting.')
-        exit(0)
-    else:
-        startup_lock(lockfile, current_pid())
-        
-    if not args.devices and not args.watch:
-        print("Use --watch or --devices, more info with: xkeysnail --help.")
-        exit(0)
-
-if args.kill:
-    try:
-        shutdown(pid, lockfile, signal.SIGTERM)
-    except (ProcessLookupError, TypeError):
-        print("PID process not found, xkeysnail is probably not running!")
-        shutdown(pid, lockfile)
-    exit(0)
-
 
 if __name__ == '__main__':
-    signal.signal(signal.SIGTERM, receiveSignal)
-    signal.signal(signal.SIGINT, receiveSignal)
-    try:
-        cli_main(config_file, args)
-    except:
-        shutdown(pid, lockfile, sigtype=None)
+    xkey = XkeySnail(args.config, args)
+    xkey.xkeyrun
