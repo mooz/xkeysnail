@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 
 from setuptools import setup
+
+__doc__ = None
+__version__ = None
+__description__ = None
+
 exec(open("xkeysnail/info.py").read())
 
 setup(name             = "xkeysnail",
