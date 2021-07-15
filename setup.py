@@ -19,10 +19,10 @@ setup(
     scripts=["bin/xkeysnail"],
     license="GPL",
     dependency_links=[
-        "https://github.com/luizoti/python-evdev/tarball/master#egg=python-evdev-1.4.1",
+        "https://github.com/luizoti/evdev/tarball/master#egg=evdev-1.4.1",
     ],
     install_requires=[
-        "python-evdev==1.4.1",
+        "evdev==1.4.1",
         "python-xlib",
         "inotify_simple",
         "psutil"
