@@ -3,13 +3,14 @@
 from setuptools import setup
 
 __doc__ = None
+__name__ = None
 __version__ = None
 __description__ = None
 
 exec(open("xkeysnail/info.py").read())
 
 setup(
-    name="xkeysnail",
+    name=__name__,
     version=__version__,  # pylint: disable=undefined-variable
     author="Masafumi Oyamada",
     url="https://github.com/mooz/xkeysnail",

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+__name__ = "xkeysnail"
+
 __version__ = "0.4.53"
 
 __logo__ = """
