@@ -1,59 +1,80 @@
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+
+"""init xkeysnail module."""
+
 import os
 import sys
+import argparse
+
+from time import sleep
+from os.path import join
+from os.path import exists
 
 
-def eval_file(path, startup_delay):
-    if startup_delay:
-        from time import sleep
-        print('Startup delay enable, wait for %s' % startup_delay)
-        sleep(startup_delay)
+parser = argparse.ArgumentParser(
+    description='Yet another keyboard remapping tool for X environment.')
+parser.add_argument(
+    '-c', '--config', dest="config",
+    metavar='config.py', type=str, nargs='?',
+    help='configuration file (See README.md for syntax)')
+parser.add_argument(
+    '-d', '--devices', dest="devices",
+    metavar='device', type=str, nargs='+',
+    help='keyboard devices to remap (if omitted, xkeysnail choose proper keyboard devices)')
+parser.add_argument(
+    '-w', '--watch', dest='watch',
+    action='store_true',
+    help='watch keyboard devices plug in ')
+parser.add_argument(
+    '-q', '--quiet', dest='quiet',
+    action='store_true',
+    help='suppress output of key events')
+parser.add_argument(
+    '-b', '--boot', dest='boot',
+    metavar='boot', type=int, default=20,
+    help='startup delay to wait config file with systemd')
+parser.add_argument(
+    '-k', '--kill', dest='kill',
+    action='store_true',
+    help='kill other xkeysnail instancies')
 
-    try:
-        with open(path, "rb") as file:
-            exec(compile(file.read(), path, 'exec'), globals())
-    except (FileNotFoundError, TypeError):
-        print('Config.py not found, use --config or place config.py in %s' % path)
-        exit(1)
+argments = parser.parse_args()
+
+DEVICE = argments.devices
+WATCH  = argments.watch
+QUIET = argments.quiet
+BOOT = argments.boot
+KILL = argments.kill
 
 
-def uinput_device_exists():
-    from os.path import exists
-    return exists('/dev/uinput')
+def search_for_configdir(args_path, wait_time):
+    """Method to search config diretory."""
+    founded_msg = "\nConfig file founded: %s"
+    USERHOME = os.path.expanduser('~').replace(
+        '/root', '/home/%s' % os.environ.get('SUDO_USER'))
+    POSSIBLE_CONFIG_DIRS = [args_path] if args_path else [
+        join(USERHOME, _path) for _path in [
+            '.xkeysnail/',
+            '.config/xkeysnail/'
+        ]
+    ]
+    if args_path:
+        if exists(args_path):
+            print(founded_msg % args_path)
+            return args_path
 
+    if wait_time > 1:
+        print('\nStartup delay enable, wait for %s' % wait_time)
+    for _ in range(wait_time):
+        for item in POSSIBLE_CONFIG_DIRS:
+            if os.path.exists(item):
+                print(founded_msg % item)
+                return item
+        sleep(1)
+    print('\nConfig directory not found:')
+    print(' Create the "%s" directory and place the "config.py" file inside it.' %
+            ', '.join(POSSIBLE_CONFIG_DIRS))
+    sys.exit(0)
 
-def has_access_to_uinput():
-    from evdev.uinput import UInputError
-    try:
-        from xkeysnail.output import _uinput  # noqa: F401
-        return True
-    except UInputError:
-        return False
-
-
-def cli_main(config_file, args):
-    from .info import __logo__, __version__
-    # Load configuration file
-    eval_file(config_file, args.boot)
-    print("")
-    print(__logo__.strip())
-    print("                             v{}".format(__version__))
-    print("")
-    # Make sure that the /dev/uinput device exists
-    if not uinput_device_exists():
-        print("""The '/dev/uinput' device does not exist.
-Please check your kernel configuration.""")
-        sys.exit(1)
-
-    # Make sure that user have root privilege
-    if not has_access_to_uinput() or os.getuid() != 0:
-        print("""Failed to open `uinput` in write mode.
-Make sure that you have executed xkeysnail with root privilege such as
-
-    $ sudo xkeysnail config.py
-""")
-        sys.exit(1)
-
-    # Enter event loop
-    from xkeysnail.input import loop
-    loop(args.devices, args.watch, args.quiet)
+CONFIG = search_for_configdir(argments.config, BOOT)
