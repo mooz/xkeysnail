@@ -141,6 +141,7 @@ def in_device_list(fn, devices):
             return True
     return False
 
+
 def loop(device_matches, device_watch, quiet):
     global start_flag
     devices = select_device(device_matches, device_watch, True)
