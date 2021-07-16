@@ -20,7 +20,10 @@ from xkeysnail import CONFIG
 from xkeysnail.input import loop
 from xkeysnail.log import log_msg
 from xkeysnail.log import wrap_logger
-from .info import __logo__, __version__
+from .info import __logo__
+from .info import __name__
+from .info import __version__
+
 
 @wrap_logger
 class XkeySnail(object):
@@ -32,6 +35,8 @@ class XkeySnail(object):
         signal.signal(signal.SIGTERM, self.receiveSignal)
         signal.signal(signal.SIGINT, self.receiveSignal)
         self.pid = self.current_pid()
+        if KILL:
+            self.kill_xkeysnail(self.get_pid_in_lockfile(), signal.SIGTERM)
 
         if exists(CONFIG):
             self.configfile = join(CONFIG, 'config.py')
@@ -39,8 +44,6 @@ class XkeySnail(object):
                 log_msg('Not founded config.py in path: %s' % self.configfile)
                 sys.exit(0)
             self.lockfile = join(CONFIG, 'lockfile')
-        if KILL:
-            self.kill_xkeysnail(self.get_pid_in_lockfile(), signal.SIGTERM)
 
         if not DEVICE and not WATCH:
             log_msg('Use --watch or --devices, more info with: xkeysnail --help.')
