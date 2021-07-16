@@ -1,9 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from xkeysnail.main import XkeySnail
+from xkeysnail import main
 
 
 if __name__ == '__main__':
-    xkey = XkeySnail()
-    xkey.xkeyrun
+    main.XkeySnail()
