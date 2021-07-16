@@ -32,7 +32,7 @@ parser.add_argument(
     help='suppress output of key events')
 parser.add_argument(
     '-b', '--boot', dest='boot',
-    metavar='boot', type=int, default=20,
+    metavar='boot', type=int, default=1,
     help='startup delay to wait config file with systemd')
 parser.add_argument(
     '-k', '--kill', dest='kill',
@@ -50,7 +50,7 @@ KILL = argments.kill
 
 def search_for_configdir(args_path, wait_time):
     """Method to search config diretory."""
-    founded_msg = "\nConfig file founded: %s"
+    founded_msg = "\nConfig diretory founded: %s"
     USERHOME = os.path.expanduser('~').replace(
         '/root', '/home/%s' % os.environ.get('SUDO_USER'))
     POSSIBLE_CONFIG_DIRS = [args_path] if args_path else [
