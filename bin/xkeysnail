@@ -1,41 +1,9 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import argparse
-
-from xkeysnail import XkeySnail
-
-
-parser = argparse.ArgumentParser(
-    description='Yet another keyboard remapping tool for X environment.')
-parser.add_argument(
-    '-c', '--config', dest="config",
-    metavar='config.py', type=str, nargs='?',
-    help='configuration file (See README.md for syntax)')
-parser.add_argument(
-    '-d', '--devices', dest="devices",
-    metavar='device', type=str, nargs='+',
-    help='keyboard devices to remap (if omitted, xkeysnail choose proper keyboard devices)')
-parser.add_argument(
-    '-w', '--watch', dest='watch',
-    action='store_true',
-    help='watch keyboard devices plug in ')
-parser.add_argument(
-    '-q', '--quiet', dest='quiet',
-    action='store_true',
-    help='suppress output of key events')
-parser.add_argument(
-    '-b', '--boot', dest='boot',
-    metavar='boot', type=int,
-    help='startup delay to wait config file with systemd')
-parser.add_argument(
-    '-k', '--kill', dest='kill',
-    action='store_true',
-    help='kill other xkeysnail instancies')
-args = parser.parse_args()
-
+from xkeysnail.main import XkeySnail
 
 
 if __name__ == '__main__':
-    xkey = XkeySnail(args.config, args)
+    xkey = XkeySnail()
     xkey.xkeyrun
