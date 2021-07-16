@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import sys
+
+from evdev import ecodes
 from select import select
-from evdev import ecodes, InputDevice, list_devices
+from evdev import InputDevice
+from evdev import list_devices
 
 from .key import Key
 from .output import send_event
@@ -113,30 +116,18 @@ def select_device(device_matches=None, device_watch="global", interactive=True):
     if interactive:
         print_device_list(devices=devices)
         if not device_matches:
-            print('\n\nXkeysnail picks up keyboard devices in config.py!')
+            print('\nDevices declared in "config.py":')
+            print('\n'.join(['  DEVICE: %s' % x for x in device_in_config]))
 
     devices = list(filter(DeviceFilter(device_matches, device_watch), devices))
     if interactive:
         if not devices and device_watch:
             pass  # will continue to watch for device add/remove
         elif devices:
-            print(
-                ' '.join(
-                    [
-                        'Okay, now enabling remapping',
-                        'for the following pre-configured device(s):\n'
-                    ]
-                )
-            )
+            print('\nOkay, remapping following device(s):\n')
         elif not devices and device_watch:
-            print(
-                ' '.join(
-                    [
-                        'error: no input devices found',
-                        '(do you have rw permission on /dev/input/*?)'
-                    ]
-                )
-            )
+            print('Error: no input devices found')
+            print(' Do you have rw permission on /dev/input/*?')
             sys.exit(1)
 
         if devices:
@@ -157,7 +148,8 @@ def loop(device_matches, device_watch, quiet):
         for device in devices:
             device.grab()
     except IOError:
-        print("IOError when grabbing device. Maybe, another xkeysnail instance is running?")
+        print("IOError when grabbing device.")
+        print(" Maybe, another xkeysnail instance is running?")
         sys.exit(1)
 
     if device_watch:
@@ -165,10 +157,10 @@ def loop(device_matches, device_watch, quiet):
         from inotify_simple import INotify, flags
         inotify = INotify()
         inotify.add_watch("/dev/input", flags.CREATE | flags.ATTRIB)
-        print('Option --watch enable, waiting for devices')
+        print('\nWaiting for new devices with --watch/-w.')
     device_filter = DeviceFilter(device_matches, device_watch)
     if quiet:
-        print("No key event will be output since quiet option was specified.")
+        print("\nQUIET mode enabled with --quiet/-q")
 
     try:
         while True:
@@ -189,8 +181,7 @@ def loop(device_matches, device_watch, quiet):
                             devices, device_filter, inotify)
                         if new_devices:
                             if start_flag is None:
-                                print(
-                                    "Okay, now enable remapping on the following devices founded:\n")
+                                print('\nOkay, remapping founded device(s):\n')
                             print("\nDevice Added: %s\n" % devices[0].name)
             except OSError:
                 if isinstance(waitable, InputDevice):
