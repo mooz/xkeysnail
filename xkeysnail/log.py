@@ -16,11 +16,12 @@ logging.basicConfig(
 
 
 def log_msg(msg):
+    """Function write messege to log file."""
     logging.warning(msg)
 
 
 def wrap_logger(func):
-    '''Decorator that reports the execution time.'''
+    """Decorator to log functions."""
     def wrap(*args, **kwargs):
         result = func(*args, **kwargs)
         args = ', '.join([str(i) for i in args])
