@@ -2,8 +2,6 @@
 
 from enum import Enum, unique, IntEnum
 
-__author__ = 'zh'
-
 
 class Key(IntEnum):
     RESERVED = 0

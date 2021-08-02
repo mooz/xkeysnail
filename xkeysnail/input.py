@@ -11,8 +11,6 @@ from .key import Key
 from .output import send_event
 from .transform import on_event, device_in_config
 
-__author__ = 'zh'
-
 start_flag = None
 
 

@@ -14,7 +14,6 @@ from .key import Action, Combo, Key, Modifier
 from .output import send_combo, send_key_action, send_key, is_pressed
 
 
-__author__ = 'zh'
 
 # ============================================================ #
 

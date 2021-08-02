@@ -4,9 +4,6 @@ from evdev import ecodes
 from evdev.uinput import UInput
 from .key import Action, Combo, Modifier
 
-__author__ = 'zh'
-
-
 # Remove all buttons so udev doesn't think xkeysnail is a joystick
 _keyboard_codes = ecodes.keys.keys() - ecodes.BTN  # pylint: disable=no-member
 
