@@ -3,6 +3,7 @@
 In this repo i tryed to add more functions to the original [xkeysnail](https://github.com/mooz/xkeysnail):
 
 What i added?
+
 - A device name argument explicit in ```define keymap``` to inform connecting X configuration to X or Y device.
 - Now any device can have its specific kemap configuration, connected with the item above, solving the problem of X configuration aftar Y device.
 - Update on how a keyboard is detected, now, keyboards plus keyboards must be known, such as unconventional technologies, example: PS3 BD Remote.
@@ -15,22 +16,26 @@ What i added?
 - Bootup delay in secs to help xkeysnail if config is stored in other filesystem, and xkeysnail is started on boot by ```.service```.
 - Other little changes.
 
-`xkeysnail` is yet another keyboard remapping tool for X environment written in Python. It's like
+`xkeysnail` is a keyboard remapping tool for X environment written in Python. It's like
 `xmodmap` but allows more flexible remappings.
 
 ![screenshot](http://mooz.github.io/image/xkeysnail_screenshot.png)
 
-- **Pros**
-    - Has high-level and flexible remapping mechanisms, such as
-        - **per-application keybindings can be defined**
-        - **multiple stroke keybindings can be defined** such as `Ctrl+x Ctrl+c` to `Ctrl+q`
-        - **not only key remapping but arbitrary commands defined by Python can be bound to a key**
-    - Runs in low-level layer (`evdev` and `uinput`), making **remapping work in almost all the places**
-- **Cons**
-    - Runs in root-mode (requires `sudo`)
+## Pros
+
+- Has high-level and flexible remapping mechanisms
+- **per-application keybindings can be defined**
+- **per-device keybindings can be defined**
+- **multiple stroke keybindings can be defined** such as `Ctrl+x Ctrl+c` to `Ctrl+q`
+- **not only key remapping but arbitrary commands defined by Python can be bound to a key**
+- Runs in low-level layer (`evdev` and `uinput`), making **remapping work in almost all the places**
+
+## Cons
+
+- Runs in root-mode (requires `sudo`)
 
 The key remapping mechanism of `xkeysnail` is based on `pykeymacs`
-(https://github.com/DreaminginCodeZH/pykeymacs).
+(<https://github.com/DreaminginCodeZH/pykeymacs>).
 
 ## Installation
 
@@ -40,7 +45,7 @@ Requires root privilege and **Python 3**.
 
     sudo apt install python3-pip
     sudo pip3 install xkeysnail
-    
+
     # If you plan to compile from source
     sudo apt install python3-dev
 
@@ -51,20 +56,20 @@ Requires root privilege and **Python 3**.
     # Add your user to input group if you don't want to run xkeysnail
     # with sudo (log out and log in again to apply group change)
     sudo usermod -a -G input $USER
-    
+
     # If you plan to compile from source
     sudo dnf install python3-devel
-    
+
 ### Manjaro/Arch
 
-    # Some distros will need to compile evdev components 
+    # Some distros will need to compile evdev components
     # and may fail to do so if gcc is not installed.
     sudo pacman -Syy
     sudo pacman -S gcc
-    
+
 ### Solus
 
-    # Some distros will need to compile evdev components 
+    # Some distros will need to compile evdev components
     # and may fail to do so if gcc is not installed.
     sudo eopkg install gcc
     sudo eopkg install -c system.devel
@@ -79,11 +84,10 @@ Requires root privilege and **Python 3**.
 
     sudo xkeysnail config.py
 
-When you encounter the errors like `Xlib.error.DisplayConnectionError: Can't connect to display ":0.0": b'No protocol specified\n'
-`, try
+When you encounter the errors like `Xlib.error.DisplayConnectionError: Can't connect to display ":0.0": b'No protocol specified\n'`, try:
 
     xhost +SI:localuser:root
-    sudo xkeysnail config.py
+    sudo xkeysnail -w/--devices /dev/input/event*
 
 If you want to specify keyboard devices, use `--devices` option:
 
@@ -110,26 +114,28 @@ is satisfied.
 
 Argument `condition` specifies the condition of activating the `mappings` on an
 application and takes one of the following forms:
+
 - Regular expression (e.g., `re.compile("YYY")`)
-    - Activates the `mappings` if the pattern `YYY` matches the `WM_CLASS` of the application.
-    - Case Insensitivity matching against `WM_CLASS` via `re.IGNORECASE` (e.g. `re.compile('Gnome-terminal', re.IGNORECASE)`)
+  - Activates the `mappings` if the pattern `YYY` matches the `WM_CLASS` of the application.
+  - Case Insensitivity matching against `WM_CLASS` via `re.IGNORECASE` (e.g. `re.compile('Gnome-terminal', re.IGNORECASE)`)
 - `lambda wm_class: some_condition(wm_class)`
-    - Activates the `mappings` if the `WM_CLASS` of the application satisfies the condition specified by the `lambda` function.
-    - Case Insensitivity matching via `casefold()` or `lambda wm_class: wm_class.casefold()` (see example below to see how to compare to a list of names)
+  - Activates the `mappings` if the `WM_CLASS` of the application satisfies the condition specified by the `lambda` function.
+  - Case Insensitivity matching via `casefold()` or `lambda wm_class: wm_class.casefold()` (see example below to see how to compare to a list of names)
 - `None`: Refers to no condition. `None`-specified keymap will be a global keymap and is always enabled.
 
 Argument `mappings` is a dictionary in the form of `{key: command, key2:
 command2, ...}` where `key` and `command` take following forms:
+
 - `key`: Key to override specified by `K("YYY")`
-    - For the syntax of key specification, please refer to the [key specification section](#key-specification).
+  - For the syntax of key specification, please refer to the [key specification section](#key-specification).
 - `command`: one of the followings
-    - `K("YYY")`: Dispatch custom key to the application.
-    - `[command1, command2, ...]`: Execute commands sequentially.
-    - `{ ... }`: Sub-keymap. Used to define multiple stroke keybindings. See [multiple stroke keys](#multiple-stroke-keys) for details.
-    - `pass_through_key`: Pass through `key` to the application. Useful to override the global mappings behavior on certain applications.
-    - `escape_next_key`: Escape next key.
-    - Arbitrary function: The function is executed and the returned value is used as a command.
-        - Can be used to invoke UNIX commands.
+  - `K("YYY")`: Dispatch custom key to the application.
+  - `[command1, command2, ...]`: Execute commands sequentially.
+  - `{ ... }`: Sub-keymap. Used to define multiple stroke keybindings. See [multiple stroke keys](#multiple-stroke-keys) for details.
+  - `pass_through_key`: Pass through `key` to the application. Useful to override the global mappings behavior on certain applications.
+  - `escape_next_key`: Escape next key.
+  - Arbitrary function: The function is executed and the returned value is used as a command.
+    - Can be used to invoke UNIX commands.
 
 Argument `name` specifies the keymap name. This is an optional argument.
 
@@ -138,6 +144,7 @@ Argument `name` specifies the keymap name. This is an optional argument.
 Key specification in a keymap is in a form of `K("(<Modifier>-)*<Key>")` where
 
 `<Modifier>` is one of the followings
+
 - `C` or `Ctrl` -> Control key
 - `M` or `Alt` -> Alt key
 - `Shift` -> Shift key
@@ -230,7 +237,7 @@ define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
 
 ### Example of Case Insensitivity Matching
 
-```
+```python
 terminals = ["gnome-terminal","konsole","io.elementary.terminal","sakura"]
 terminals = [term.casefold() for term in terminals]
 termStr = "|".join(str(x) for x in terminals)
@@ -265,7 +272,6 @@ define_conditional_modmap(re.compile(termStr, re.IGNORECASE), {
 
 In the Firefox location bar, go to `about:config`, search for `ui.key.menuAccessKeyFocuses`, and set the Value to `false`.
 
-
 ## License
 
 `xkeysnail` is distributed under GPL.
@@ -287,7 +293,7 @@ In the Firefox location bar, go to `about:config`, search for `ui.key.menuAccess
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 `xkeysnail` is based on `pykeymacs`
- (https://github.com/DreaminginCodeZH/pykeymacs), which is distributed under
+ (<https://github.com/DreaminginCodeZH/pykeymacs>), which is distributed under
  GPL.
 
     pykeymacs
