@@ -434,17 +434,16 @@ def transform_key(device_name, key, action, wm_class=None, quiet=False):
         _mode_maps = None
         return
 
-    def convertcombo(combos):
-        command_list = list()
-        if isinstance(combos, list):
-            for x in combos:
-                if isinstance(x, tuple):
-                    command_list.append(x[1])
-                else:
-                    command_list.append(x)
-            return '[%s]' % ', '.join([str(x) for x in command_list])
-        else:
-            return combos
+    def get_keymap_combo(mappings, combo):
+        for key in mappings:
+            if key == combo:
+                _combo = mappings[key]
+                try:
+                    _combo = ', '.join([t[1] for t in _combo])
+                except TypeError:
+                    _combo = _combo
+                return _combo
+        return combo
 
     is_top_level = False
     if _mode_maps is None:
@@ -459,21 +458,17 @@ def transform_key(device_name, key, action, wm_class=None, quiet=False):
                or (hasattr(condition, "search") and condition.search(wm_class)) \
                or condition is None:
                 if event_device_name == device_name:
+                    keymap_combo = get_keymap_combo(mappings, combo)
                     _mode_maps.append(mappings)
                     keymap_names.append(name)
         if not quiet:
-            print("\nDevice: {}\nWM_CLASS '{}' | active keymaps = [{}] | %s => %s".format(
-                device_name,
-                wm_class,
-                ", ".join(keymap_names
-                          )
-            ) % (
-                combo,
-                convertcombo(
-                    mappings[combo]
-                ) if combo in mappings else combo
+            STR_DEVICE = "Device: %s\n" % device_name
+            STR_WMCLASS = "WM_CLASS => '%s'" % wm_class
+            STR_KEYMAP = "active keymaps => [%s]" % ", ".join(keymap_names)
+            STR_COMBO = "%s => %s" % (combo, keymap_combo)
+            print(STR_DEVICE, ' | '.join(
+                [STR_WMCLASS, STR_KEYMAP, STR_COMBO]
             ), end="\r\n")
-
     # _mode_maps: [global_map, local_1, local_2, ...]
     for mappings in _mode_maps:
         if combo not in mappings:
