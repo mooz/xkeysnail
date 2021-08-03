@@ -404,6 +404,7 @@ def transform_key(device_name, key, action, wm_class=None, quiet=False):
                     keymap_names.append(name)
                     keymap_combo = get_keymap_combo(mappings, combo)
         if not quiet:
+            keymap_combo = keymap_combo if keymap_combo else "Key not configured for wm_class/profile."
             STR_DEVICE = "Device: %s\n" % device_name
             STR_WMCLASS = "WM_CLASS => '%s'" % wm_class
             STR_KEYMAP = "active keymaps => [%s]" % ", ".join(keymap_names)
