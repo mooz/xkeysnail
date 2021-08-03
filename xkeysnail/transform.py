@@ -8,10 +8,10 @@ from time import time
 from inspect import signature
 
 from xkeysnail.log import wrap_logger
-from xkeysnail.xkib_info import get_active_window_wm_class
+from xkeysnail.xlib_info import get_wmclass
 
-from .key import Action, Combo, Key, Modifier
-from .output import is_pressed, send_combo, send_key, send_key_action
+from xkeysnail.key import Action, Combo, Key, Modifier
+from xkeysnail.output import is_pressed, send_combo, send_key, send_key_action
 
 _pressed_modifier_keys = set()
 
