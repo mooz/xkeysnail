@@ -16,6 +16,51 @@ from xkeysnail.output import is_pressed, send_combo, send_key, send_key_action
 _pressed_modifier_keys = set()
 
 
+# ============================================================ #
+
+_pressed_keys = set()
+
+# ============================================================ #
+# Mark
+# ============================================================ #
+
+_mark_set = False
+
+# ============================================================
+# Keymap
+# ============================================================
+
+_toplevel_keymaps = []
+_mode_maps = None
+
+escape_next_key = {}
+pass_through_key = {}
+
+device_in_config = list()
+
+# ============================================================
+# Key handler
+# ============================================================
+
+# keycode translation
+# e.g., { Key.CAPSLOCK: Key.LEFT_CTRL }
+_mod_map = None
+_conditional_mod_map = []
+
+# multipurpose keys
+# e.g, {Key.LEFT_CTRL: [Key.ESC, Key.LEFT_CTRL, Action.RELEASE]}
+_multipurpose_map = None
+_conditional_multipurpose_map = []
+
+# last key that sent a PRESS event or a non-mod or non-multi key that sent a RELEASE
+# or REPEAT
+_last_key = None
+
+# last key time record time when execute multi press
+_last_key_time = time()
+_timeout = 1
+
+
 def update_pressed_modifier_keys(key, action):
     """Update pressed modifier_keys keys."""
     if action.is_pressed():
@@ -29,11 +74,6 @@ def get_pressed_modifiers():
     return {Modifier.from_key(key) for key in _pressed_modifier_keys}
 
 
-# ============================================================ #
-
-
-_pressed_keys = set()
-
 def update_pressed_keys(key, action):
     """Update pressed keys."""
     if action.is_pressed():
@@ -41,12 +81,6 @@ def update_pressed_keys(key, action):
     else:
         _pressed_keys.discard(key)
 
-
-# ============================================================ #
-# Mark
-# ============================================================ #
-
-_mark_set = False
 
 def with_mark(combo):
     if isinstance(combo, Key):
@@ -108,18 +142,6 @@ def create_modifiers_from_strings(modifier_strs):
             modifiers.add(Modifier.SHIFT)
     return modifiers
 
-# ============================================================
-# Keymap
-# ============================================================
-
-
-_toplevel_keymaps = []
-_mode_maps = None
-
-escape_next_key = {}
-pass_through_key = {}
-
-device_in_config = list()
 
 def define_keymap(event_device_name, condition, mappings, name="Anonymous keymap"):
     """Method to expand config setup."""
@@ -181,28 +203,6 @@ def define_keymap(event_device_name, condition, mappings, name="Anonymous keymap
     _toplevel_keymaps.append((event_device_name, condition, mappings, name))
     return mappings
 
-
-# ============================================================
-# Key handler
-# ============================================================
-
-# keycode translation
-# e.g., { Key.CAPSLOCK: Key.LEFT_CTRL }
-_mod_map = None
-_conditional_mod_map = []
-
-# multipurpose keys
-# e.g, {Key.LEFT_CTRL: [Key.ESC, Key.LEFT_CTRL, Action.RELEASE]}
-_multipurpose_map = None
-_conditional_multipurpose_map = []
-
-# last key that sent a PRESS event or a non-mod or non-multi key that sent a RELEASE
-# or REPEAT
-_last_key = None
-
-# last key time record time when execute multi press
-_last_key_time = time()
-_timeout = 1
 
 def define_timeout(seconds=1):
     """Defines timeout."""
