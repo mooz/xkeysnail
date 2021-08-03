@@ -323,11 +323,10 @@ def multipurpose_handler(multipurpose_map, device_name, key, action):
 def on_event(event, device_name, quiet):
     key = Key(event.code)
     action = Action(event.value)
-    wm_class = None
+    wm_class = get_wmclass()
     # translate keycode (like xmodmap)
     active_mod_map = _mod_map
     if _conditional_mod_map:
-        wm_class = get_active_window_wm_class()
         for condition, mod_map in _conditional_mod_map:
             params = [wm_class]
             if len(signature(condition).parameters) == 2:
@@ -341,7 +340,6 @@ def on_event(event, device_name, quiet):
 
     active_multipurpose_map = _multipurpose_map
     if _conditional_multipurpose_map:
-        wm_class = get_active_window_wm_class()
         for condition, mod_map in _conditional_multipurpose_map:
             params = [wm_class]
             if len(signature(condition).parameters) == 2:
@@ -397,8 +395,6 @@ def transform_key(device_name, key, action, wm_class=None, quiet=False):
         # Decide keymap(s)
         is_top_level = True
         _mode_maps = []
-        if wm_class is None:
-            wm_class = get_active_window_wm_class()
         keymap_names = []
         for event_device_name, condition, mappings, name in _toplevel_keymaps:
             if (callable(condition) and condition(wm_class)) \
