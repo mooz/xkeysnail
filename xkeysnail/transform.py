@@ -371,7 +371,7 @@ def on_key(device_name, key, action, wm_class=None, quiet=False):
 def transform_key(device_name, key, action, wm_class=None, quiet=False):
     global _mode_maps
     global _toplevel_keymaps
-    combo = Combo(get_pressed_modifiers(), key)
+    keymap_combo = combo = Combo(get_pressed_modifiers(), key)
 
     if _mode_maps is escape_next_key:
         print("Escape key: {}".format(combo))
@@ -388,7 +388,6 @@ def transform_key(device_name, key, action, wm_class=None, quiet=False):
                 except TypeError:
                     _combo = _combo
                 return _combo
-        return combo
 
     is_top_level = False
     if _mode_maps is None:
@@ -401,9 +400,9 @@ def transform_key(device_name, key, action, wm_class=None, quiet=False):
                or (hasattr(condition, "search") and condition.search(wm_class)) \
                or condition is None:
                 if event_device_name == device_name:
-                    keymap_combo = get_keymap_combo(mappings, combo)
                     _mode_maps.append(mappings)
                     keymap_names.append(name)
+                    keymap_combo = get_keymap_combo(mappings, combo)
         if not quiet:
             STR_DEVICE = "Device: %s\n" % device_name
             STR_WMCLASS = "WM_CLASS => '%s'" % wm_class
