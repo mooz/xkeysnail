@@ -91,11 +91,13 @@ def with_mark(combo):
 
     return _with_mark
 
+
 def set_mark(mark_set):
     def _set_mark():
         global _mark_set
         _mark_set = mark_set
     return _set_mark
+
 
 def with_or_set_mark(combo):
     if isinstance(combo, Key):
@@ -209,6 +211,7 @@ def define_timeout(seconds=1):
     global _timeout
     _timeout = seconds
 
+
 def define_modmap(mod_remappings):
     """Defines modmap (keycode translation)
 
@@ -220,6 +223,7 @@ def define_modmap(mod_remappings):
     """
     global _mod_map
     _mod_map = mod_remappings
+
 
 def define_conditional_modmap(condition, mod_remappings):
     """Defines conditional modmap (keycode translation)
@@ -235,6 +239,7 @@ def define_conditional_modmap(condition, mod_remappings):
     if not callable(condition):
         raise ValueError('condition must be a function or compiled regexp')
     _conditional_mod_map.append((condition, mod_remappings))
+
 
 def define_multipurpose_modmap(multipurpose_remappings):
     """Defines multipurpose modmap (multi-key translations)
@@ -254,6 +259,7 @@ def define_multipurpose_modmap(multipurpose_remappings):
         value.append(Action.RELEASE)
     _multipurpose_map = multipurpose_remappings
 
+
 def define_conditional_multipurpose_modmap(condition, multipurpose_remappings):
     """Defines conditional multipurpose modmap (multi-key translation)
 
@@ -270,6 +276,7 @@ def define_conditional_multipurpose_modmap(condition, multipurpose_remappings):
     for _, value in multipurpose_remappings.items():
         value.append(Action.RELEASE)
     _conditional_multipurpose_map.append((condition, multipurpose_remappings))
+
 
 def multipurpose_handler(multipurpose_map, device_name, key, action):
 
@@ -311,6 +318,7 @@ def multipurpose_handler(multipurpose_map, device_name, key, action):
     # we want to register all key-presses
     if action == Action.PRESS:
         _last_key = key
+
 
 def on_event(event, device_name, quiet):
     key = Key(event.code)
