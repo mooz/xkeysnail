@@ -8,7 +8,7 @@ from xkeysnail import CONFIG
 
 
 logging.basicConfig(
-    filemode='w',
+    filemode='a',
     filename=join(CONFIG, "xkeysnail.log"),
     level=logging.DEBUG,
     format="%(asctime)s | %(message)s"
