@@ -33,11 +33,12 @@ class XkeySnail(object):
         super().__init__()
         signal.signal(signal.SIGTERM, self.receiveSignal)
         signal.signal(signal.SIGINT, self.receiveSignal)
+        self.pid = self.current_pid()
+        self.lockfile_path = join(CONFIG, 'lockfile')
+
         if KILL:
             self.kill_xkeysnail(self.lockfile_pid(), signal.SIGTERM)
 
-        self.pid = self.current_pid()
-        self.fastupdatelock = 0
         if exists(CONFIG):
             self.configfile = join(CONFIG, 'config.py')
             if not exists(self.configfile):
@@ -51,7 +52,7 @@ class XkeySnail(object):
         self.check_another_instance()
         self.create_lockfile_on_startup()
         self.eval_config()
-        self.log_msg_logo_on_startup()
+        self.print_logo_on_startup()
         self.check_if_uinput_device_exists()
         self.check_if_access_to_uinput()
         self.start_xkeysnail_loop()
@@ -74,15 +75,14 @@ class XkeySnail(object):
 
     def lockfile(self):
         """Method to check if lockfile exist."""
-        lockfile = join(CONFIG, 'lockfile')
-        if exists(lockfile):
-            return lockfile
+        if exists(self.lockfile_path):
+            return True
 
     def check_another_instance(self):
         """Method to check other xkeysnail instance."""
         if self.lockfile():
-            print('Another instance of keysnail is running, exiting.')
-            sys.exit(0)
+            if self.check_pid_in_procs_list():
+                sys.exit(0)
 
     def check_pid_in_procs_list(self):
         """Check existence of current pid in process list."""
@@ -94,26 +94,27 @@ class XkeySnail(object):
     def lockfile_pid(self):
         """Method to get pid stored in lockfile."""
         try:
-            with open(self.lockfile(), 'r') as lk:
+            with open(self.lockfile_path, 'r') as lk:
                 try:
                     return int(lk.read())
                 finally:
                     lk.close()
-        except (FileNotFoundError, TypeError):
-            pass
+        except (FileNotFoundError, TypeError) as GetLockPidError:
+            log_msg('INFO -> lockfile_pid: %s' % GetLockPidError)
 
     def create_lockfile_on_startup(self):
         """Method to create lockfile on startup."""
         try:
-            with open(self.lockfile(), 'w+') as lockfile:
+            with open(self.lockfile_path, 'w+') as lockfile:
                 try:
                     lockfile.write(str(self.pid))
                 finally:
                     lockfile.close()
-        except (FileNotFoundError, TypeError):
-            pass
+        except (FileNotFoundError, TypeError) as CreateLockFileError:
+            log_msg('INFO -> create_lockfile_on_startup: %s' %
+                    CreateLockFileError)
 
-    @ staticmethod
+    @staticmethod
     def current_pid():
         """Staticmethod to return current pid."""
         return getpid()
@@ -164,5 +165,5 @@ class XkeySnail(object):
             pass
         finally:
             if self.lockfile():
-                os.remove(self.lockfile())
+                os.remove(self.lockfile_path)
         sys.exit(0)
