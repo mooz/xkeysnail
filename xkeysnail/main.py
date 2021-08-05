@@ -19,13 +19,12 @@ from xkeysnail import CONFIG
 
 from xkeysnail.input import loop
 from xkeysnail.log import log_msg
-from xkeysnail.log import wrap_logger
-from .info import __logo__
-from .info import __name__
-from .info import __version__
+
+from xkeysnail.info import __logo__
+from xkeysnail.info import __name__
+from xkeysnail.info import __version__
 
 
-@wrap_logger
 class XkeySnail(object):
     """Class to control startup fo Xkeysnail."""
 
