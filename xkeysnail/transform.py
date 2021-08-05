@@ -2,56 +2,63 @@
 
 """Package with methos to transforme key combos."""
 
-import re
 import itertools
+
 from time import time
-from shutil import which
-from subprocess import Popen
 from inspect import signature
+
 from xkeysnail.log import wrap_logger
+from xkeysnail.xlib_info import get_wmclass
 
-from .key import Action, Combo, Key, Modifier
-from .output import send_combo, send_key_action, send_key, is_pressed
-
-
-__author__ = 'zh'
-
-# ============================================================ #
-
-import Xlib.display
-
-
-def get_active_window_wm_class(display=Xlib.display.Display()):
-    """Get active window's WM_CLASS."""
-    current_window = display.get_input_focus().focus
-    pair = get_class_name(current_window)
-    if pair:
-        # (process name, class name)
-        return str(pair[1])
-    else:
-        return ""
-
-
-def get_class_name(window):
-    """Get window's class name (recursively checks parents)."""
-    try:
-        wmname = window.get_wm_name()
-        wmclass = window.get_wm_class()
-        # workaround for Java app
-        # https://github.com/JetBrains/jdk8u_jdk/blob/master/src/solaris/classes/sun/awt/X11/XFocusProxyWindow.java#L35
-        if (wmclass is None and wmname is None) or "FocusProxy" in wmclass:
-            parent_window = window.query_tree().parent
-            if parent_window:
-                return get_class_name(parent_window)
-            return None
-        return wmclass
-    except:
-        return None
-
-# ============================================================ #
-
+from xkeysnail.key import Action, Combo, Key, Modifier
+from xkeysnail.output import is_pressed, send_combo, send_key, send_key_action
 
 _pressed_modifier_keys = set()
+
+
+# ============================================================ #
+
+_pressed_keys = set()
+
+# ============================================================ #
+# Mark
+# ============================================================ #
+
+_mark_set = False
+
+# ============================================================
+# Keymap
+# ============================================================
+
+_toplevel_keymaps = []
+_mode_maps = None
+
+escape_next_key = {}
+pass_through_key = {}
+
+device_in_config = list()
+
+# ============================================================
+# Key handler
+# ============================================================
+
+# keycode translation
+# e.g., { Key.CAPSLOCK: Key.LEFT_CTRL }
+_mod_map = None
+_conditional_mod_map = []
+
+# multipurpose keys
+# e.g, {Key.LEFT_CTRL: [Key.ESC, Key.LEFT_CTRL, Action.RELEASE]}
+_multipurpose_map = None
+_conditional_multipurpose_map = []
+
+# last key that sent a PRESS event or a non-mod or non-multi key that sent a RELEASE
+# or REPEAT
+_last_key = None
+
+# last key time record time when execute multi press
+_last_key_time = time()
+_timeout = 1
 
 
 def update_pressed_modifier_keys(key, action):
@@ -67,11 +74,6 @@ def get_pressed_modifiers():
     return {Modifier.from_key(key) for key in _pressed_modifier_keys}
 
 
-# ============================================================ #
-
-
-_pressed_keys = set()
-
 def update_pressed_keys(key, action):
     """Update pressed keys."""
     if action.is_pressed():
@@ -79,12 +81,6 @@ def update_pressed_keys(key, action):
     else:
         _pressed_keys.discard(key)
 
-
-# ============================================================ #
-# Mark
-# ============================================================ #
-
-_mark_set = False
 
 def with_mark(combo):
     if isinstance(combo, Key):
@@ -95,11 +91,13 @@ def with_mark(combo):
 
     return _with_mark
 
+
 def set_mark(mark_set):
     def _set_mark():
         global _mark_set
         _mark_set = mark_set
     return _set_mark
+
 
 def with_or_set_mark(combo):
     if isinstance(combo, Key):
@@ -112,64 +110,6 @@ def with_or_set_mark(combo):
 
     return _with_or_set_mark
 
-
-# ============================================================ #
-# Utility functions for keymap
-# ============================================================ #
-def launch(command, multplier=None):
-    """Method to launch command in config."""
-
-    if multplier:
-        command = ([command] * multplier)
-
-    def notinpath(args):
-        """Check existence of command in $PATH"""
-        if not any(which(k) for k in args):
-            print()
-            print("Commands not found in $PATH, enter the absolute path.")
-            print()
-            return
-        Popen(args, start_new_session=True)
-
-    def launcher():
-        """Launch command."""
-        if multplier:
-            for cmd_block in command:
-                args = cmd_block if len(
-                    cmd_block) > 1 else cmd_block[0].split(' ')
-                notinpath(args)
-        else:
-            args = command if len(command) > 1 else command[0].split(' ')
-            notinpath(args)
-
-    if multplier:
-        return launcher, 'command(%s, x%s)' % (command[0], multplier)
-    else:
-        return launcher, 'command(%s)' % command
-
-def sleep(sec):
-    """Sleep sec in commands."""
-    def sleeper():
-        import time
-        time.sleep(sec)
-    return sleeper, 'sleep(%s)' % sec
-
-# ============================================================ #
-
-def K(exp):
-    """Helper function to specify keymap."""
-    modifier_strs = []
-    while True:
-        m = re.match(
-            r"\A(LC|LCtrl|RC|RCtrl|C|Ctrl|LM|LAlt|RM|RAlt|M|Alt|LShift|RShift|Shift|LSuper|LWin|RSuper|RWin|Super|Win)-", exp)
-        if m is None:
-            break
-        modifier = m.group(1)
-        modifier_strs.append(modifier)
-        exp = re.sub(r"\A{}-".format(modifier), "", exp)
-    key_str = exp.upper()
-    key = getattr(Key, key_str)
-    return Combo(create_modifiers_from_strings(modifier_strs), key)
 
 def create_modifiers_from_strings(modifier_strs):
     """Method to create modifiers from string."""
@@ -204,18 +144,6 @@ def create_modifiers_from_strings(modifier_strs):
             modifiers.add(Modifier.SHIFT)
     return modifiers
 
-# ============================================================
-# Keymap
-# ============================================================
-
-
-_toplevel_keymaps = []
-_mode_maps = None
-
-escape_next_key = {}
-pass_through_key = {}
-
-device_in_config = list()
 
 def define_keymap(event_device_name, condition, mappings, name="Anonymous keymap"):
     """Method to expand config setup."""
@@ -278,32 +206,11 @@ def define_keymap(event_device_name, condition, mappings, name="Anonymous keymap
     return mappings
 
 
-# ============================================================
-# Key handler
-# ============================================================
-
-# keycode translation
-# e.g., { Key.CAPSLOCK: Key.LEFT_CTRL }
-_mod_map = None
-_conditional_mod_map = []
-
-# multipurpose keys
-# e.g, {Key.LEFT_CTRL: [Key.ESC, Key.LEFT_CTRL, Action.RELEASE]}
-_multipurpose_map = None
-_conditional_multipurpose_map = []
-
-# last key that sent a PRESS event or a non-mod or non-multi key that sent a RELEASE
-# or REPEAT
-_last_key = None
-
-# last key time record time when execute multi press
-_last_key_time = time()
-_timeout = 1
-
 def define_timeout(seconds=1):
     """Defines timeout."""
     global _timeout
     _timeout = seconds
+
 
 def define_modmap(mod_remappings):
     """Defines modmap (keycode translation)
@@ -316,6 +223,7 @@ def define_modmap(mod_remappings):
     """
     global _mod_map
     _mod_map = mod_remappings
+
 
 def define_conditional_modmap(condition, mod_remappings):
     """Defines conditional modmap (keycode translation)
@@ -331,6 +239,7 @@ def define_conditional_modmap(condition, mod_remappings):
     if not callable(condition):
         raise ValueError('condition must be a function or compiled regexp')
     _conditional_mod_map.append((condition, mod_remappings))
+
 
 def define_multipurpose_modmap(multipurpose_remappings):
     """Defines multipurpose modmap (multi-key translations)
@@ -350,6 +259,7 @@ def define_multipurpose_modmap(multipurpose_remappings):
         value.append(Action.RELEASE)
     _multipurpose_map = multipurpose_remappings
 
+
 def define_conditional_multipurpose_modmap(condition, multipurpose_remappings):
     """Defines conditional multipurpose modmap (multi-key translation)
 
@@ -366,6 +276,7 @@ def define_conditional_multipurpose_modmap(condition, multipurpose_remappings):
     for _, value in multipurpose_remappings.items():
         value.append(Action.RELEASE)
     _conditional_multipurpose_map.append((condition, multipurpose_remappings))
+
 
 def multipurpose_handler(multipurpose_map, device_name, key, action):
 
@@ -408,14 +319,14 @@ def multipurpose_handler(multipurpose_map, device_name, key, action):
     if action == Action.PRESS:
         _last_key = key
 
+
 def on_event(event, device_name, quiet):
     key = Key(event.code)
     action = Action(event.value)
-    wm_class = None
+    wm_class = get_wmclass()
     # translate keycode (like xmodmap)
     active_mod_map = _mod_map
     if _conditional_mod_map:
-        wm_class = get_active_window_wm_class()
         for condition, mod_map in _conditional_mod_map:
             params = [wm_class]
             if len(signature(condition).parameters) == 2:
@@ -429,7 +340,6 @@ def on_event(event, device_name, quiet):
 
     active_multipurpose_map = _multipurpose_map
     if _conditional_multipurpose_map:
-        wm_class = get_active_window_wm_class()
         for condition, mod_map in _conditional_multipurpose_map:
             params = [wm_class]
             if len(signature(condition).parameters) == 2:
@@ -461,7 +371,7 @@ def on_key(device_name, key, action, wm_class=None, quiet=False):
 def transform_key(device_name, key, action, wm_class=None, quiet=False):
     global _mode_maps
     global _toplevel_keymaps
-    combo = Combo(get_pressed_modifiers(), key)
+    keymap_combo = combo = Combo(get_pressed_modifiers(), key)
 
     if _mode_maps is escape_next_key:
         print("Escape key: {}".format(combo))
@@ -469,25 +379,21 @@ def transform_key(device_name, key, action, wm_class=None, quiet=False):
         _mode_maps = None
         return
 
-    def convertcombo(combos):
-        command_list = list()
-        if isinstance(combos, list):
-            for x in combos:
-                if isinstance(x, tuple):
-                    command_list.append(x[1])
-                else:
-                    command_list.append(x)
-            return '[%s]' % ', '.join([str(x) for x in command_list])
-        else:
-            return combos
+    def get_keymap_combo(mappings, combo):
+        for key in mappings:
+            if key == combo:
+                _combo = mappings[key]
+                try:
+                    _combo = ', '.join([t[1] for t in _combo])
+                except TypeError:
+                    _combo = _combo
+                return _combo
 
     is_top_level = False
     if _mode_maps is None:
         # Decide keymap(s)
         is_top_level = True
         _mode_maps = []
-        if wm_class is None:
-            wm_class = get_active_window_wm_class()
         keymap_names = []
         for event_device_name, condition, mappings, name in _toplevel_keymaps:
             if (callable(condition) and condition(wm_class)) \
@@ -496,19 +402,16 @@ def transform_key(device_name, key, action, wm_class=None, quiet=False):
                 if event_device_name == device_name:
                     _mode_maps.append(mappings)
                     keymap_names.append(name)
+                    keymap_combo = get_keymap_combo(mappings, combo)
         if not quiet:
-            print("\nDevice: {}\nWM_CLASS '{}' | active keymaps = [{}] | %s => %s".format(
-                device_name,
-                wm_class,
-                ", ".join(keymap_names
-                          )
-            ) % (
-                combo,
-                convertcombo(
-                    mappings[combo]
-                ) if combo in mappings else combo
+            keymap_combo = keymap_combo if keymap_combo else "Key not configured for wm_class/profile."
+            STR_DEVICE = "Device: %s\n" % device_name
+            STR_WMCLASS = "WM_CLASS => '%s'" % wm_class
+            STR_KEYMAP = "active keymaps => [%s]" % ", ".join(keymap_names)
+            STR_COMBO = "%s => %s" % (combo, keymap_combo)
+            print(STR_DEVICE, ' | '.join(
+                [STR_WMCLASS, STR_KEYMAP, STR_COMBO]
             ), end="\r\n")
-
     # _mode_maps: [global_map, local_1, local_2, ...]
     for mappings in _mode_maps:
         if combo not in mappings:

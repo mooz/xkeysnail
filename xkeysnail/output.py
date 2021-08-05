@@ -4,9 +4,6 @@ from evdev import ecodes
 from evdev.uinput import UInput
 from .key import Action, Combo, Modifier
 
-__author__ = 'zh'
-
-
 # Remove all buttons so udev doesn't think xkeysnail is a joystick
 _keyboard_codes = ecodes.keys.keys() - ecodes.BTN  # pylint: disable=no-member
 
@@ -34,6 +31,7 @@ _uinput = UInput(events={ecodes.EV_KEY: _keyboard_codes,  # pylint: disable=no-m
 _pressed_modifier_keys = set()
 _pressed_keys = set()
 
+
 def update_modifier_key_pressed(key, action):
     if key in Modifier.get_all_keys():
         if action.is_pressed():
@@ -41,14 +39,17 @@ def update_modifier_key_pressed(key, action):
         else:
             _pressed_modifier_keys.discard(key)
 
+
 def update_pressed_keys(key, action):
     if action.is_pressed():
         _pressed_keys.add(key)
     else:
         _pressed_keys.discard(key)
 
+
 def is_pressed(key):
     return key in _pressed_keys
+
 
 def send_sync():
     _uinput.syn()

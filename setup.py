@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 from setuptools import setup
 
 __doc__ = None
@@ -29,3 +30,8 @@ setup(
         "psutil"
     ],
 )
+print()
+print()
+print('Running "xhost +SI:localuser:root" command to avoid Xlib.error.DisplayConnectionError.')
+print()
+os.system('xhost +SI:localuser:root')
