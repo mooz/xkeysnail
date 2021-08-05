@@ -42,11 +42,11 @@ class XkeySnail(object):
         if exists(CONFIG):
             self.configfile = join(CONFIG, 'config.py')
             if not exists(self.configfile):
-                print('Not founded config.py in path: %s' % self.configfile)
+                log_msg('Not founded config.py in path: %s' % self.configfile)
                 sys.exit(0)
 
         if not DEVICE and not WATCH:
-            print('Use --watch or --devices, more info with: xkeysnail --help.')
+            log_msg('Use --watch or --devices, more info with: xkeysnail --help.')
             sys.exit(0)
 
         self.check_another_instance()
@@ -82,7 +82,10 @@ class XkeySnail(object):
         """Method to check other xkeysnail instance."""
         if self.lockfile():
             if self.check_pid_in_procs_list():
+                log_msg('Another instance of keysnail is running, exiting.')
                 sys.exit(0)
+        log_msg("No other instance detected.")
+        log_msg('XkeySnail start with PID: %s' % self.pid)
 
     def check_pid_in_procs_list(self):
         """Check existence of current pid in process list."""
@@ -108,6 +111,7 @@ class XkeySnail(object):
             with open(self.lockfile_path, 'w+') as lockfile:
                 try:
                     lockfile.write(str(self.pid))
+                    log_msg('Lockfile created with PID: %s' % self.pid)
                 finally:
                     lockfile.close()
         except (FileNotFoundError, TypeError) as CreateLockFileError:
@@ -119,9 +123,9 @@ class XkeySnail(object):
         """Staticmethod to return current pid."""
         return getpid()
 
-    @ staticmethod
-    def log_msg_logo_on_startup():
-        """Staticmethod to log_msg startup msg."""
+    @staticmethod
+    def print_logo_on_startup():
+        """Staticmethod to print startup msg."""
         print("")
         print(__logo__.strip())
         print("                             v{}".format(__version__))
@@ -131,8 +135,8 @@ class XkeySnail(object):
     def check_if_uinput_device_exists():
         """Staticmethod to check for /dev/uinput existence."""
         if not exists('/dev/uinput'):
-            print('The "/dev/uinput" device does not exist.')
-            print('Please check your kernel configuration.')
+            log_msg('The "/dev/uinput" device does not exist.')
+            log_msg('Please check your kernel configuration.')
             sys.exit(1)
         return True
 
@@ -144,21 +148,21 @@ class XkeySnail(object):
             from xkeysnail.output import _uinput  # noqa: F401
             return True
         except UInputError:
-            print('Failed to open `uinput` in write mode.')
+            log_msg('Failed to open `uinput` in write mode.')
             if os.getuid() != 0:
-                print('Make sure that you have executed xkeysnail with root privileges.')
-                print('Such as: sudo xkeysnail -c config.py')
+                log_msg('Make sure that you have executed xkeysnail with root privileges.')
+                log_msg('Such as: sudo xkeysnail -c config.py')
             sys.exit(1)
 
     def kill_xkeysnail(self, pid=None, sigtype=None):
         """Method with actions to be performed during finalization."""
         try:
             os.kill(pid, sigtype)
-            print('Process PID %s, finalized by user.' % pid)
+            log_msg('Process PID %s, finalized by user.' % pid)
         except (ProcessLookupError, TypeError):
-            print('PID process not found, xkeysnail is probably not running!')
+            log_msg('PID process not found, xkeysnail is probably not running!')
         except PermissionError:
-            print(
+            log_msg(
                 'Xkeysnail: AccessDenied, try again with --> "sudo xkeysnail -k"')
             sys.exit(1)
         except RecursionError:
