@@ -34,6 +34,7 @@ class XkeySnail(object):
         signal.signal(signal.SIGTERM, self.receiveSignal)
         signal.signal(signal.SIGINT, self.receiveSignal)
         self.pid = self.current_pid()
+
         self.lockfile_path = join(CONFIG, 'lockfile')
 
         if KILL:
