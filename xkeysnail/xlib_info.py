@@ -10,10 +10,10 @@ from xkeysnail.log import log_msg
 
 def get_window_info(window):
     """Get window's info (recursively checks parents)."""
-    wmname = window.get_wm_name()
     try:
+        wmname = window.get_wm_name()
         wmclass = window.get_wm_class()[1]  # (process name, class name)
-    except TypeError:
+    except (TypeError, AttributeError):
         wmclass = window.get_wm_class()
         pass
     # workaround for Java app
