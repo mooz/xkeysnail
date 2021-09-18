@@ -396,9 +396,9 @@ def transform_key(device_name, key, action, wm_class=None, quiet=False):
         _mode_maps = []
         keymap_names = []
         for event_device_name, condition, mappings, name in _toplevel_keymaps:
-            if (callable(condition) and condition(wm_class)) \
-               or (hasattr(condition, "search") and condition.search(wm_class)) \
-               or condition is None:
+            if (callable(condition) and condition(wm_class)) or \
+                (hasattr(condition, "search") and condition.search(wm_class)) or \
+                    condition is None:
                 if event_device_name == device_name:
                     _mode_maps.append(mappings)
                     keymap_names.append(name)
