@@ -12,11 +12,11 @@ def get_window_info(window):
     """Get window's info (recursively checks parents)."""
     try:
         try:
-            wmname = window.get_wm_name()
+            wmname = window.get_wm_name().lower()
             # (process name, class name)
-            wmclass = window.get_wm_class()[1]
+            wmclass = window.get_wm_class()[1].lower()
         except TypeError:
-            wmclass = window.get_wm_class()
+            wmclass = window.get_wm_class().lower()
             pass
         # workaround for Java app
         # https://github.com/JetBrains/jdk8u_jdk/blob/master/src/solaris/classes/sun/awt/X11/XFocusProxyWindow.java#L35
