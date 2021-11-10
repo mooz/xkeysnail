@@ -1,27 +1,38 @@
 # -*- coding: utf-8 -*-
 
+"""
+    Input module.
+"""
+
 import sys
 
-from evdev import ecodes
 from select import select
+
+from evdev import ecodes
 from evdev import InputDevice
 from evdev import list_devices
 
+from inotify_simple import flags
+from inotify_simple import INotify
+
 from .key import Key
 from .output import send_event
-from .transform import on_event, device_in_config
 
-start_flag = None
+from .transform import on_event
+from .transform import device_in_config
+
+START_FLAG = None
 
 
 def get_devices_list():
-    return [InputDevice(device_fn) for device_fn in reversed(list_devices())]
+    """Get list of InputDevices."""
+    return [InputDevice(device_fn_info) for device_fn_info in reversed(list_devices())]
 
 
 def is_keyboard_device(device):
     """Guess the device is a keyboard or not"""
     capabilities = device.capabilities(verbose=False)
-    _KEYS = [
+    _keys = [
         Key.SPACE,
         Key.ENTER,
         Key.KEY_0,
@@ -38,7 +49,7 @@ def is_keyboard_device(device):
         return False
     supported_keys = capabilities[1]
 
-    if not any(k in supported_keys for k in _KEYS):
+    if not any(k in supported_keys for k in _keys):
         # Not support common keys. Not keyboard.
         return False
     if Key.BTN_MOUSE in supported_keys:
@@ -49,6 +60,7 @@ def is_keyboard_device(device):
 
 
 def print_device_list(devices):
+    """Print a list of devices."""
     device_format = '{1.fn:<20} {1.phys:<35} {1.name}'
     try:
         device_lines = [device_format.format(
@@ -65,20 +77,24 @@ def print_device_list(devices):
 
 
 def get_devices_from_paths(device_paths):
-    return [InputDevice(device_fn) for device_fn in device_paths]
+    """Get devices with paths."""
+    return [InputDevice(device_fn_info) for device_fn_info in device_paths]
 
 
 def is_device_name_in_config(device):
+    """Check if device is in config file."""
     return any(k == device.name for k in device_in_config)
 
 
 class DeviceFilter(object):
+    """Filter InputDevices."""
     def __init__(self, matches, device_watch):
         self.matches = matches
         self.watch = device_watch
 
     def __call__(self, device):
-        # Match by device path or name, if no keyboard devices specified, picks up keyboard-ish devices.
+        # Match by device path or name, if no keyboard devices specified,
+        # picks up keyboard-ish devices.
         if self.watch:
             if is_device_name_in_config(device):
                 return True
@@ -86,7 +102,8 @@ class DeviceFilter(object):
             try:
                 check_device = InputDevice(self.matches[0])
                 if check_device.name == "py-evdev-uinput":
-                    # Exclude evdev device, we use for output emulation, from input monitoring list
+                    # Exclude evdev device, we use for output emulation,
+                    # from input monitoring list
                     print('The device:')
                     print(' PATH: %s' % check_device.fn)
                     print(' NAME: %s' % check_device.name)
@@ -133,15 +150,17 @@ def select_device(device_matches=None, device_watch="global", interactive=True):
     return devices
 
 
-def in_device_list(fn, devices):
+def in_device_list(fn_info, devices):
+    """Check if device is in list."""
     for device in devices:
-        if device.fn == fn:
+        if device.fn == fn_info:
             return True
     return False
 
 
 def loop(device_matches, device_watch, quiet):
-    global start_flag
+    """The main loop."""
+    global START_FLAG
     devices = select_device(device_matches, device_watch, True)
     try:
         for device in devices:
@@ -152,8 +171,7 @@ def loop(device_matches, device_watch, quiet):
         sys.exit(1)
 
     if device_watch:
-        start_flag = True
-        from inotify_simple import INotify, flags
+        START_FLAG = True
         inotify = INotify()
         inotify.add_watch("/dev/input", flags.CREATE | flags.ATTRIB)
         print('\nWaiting for new devices with --watch/-w.')
@@ -167,11 +185,11 @@ def loop(device_matches, device_watch, quiet):
                 waitables = devices[:]
                 if device_watch:
                     waitables.append(inotify.fd)
-                r, _, _ = select(waitables, [], [])
-                for waitable in r:
+                r_waitable, _, _ = select(waitables, [], [])
+                for waitable in r_waitable:
                     if isinstance(waitable, InputDevice):
                         for event in waitable.read():
-                            if event.type == ecodes.EV_KEY:  # pylint: disable=no-member
+                            if event.type == ecodes.EV_KEY:  # pylint: disable=no-member, c-extension-no-member
                                 on_event(event, waitable.name, quiet)
                             else:
                                 send_event(event)
@@ -179,14 +197,14 @@ def loop(device_matches, device_watch, quiet):
                         new_devices = add_new_device(
                             devices, device_filter, inotify)
                         if new_devices:
-                            if start_flag is None:
+                            if START_FLAG is None:
                                 print('\nOkay, remapping founded device(s):\n')
                             print("\nDevice Added: %s\n" % devices[0].name)
             except OSError:
                 if isinstance(waitable, InputDevice):
                     remove_device(devices, waitable)
                     if not device_watch:
-                        if not len(devices):
+                        if not devices:
                             break
     finally:
         for device in devices:
@@ -199,6 +217,7 @@ def loop(device_matches, device_watch, quiet):
 
 
 def add_new_device(devices, device_filter, inotify):
+    """Add new devices."""
     new_devices = []
     for event in inotify.read():
         new_device = InputDevice("/dev/input/" + event.name)
@@ -215,6 +234,7 @@ def add_new_device(devices, device_filter, inotify):
 
 
 def remove_device(devices, device):
+    """Remove devices."""
     devices.remove(device)
     print("\nDevice removed: %s" % device.name)
     try:

@@ -1,31 +1,41 @@
 # -*- coding: utf-8 -*-
 
-"""Package with methods to control Xkeysnail startup."""
+"""
+    Package with methods to control Xkeysnail startup.
+"""
 
 import os
 import sys
-import psutil
-import signal
-from os import getpid
 
+import signal
+
+from os import getpid
 from os.path import join
 from os.path import exists
 
-from . import __logo__
-from . import __version__
+import psutil
+
+from evdev.uinput import UInputError
+
+
 from xkeysnail import KILL
 from xkeysnail import QUIET
 from xkeysnail import WATCH
 from xkeysnail import DEVICE
 from xkeysnail import CONFIG
 
+
 from xkeysnail.input import loop
 from xkeysnail.log import log_msg
 
-from xkeysnail.info import __logo__
-from xkeysnail.info import __name__
-from xkeysnail.info import __version__
+try:
+    from xkeysnail.output import _uinput
+    UI_IMPORT_ERROR = True
+except UInputError:
+    UI_IMPORT_ERROR = False
 
+from . import __logo__
+from . import __version__
 
 class XkeySnail(object):
     """Class to control startup fo Xkeysnail."""
@@ -33,8 +43,8 @@ class XkeySnail(object):
     def __init__(self) -> None:
         """__init__ xkeysnail class."""
         super().__init__()
-        signal.signal(signal.SIGTERM, self.receiveSignal)
-        signal.signal(signal.SIGINT, self.receiveSignal)
+        signal.signal(signal.SIGTERM, self.receive_signal)
+        signal.signal(signal.SIGINT, self.receive_signal)
         self.pid = self.current_pid()
 
         self.lockfile_path = join(CONFIG, 'lockfile')
@@ -60,9 +70,9 @@ class XkeySnail(object):
         self.check_if_access_to_uinput()
         self.start_xkeysnail_loop()
 
-    def receiveSignal(self, signalNumber, _):
+    def receive_signal(self, signaln_umber, _):
         """Signal handler to detect linux signals."""
-        self.kill_xkeysnail(self.pid, signalNumber)
+        self.kill_xkeysnail(self.pid, signaln_umber)
 
     def start_xkeysnail_loop(self):
         """Start xkeysnail loop."""
@@ -100,13 +110,13 @@ class XkeySnail(object):
     def lockfile_pid(self):
         """Method to get pid stored in lockfile."""
         try:
-            with open(self.lockfile_path, 'r') as lk:
+            with open(self.lockfile_path, 'r') as lockfile:
                 try:
-                    return int(lk.read())
+                    return int(lockfile.read())
                 finally:
-                    lk.close()
-        except (FileNotFoundError, TypeError) as GetLockPidError:
-            log_msg('INFO -> lockfile_pid: %s' % GetLockPidError)
+                    lockfile.close()
+        except (FileNotFoundError, TypeError) as getlockpiderror:
+            log_msg('INFO -> lockfile_pid: %s' % getlockpiderror)
 
     def create_lockfile_on_startup(self):
         """Method to create lockfile on startup."""
@@ -117,9 +127,9 @@ class XkeySnail(object):
                     log_msg('Lockfile created with PID: %s' % self.pid)
                 finally:
                     lockfile.close()
-        except (FileNotFoundError, TypeError) as CreateLockFileError:
+        except (FileNotFoundError, TypeError) as createlockfileerror:
             log_msg('INFO -> create_lockfile_on_startup: %s' %
-                    CreateLockFileError)
+                    createlockfileerror)
 
     @staticmethod
     def current_pid():
@@ -146,11 +156,9 @@ class XkeySnail(object):
     @ staticmethod
     def check_if_access_to_uinput():
         """Staticmethod to check if _uinput is accessible."""
-        from evdev.uinput import UInputError
-        try:
-            from xkeysnail.output import _uinput  # noqa: F401
+        if UI_IMPORT_ERROR:
             return True
-        except UInputError:
+        else:
             log_msg('Failed to open `uinput` in write mode.')
             if os.getuid() != 0:
                 log_msg('Make sure that you have executed xkeysnail with root privileges.')

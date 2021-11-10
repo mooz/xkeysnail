@@ -67,10 +67,10 @@ KILL = argments.kill
 def search_for_configdir(args_path, wait_time):
     """Method to search config diretory."""
     founded_msg = "\nConfig diretory founded: %s"
-    USERHOME = os.path.expanduser('~').replace(
+    userhome = os.path.expanduser('~').replace(
         '/root', '/home/%s' % os.environ.get('SUDO_USER'))
-    POSSIBLE_CONFIG_DIRS = [args_path] if args_path else [
-        join(USERHOME, _path) for _path in [
+    possible_config_dirs = [args_path] if args_path else [
+        join(userhome, _path) for _path in [
             '.xkeysnail/',
             '.config/xkeysnail/'
         ]
@@ -83,14 +83,14 @@ def search_for_configdir(args_path, wait_time):
     if wait_time > 1:
         print('\nStartup delay enable, wait for %s' % wait_time)
     for _ in range(wait_time):
-        for item in POSSIBLE_CONFIG_DIRS:
+        for item in possible_config_dirs:
             if os.path.exists(item):
                 print(founded_msg % item)
                 return item
         sleep(1)
     print('\nConfig directory not found:')
     print(' Create the "%s" directory and place the "config.py" file inside it.' %
-            ', '.join(POSSIBLE_CONFIG_DIRS))
+            ', '.join(possible_config_dirs))
     sys.exit(0)
 
 CONFIG = search_for_configdir(argments.config, BOOT)
