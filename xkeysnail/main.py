@@ -11,6 +11,8 @@ from os import getpid
 from os.path import join
 from os.path import exists
 
+from . import __logo__
+from . import __version__
 from xkeysnail import KILL
 from xkeysnail import QUIET
 from xkeysnail import WATCH
