@@ -13,7 +13,7 @@ exec(open("xkeysnail/info.py").read())
 setup(
     name=__name__,
     version=__version__,  # pylint: disable=undefined-variable
-    author="Masafumi Oyamada",
+    author=" | ".join(["Masafumi Oyamada", "Luiz Antonio Lazoti"]),
     url="https://github.com/mooz/xkeysnail",
     description=__description__,  # pylint: disable=undefined-variable
     long_description=__doc__,

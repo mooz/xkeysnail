@@ -17,7 +17,7 @@ logging.basicConfig(
 
 def log_msg(msg):
     """Function write messege to log file."""
-    logging.warning(msg)
+    logging.info(msg)
 
 
 def wrap_logger(func):
