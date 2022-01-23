@@ -39,46 +39,10 @@ The key remapping mechanism of `xkeysnail` is based on `pykeymacs`
 
 ## Installation
 
-Requires root privilege and **Python 3**.
-
-### Ubuntu
-
-    sudo apt install python3-pip
-    sudo pip3 install xkeysnail
-
-    # If you plan to compile from source
-    sudo apt install python3-dev
-
-### Fedora
-
-    sudo dnf install python3-pip
-    sudo pip3 install xkeysnail
-    # Add your user to input group if you don't want to run xkeysnail
-    # with sudo (log out and log in again to apply group change)
-    sudo usermod -a -G input $USER
-
-    # If you plan to compile from source
-    sudo dnf install python3-devel
-
-### Manjaro/Arch
-
-    # Some distros will need to compile evdev components
-    # and may fail to do so if gcc is not installed.
-    sudo pacman -Syy
-    sudo pacman -S gcc
-
-### Solus
-
-    # Some distros will need to compile evdev components
-    # and may fail to do so if gcc is not installed.
-    sudo eopkg install gcc
-    sudo eopkg install -c system.devel
-
-### From source
-
-    git clone --depth 1 https://github.com/mooz/xkeysnail.git
+    git clone https://github.com/mooz/xkeysnail.git
     cd xkeysnail
-    sudo pip3 install --upgrade .
+    sudo pip install -r ./requirements.txt
+    sudo pip install .
 
 ## Usage
 
