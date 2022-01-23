@@ -32,16 +32,8 @@ setup(
     packages=['xkeysnail'],
     scripts=['bin/xkeysnail'],
     license='GPL',
-    dependency_links=[
-        'https://github.com/luizoti/evdev/tarball/master#egg=evdev-1.4.1',
-    ],
-    install_requires=[
-        'evdev==1.4.1',
-        'python-xlib',
-        'inotify_simple',
-        'psutil'
-    ],
 )
+
 print()
 print()
 print('Running "xhost +SI:localuser:root" command to avoid Xlib.error.DisplayConnectionError.')
