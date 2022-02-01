@@ -31,6 +31,7 @@ Requires root privilege and **Python 3**.
 
 ### Fedora
 
+    sudo dnf install python3-devel
     sudo dnf install python3-pip
     sudo pip3 install xkeysnail
     # Add your user to input group if you don't want to run xkeysnail
