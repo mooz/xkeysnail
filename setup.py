@@ -6,7 +6,7 @@ from setuptools import setup
 
 
 __doc__ = """
-``xkeysnail`` is a keyboard remapping tool for X environment.
+``keyscrew`` is a keyboard remapping tool.
 It's like ``xmodmap`` but allows more flexible remappings.
 
 -  Has high-level and flexible remapping mechanisms, such as
@@ -23,14 +23,14 @@ It's like ``xmodmap`` but allows more flexible remappings.
 """
 
 setup(
-    name='xkeysnail',
+    name='keyscrew',
     version='0.4.81',
     author=' | '.join(['Masafumi Oyamada', 'Luiz Antonio Lazoti', 'zh']),
-    url='https://github.com/luizoti/xkeysnail',
-    description='Keyboard remapping tool for X environment.',
+    url='https://github.com/luizoti/keyscrew',
+    description='Keyboard remapping tool.',
     long_description=__doc__,
-    packages=['xkeysnail'],
-    scripts=['bin/xkeysnail'],
+    packages=['keyscrew'],
+    scripts=['bin/keyscrew'],
     license='GPL',
 )
 

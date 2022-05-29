@@ -3,9 +3,9 @@ import re
 from shutil import which
 from subprocess import Popen
 
-from xkeysnail.transform import Key
-from xkeysnail.transform import Combo
-from xkeysnail.transform import create_modifiers_from_strings
+from keyscrew.transform import Key
+from keyscrew.transform import Combo
+from keyscrew.transform import create_modifiers_from_strings
 
 # ============================================================ #
 # Utility functions for keymap

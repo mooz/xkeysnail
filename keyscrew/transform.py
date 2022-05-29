@@ -7,11 +7,11 @@ import itertools
 from time import time
 from inspect import signature
 
-from xkeysnail.log import wrap_logger
-from xkeysnail.xlib_info import get_wmclass
+from keyscrew.log import wrap_logger
+from keyscrew.xlib_info import get_wmclass
 
-from xkeysnail.key import Action, Combo, Key, Modifier
-from xkeysnail.output import is_pressed, send_combo, send_key, send_key_action
+from keyscrew.key import Action, Combo, Key, Modifier
+from keyscrew.output import is_pressed, send_combo, send_key, send_key_action
 
 _pressed_modifier_keys = set()
 

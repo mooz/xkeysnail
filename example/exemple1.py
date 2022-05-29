@@ -3,8 +3,8 @@
 
 import re
 
-from xkeysnail.utils import *
-from xkeysnail.transform import *
+from keyscrew.utils import *
+from keyscrew.transform import *
 
 WM_LIST = [
             'konsole',

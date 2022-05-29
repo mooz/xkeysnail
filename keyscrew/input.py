@@ -5,28 +5,26 @@
 """
 
 import sys
-
 from select import select
-
-from evdev import ecodes
-from evdev import InputDevice
-from evdev import list_devices
-
-from inotify_simple import flags
-from inotify_simple import INotify
+from evdev import ecodes, InputDevice, list_devices
+from inotify_simple import flags, INotify
 
 from .key import Key
-from .output import send_event
+
+from evdev.uinput import UInputError
+
+try:
+    from .output import send_event
+except UInputError:
+    pass
 
 from .transform import on_event
 from .transform import device_in_config
 
-START_FLAG = None
-
 
 def get_devices_list():
     """Get list of InputDevices."""
-    return [InputDevice(device_fn_info) for device_fn_info in reversed(list_devices())]
+    return list(map(InputDevice, reversed(list_devices())))
 
 
 def is_keyboard_device(device):
@@ -63,8 +61,10 @@ def print_device_list(devices):
     """Print a list of devices."""
     device_format = '{1.fn:<20} {1.phys:<35} {1.name}'
     try:
-        device_lines = [device_format.format(
-            n, d) for n, d in enumerate(devices)]
+        device_lines = [
+            device_format.format(n, d) for n, d in enumerate(devices)
+        ]
+
         print('-' * len(max(device_lines, key=len)))
         print('{:<20} {:<35} {}'.format('Device', 'Phys', 'Name'))
         print('-' * len(max(device_lines, key=len)))
@@ -78,7 +78,7 @@ def print_device_list(devices):
 
 def get_devices_from_paths(device_paths):
     """Get devices with paths."""
-    return [InputDevice(device_fn_info) for device_fn_info in device_paths]
+    return list(map(InputDevice, device_paths))
 
 
 def is_device_name_in_config(device):
@@ -104,15 +104,15 @@ class DeviceFilter(object):
                 if check_device.name == "py-evdev-uinput":
                     # Exclude evdev device, we use for output emulation,
                     # from input monitoring list
-                    print('The device:')
-                    print(' PATH: %s' % check_device.fn)
-                    print(' NAME: %s' % check_device.name)
-                    print(' Cannot be used as it is the Xkeysnail output device,')
-                    print(' provide the correct device!!')
+                    print("The device:")
+                    print(f" PATH: {check_device.fn}")
+                    print(f" NAME: {check_device.name}")
+                    print(" Cannot be used as it is the Xkeysnail output device,")
+                    print(" provide the correct device!!")
                     sys.exit(1)
             except FileNotFoundError:
-                print('Device not found!')
-                print(' PATH %s, not found!' % self.matches[0])
+                print("Device not found!")
+                print(f" PATH {self.matches[0]}, not found!")
                 sys.exit(1)
 
             for match in self.matches:
@@ -132,7 +132,7 @@ def select_device(device_matches=None, device_watch="global", interactive=True):
         print_device_list(devices=devices)
         if not device_matches:
             print('\nDevices declared in "config.py":')
-            print('\n'.join(['  DEVICE: %s' % x for x in device_in_config]))
+            print("\n".join(list(map(lambda x: f"  DEVICE: {x}", device_in_config))))
 
     devices = list(filter(DeviceFilter(device_matches, device_watch), devices))
     if interactive:
@@ -160,7 +160,6 @@ def in_device_list(fn_info, devices):
 
 def loop(device_matches, device_watch, quiet):
     """The main loop."""
-    global START_FLAG
     devices = select_device(device_matches, device_watch, True)
     try:
         for device in devices:
@@ -171,7 +170,6 @@ def loop(device_matches, device_watch, quiet):
         sys.exit(1)
 
     if device_watch:
-        START_FLAG = True
         inotify = INotify()
         inotify.add_watch("/dev/input", flags.CREATE | flags.ATTRIB)
         print('\nWaiting for new devices with --watch/-w.')
@@ -197,9 +195,7 @@ def loop(device_matches, device_watch, quiet):
                         new_devices = add_new_device(
                             devices, device_filter, inotify)
                         if new_devices:
-                            if START_FLAG is None:
-                                print('\nOkay, remapping founded device(s):\n')
-                            print("\nDevice Added: %s\n" % devices[0].name)
+                            print(f"\nDevice Added: {devices[0].name}\n")
             except OSError:
                 if isinstance(waitable, InputDevice):
                     remove_device(devices, waitable)

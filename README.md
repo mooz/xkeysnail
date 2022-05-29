@@ -1,6 +1,6 @@
-# xkeysnail
+# keyscrew
 
-In this repo i tryed to add more functions to the original [xkeysnail](https://github.com/mooz/xkeysnail):
+In this repo i tryed to add more functions to the original [keyscrew](https://github.com/mooz/keyscrew):
 
 What i added?
 
@@ -8,18 +8,17 @@ What i added?
 - Now any device can have its specific kemap configuration, connected with the item above, solving the problem of X configuration aftar Y device.
 - Update related to how keyboards are detected, now unconventional keyboards can be detected, such as: PS3 BD Remote.
 - Modifications to the --watch mechanism, devices will now be detected when they are added or removed.
-- Xkeysnail now searches different directories for the configuration file.
+- keyscrew now searches different directories for the configuration file.
 - ```launch()``` can multiply commands by executing several at once.
-- ```launch()``` will detach the command from xkeysnail.
-- Updates in how xkeysnail will detect multple instancies.
+- ```launch()``` will detach the command from keyscrew.
+- Updates in how keyscrew will detect multple instancies.
 - ```-K``` options to kill other instances, making booting via systemd more practical.
-- Bootup delay in secs to help xkeysnail if config is stored in other filesystem, and xkeysnail is started on boot by ```.service```.
+- Bootup delay in secs to help keyscrew if config is stored in other filesystem, and keyscrew is started on boot by ```.service```.
 - Other little changes.
 
-`xkeysnail` is a keyboard remapping tool for X environment written in Python. It's like
-`xmodmap` but allows more flexible remappings.
+`keyscrew` is a keyboard remapping tool written in Python. It's like `xmodmap` but allows more flexible remappings.
 
-![screenshot](http://mooz.github.io/image/xkeysnail_screenshot.png)
+![screenshot](http://mooz.github.io/image/keyscrew_screenshot.png)
 
 ## Pros
 
@@ -34,28 +33,28 @@ What i added?
 
 - Runs in root-mode (requires `sudo`)
 
-The key remapping mechanism of `xkeysnail` is based on `pykeymacs`
+The key remapping mechanism of `keyscrew` is based on `pykeymacs`
 (<https://github.com/DreaminginCodeZH/pykeymacs>).
 
 ## Installation
 
-    git clone https://github.com/mooz/xkeysnail.git
-    cd xkeysnail
+    git clone https://github.com/mooz/keyscrew.git
+    cd keyscrew
     sudo pip install -r ./requirements.txt
     sudo pip install .
 
 ## Usage
 
-    sudo xkeysnail config.py
+    sudo keyscrew config.py
 
 When you encounter the errors like `Xlib.error.DisplayConnectionError: Can't connect to display ":0.0": b'No protocol specified\n'`, try:
 
     xhost +SI:localuser:root
-    sudo xkeysnail -w/--devices /dev/input/event*
+    sudo keyscrew -w/--devices /dev/input/event*
 
 If you want to specify keyboard devices, use `--devices` option:
 
-    sudo xkeysnail config.py --devices /dev/input/event3 'Topre Corporation HHKB Professional'
+    sudo keyscrew config.py --devices /dev/input/event3 'Topre Corporation HHKB Professional'
 
 If you have hot-plugging keyboards, use `--watch` option.
 
@@ -65,7 +64,7 @@ If you want to suppress output of key events, use `-q` / `--quiet` option especi
 
 (**If you just need Emacs-like keybindings, consider to
 use
-[`example/config.py`](https://github.com/mooz/xkeysnail/blob/master/example/config.py),
+[`example/config.py`](https://github.com/mooz/keyscrew/blob/master/example/config.py),
 which contains Emacs-like keybindings)**.
 
 Configuration file is a Python script that consists of several keymaps defined
@@ -117,7 +116,7 @@ Key specification in a keymap is in a form of `K("(<Modifier>-)*<Key>")` where
 You can specify left/right modifiers by adding any one of prefixes `L`/`R`.
 
 And `<Key>` is a key whose name is defined
-in [`key.py`](https://github.com/mooz/xkeysnail/blob/master/xkeysnail/key.py).
+in [`key.py`](https://github.com/mooz/keyscrew/blob/master/keyscrew/key.py).
 
 Here is a list of key specification examples:
 
@@ -156,12 +155,12 @@ Use the second value (in this case `Firefox`) as the `WM_CLASS` value in your
 
 ### Example `config.py`
 
-See [`example/config.py`](https://github.com/mooz/xkeysnail/blob/master/example/config.py).
+See [`example/config.py`](https://github.com/mooz/keyscrew/blob/master/example/config.py).
 
 Here is an excerpt of `example/config.py`.
 
 ```python
-from xkeysnail.transform import *
+from keyscrew.transform import *
 
 define_keymap(re.compile("Firefox|Google-chrome"), {
     # Ctrl+Alt+j/k to switch next/previous tab
@@ -232,15 +231,15 @@ define_conditional_modmap(re.compile(termStr, re.IGNORECASE), {
 
 ## FAQ
 
-### How do I fix Firefox capturing Alt before xkeysnail?
+### How do I fix Firefox capturing Alt before keyscrew?
 
 In the Firefox location bar, go to `about:config`, search for `ui.key.menuAccessKeyFocuses`, and set the Value to `false`.
 
 ## License
 
-`xkeysnail` is distributed under GPL.
+`keyscrew` is distributed under GPL.
 
-    xkeysnail
+    keyscrew
     Copyright (C) 2018 Masafumi Oyamada
 
     This program is free software: you can redistribute it and/or modify
@@ -256,7 +255,7 @@ In the Firefox location bar, go to `about:config`, search for `ui.key.menuAccess
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-`xkeysnail` is based on `pykeymacs`
+`keyscrew` is based on `pykeymacs`
  (<https://github.com/DreaminginCodeZH/pykeymacs>), which is distributed under
  GPL.
 

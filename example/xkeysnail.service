@@ -1,5 +1,5 @@
 [Unit]
-Description=Xkeysnail startup service
+Description=Keyscrew startup service
 
 [Service]
 Type=simple
@@ -8,9 +8,9 @@ Group=root
 Environment=XAUTHORITY=/home/YOUR_USER/.Xauthority
 Environment=DISPLAY=:0
 Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
-ExecStart=sudo xkeysnail -w -q -b 10
-ExecReload=sudo xkeysnail -k && sudo xkeysnail -w -q -b 10
-ExecStop=sudo xkeysnail -k
+ExecStart=sudo keyscrew -w -q -b 10
+ExecReload=sudo keyscrew -k && sudo keyscrew -w -q -b 10
+ExecStop=sudo keyscrew -k
 
 [Install]
 WantedBy=graphical.target

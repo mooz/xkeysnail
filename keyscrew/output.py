@@ -4,25 +4,28 @@ from evdev import ecodes
 from evdev.uinput import UInput
 from .key import Action, Combo, Modifier
 
-# Remove all buttons so udev doesn't think xkeysnail is a joystick
+# Remove all buttons so udev doesn't think keyscrew is a joystick
 _keyboard_codes = ecodes.keys.keys() - ecodes.BTN  # pylint: disable=no-member
 
 # But we want mouse buttons, so let's enumerate those and add them
 # back into the set of buttons we'll watch and use
-mouse_btns = {256: ['BTN_0', 'BTN_MISC'],
-              257: 'BTN_1',
-              258: 'BTN_2',
-              259: 'BTN_3',
-              260: 'BTN_4',
-              261: 'BTN_5',
-              262: 'BTN_6',
-              263: 'BTN_7',
-              264: 'BTN_8',
-              265: 'BTN_9',
-              272: ['BTN_LEFT', 'BTN_MOUSE'],
-              274: 'BTN_MIDDLE',
-              273: 'BTN_RIGHT'}
-_keyboard_codes.update(mouse_btns)
+
+_keyboard_codes.update({
+    256: ['BTN_0', 'BTN_MISC'],
+    257: 'BTN_1',
+    258: 'BTN_2',
+    259: 'BTN_3',
+    260: 'BTN_4',
+    261: 'BTN_5',
+    262: 'BTN_6',
+    263: 'BTN_7',
+    264: 'BTN_8',
+    265: 'BTN_9',
+    272: ['BTN_LEFT', 'BTN_MOUSE'],
+    274: 'BTN_MIDDLE',
+    273: 'BTN_RIGHT'
+    }
+)
 
 _uinput = UInput(events={ecodes.EV_KEY: _keyboard_codes,  # pylint: disable=no-member
                          ecodes.EV_REL: set([0, 1, 6, 8, 9]),  # pylint: disable=no-member

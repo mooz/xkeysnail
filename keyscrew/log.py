@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-"""Xkeysnail log module."""
+"""keyscrew log module."""
 
 import logging
 from os.path import join
-from xkeysnail import CONFIG
+from keyscrew import CONFIG
 
 
 logging.basicConfig(
     filemode='a',
-    filename=join(CONFIG, "xkeysnail.log"),
+    filename=join(CONFIG, "keyscrew.log"),
     level=logging.DEBUG,
     format="%(asctime)s | %(message)s"
 )
