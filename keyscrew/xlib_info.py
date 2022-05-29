@@ -38,7 +38,6 @@ def get_display(time=30):
             time =- 1
         except ConnectionClosedError as connectionclosederror:
             log_msg(f"Xlib: {connectionclosederror}")
-            return Display()
     return None
 
 
