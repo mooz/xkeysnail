@@ -137,7 +137,7 @@ class KeyScrew():
         print(f"v{__version__}")
         print()
 
-    @ staticmethod
+    @staticmethod
     def check_if_uinput_device_exists():
         """Staticmethod to check for /dev/uinput existence."""
         if not exists("/dev/uinput"):
@@ -146,7 +146,7 @@ class KeyScrew():
             sys.exit(1)
         return True
 
-    @ staticmethod
+    @staticmethod
     def check_if_access_to_uinput():
         """Staticmethod to check if _uinput is accessible."""
         if _UINPUT:
