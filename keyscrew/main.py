@@ -4,21 +4,21 @@
 
 import os
 import sys
-
-import psutil
 import signal
 
 from os import getpid
-from os.path import join
-from os.path import exists
+from os.path import join, exists
 
+import psutil
 from evdev.uinput import UInputError
 
-from keyscrew import KILL
-from keyscrew import QUIET
-from keyscrew import WATCH
-from keyscrew import DEVICE
-from keyscrew import CONFIG
+from keyscrew import (
+    KILL,
+    QUIET,
+    WATCH,
+    DEVICE,
+    CONFIG
+)
 
 from keyscrew.input import loop
 from keyscrew.log import log_msg
