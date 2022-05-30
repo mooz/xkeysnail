@@ -8,10 +8,11 @@ from time import time
 from inspect import signature
 
 from keyscrew.log import wrap_logger
-from keyscrew.xlib_info import get_wmclass
-
+from keyscrew.xlib_info import wait_for_display
 from keyscrew.key import Action, Combo, Key, Modifier
 from keyscrew.output import is_pressed, send_combo, send_key, send_key_action
+print('TESTEETATATA')
+WINDOW = wait_for_display()
 
 _pressed_modifier_keys = set()
 
@@ -323,7 +324,7 @@ def multipurpose_handler(multipurpose_map, device_name, key, action):
 def on_event(event, device_name, quiet):
     key = Key(event.code)
     action = Action(event.value)
-    wm_class = get_wmclass()
+    wm_class = WINDOW.get_window_info()["wmclass"]
     # translate keycode (like xmodmap)
     active_mod_map = _mod_map
     if _conditional_mod_map:
