@@ -26,7 +26,6 @@ try:
     from keyscrew.output import _uinput as _UINPUT
 except UInputError:
     _UINPUT = False
-    sys.exit(0)
 
 from . import __logo__
 from . import __version__
