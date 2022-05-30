@@ -386,7 +386,7 @@ def transform_key(device_name, key, action, wm_class=None, quiet=False):
                 try:
                     _combo = ', '.join([t[1] for t in _combo])
                 except TypeError:
-                    _combo = _combo
+                    pass
                 return _combo
 
     is_top_level = False
