@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
-from xkeysnail.transform import *
+from keyscrew.transform import *
 
 # define timeout for multipurpose_modmap
 define_timeout(1)

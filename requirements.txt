@@ -1,0 +1,4 @@
+python-xlib
+inotify_simple
+psutil
+git+https://github.com/luizoti/evdev.git

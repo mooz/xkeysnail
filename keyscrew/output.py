@@ -4,35 +4,36 @@ from evdev import ecodes
 from evdev.uinput import UInput
 from .key import Action, Combo, Modifier
 
-__author__ = 'zh'
-
-
-# Remove all buttons so udev doesn't think xkeysnail is a joystick
-_keyboard_codes = ecodes.keys.keys() - ecodes.BTN
+# Remove all buttons so udev doesn't think keyscrew is a joystick
+_keyboard_codes = ecodes.keys.keys() - ecodes.BTN  # pylint: disable=no-member
 
 # But we want mouse buttons, so let's enumerate those and add them
 # back into the set of buttons we'll watch and use
-mouse_btns = {256: ['BTN_0', 'BTN_MISC'],
-              257: 'BTN_1',
-              258: 'BTN_2',
-              259: 'BTN_3',
-              260: 'BTN_4',
-              261: 'BTN_5',
-              262: 'BTN_6',
-              263: 'BTN_7',
-              264: 'BTN_8',
-              265: 'BTN_9',
-              272: ['BTN_LEFT', 'BTN_MOUSE'],
-              274: 'BTN_MIDDLE',
-              273: 'BTN_RIGHT'}
-_keyboard_codes.update(mouse_btns)
 
-_uinput = UInput(events={ecodes.EV_KEY: _keyboard_codes,
-                         ecodes.EV_REL: set([0,1,6,8,9]),
+_keyboard_codes.update({
+    256: ['BTN_0', 'BTN_MISC'],
+    257: 'BTN_1',
+    258: 'BTN_2',
+    259: 'BTN_3',
+    260: 'BTN_4',
+    261: 'BTN_5',
+    262: 'BTN_6',
+    263: 'BTN_7',
+    264: 'BTN_8',
+    265: 'BTN_9',
+    272: ['BTN_LEFT', 'BTN_MOUSE'],
+    274: 'BTN_MIDDLE',
+    273: 'BTN_RIGHT'
+    }
+)
+
+_uinput = UInput(events={ecodes.EV_KEY: _keyboard_codes,  # pylint: disable=no-member
+                         ecodes.EV_REL: set([0, 1, 6, 8, 9]),  # pylint: disable=no-member
                          })
 
 _pressed_modifier_keys = set()
 _pressed_keys = set()
+
 
 def update_modifier_key_pressed(key, action):
     if key in Modifier.get_all_keys():
@@ -41,14 +42,17 @@ def update_modifier_key_pressed(key, action):
         else:
             _pressed_modifier_keys.discard(key)
 
+
 def update_pressed_keys(key, action):
     if action.is_pressed():
         _pressed_keys.add(key)
     else:
         _pressed_keys.discard(key)
 
+
 def is_pressed(key):
     return key in _pressed_keys
+
 
 def send_sync():
     _uinput.syn()

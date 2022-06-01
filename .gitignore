@@ -1,2 +1,7 @@
-__pycache__/
 .pyc
+dist
+build
+.vscode
+__pycache__/
+*.code-workspace
+keyscrew.egg-info

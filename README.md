@@ -1,78 +1,60 @@
-# xkeysnail
+# keyscrew
 
-`xkeysnail` is yet another keyboard remapping tool for X environment written in Python. It's like
-`xmodmap` but allows more flexible remappings.
+In this repo i tryed to add more functions to the original [keyscrew](https://github.com/mooz/keyscrew):
 
-![screenshot](http://mooz.github.io/image/xkeysnail_screenshot.png)
+What i added?
 
-- **Pros**
-    - Has high-level and flexible remapping mechanisms, such as
-        - **per-application keybindings can be defined**
-        - **multiple stroke keybindings can be defined** such as `Ctrl+x Ctrl+c` to `Ctrl+q`
-        - **not only key remapping but arbitrary commands defined by Python can be bound to a key**
-    - Runs in low-level layer (`evdev` and `uinput`), making **remapping work in almost all the places**
-- **Cons**
-    - Runs in root-mode (requires `sudo`)
+- A device name argument explicit in ```define keymap``` to inform connecting X configuration to X or Y device.
+- Now any device can have its specific kemap configuration, connected with the item above, solving the problem of X configuration aftar Y device.
+- Update related to how keyboards are detected, now unconventional keyboards can be detected, such as: PS3 BD Remote.
+- Modifications to the --watch mechanism, devices will now be detected when they are added or removed.
+- keyscrew now searches different directories for the configuration file.
+- ```launch()``` can multiply commands by executing several at once.
+- ```launch()``` will detach the command from keyscrew.
+- Updates in how keyscrew will detect multple instancies.
+- ```-K``` options to kill other instances, making booting via systemd more practical.
+- Bootup delay in secs to help keyscrew if config is stored in other filesystem, and keyscrew is started on boot by ```.service```.
+- Other little changes.
 
-The key remapping mechanism of `xkeysnail` is based on `pykeymacs`
-(https://github.com/DreaminginCodeZH/pykeymacs).
+`keyscrew` is a keyboard remapping tool written in Python. It's like `xmodmap` but allows more flexible remappings.
+
+![screenshot](http://mooz.github.io/image/keyscrew_screenshot.png)
+
+## Pros
+
+- Has high-level and flexible remapping mechanisms
+- **per-application keybindings can be defined**
+- **per-device keybindings can be defined**
+- **multiple stroke keybindings can be defined** such as `Ctrl+x Ctrl+c` to `Ctrl+q`
+- **not only key remapping but arbitrary commands defined by Python can be bound to a key**
+- Runs in low-level layer (`evdev` and `uinput`), making **remapping work in almost all the places**
+
+## Cons
+
+- Runs in root-mode (requires `sudo`)
+
+The key remapping mechanism of `keyscrew` is based on `pykeymacs`
+(<https://github.com/DreaminginCodeZH/pykeymacs>).
 
 ## Installation
 
-Requires root privilege and **Python 3**.
-
-### Ubuntu
-
-    sudo apt install python3-pip
-    sudo pip3 install xkeysnail
-    
-    # If you plan to compile from source
-    sudo apt install python3-dev
-
-### Fedora
-
-    sudo dnf install python3-pip
-    sudo pip3 install xkeysnail
-    # Add your user to input group if you don't want to run xkeysnail
-    # with sudo (log out and log in again to apply group change)
-    sudo usermod -a -G input $USER
-    
-    # If you plan to compile from source
-    sudo dnf install python3-devel
-    
-### Manjaro/Arch
-
-    # Some distros will need to compile evdev components 
-    # and may fail to do so if gcc is not installed.
-    sudo pacman -Syy
-    sudo pacman -S gcc
-    
-### Solus
-
-    # Some distros will need to compile evdev components 
-    # and may fail to do so if gcc is not installed.
-    sudo eopkg install gcc
-    sudo eopkg install -c system.devel
-
-### From source
-
-    git clone --depth 1 https://github.com/mooz/xkeysnail.git
-    cd xkeysnail
-    sudo pip3 install --upgrade .
+    git clone https://github.com/mooz/keyscrew.git
+    cd keyscrew
+    sudo pip install -r ./requirements.txt
+    sudo pip install .
 
 ## Usage
 
-    sudo xkeysnail config.py
+    sudo keyscrew config.py
 
-When you encounter the errors like `Xlib.error.DisplayConnectionError: Can't connect to display ":0.0": b'No protocol specified\n'
-`, try
+When you encounter the errors like `Xlib.error.DisplayConnectionError: Can't connect to display ":0.0": b'No protocol specified\n'`, try:
 
     xhost +SI:localuser:root
-    sudo xkeysnail config.py
+    sudo keyscrew -w/--devices /dev/input/event*
 
 If you want to specify keyboard devices, use `--devices` option:
 
-    sudo xkeysnail config.py --devices /dev/input/event3 'Topre Corporation HHKB Professional'
+    sudo keyscrew config.py --devices /dev/input/event3 'Topre Corporation HHKB Professional'
 
 If you have hot-plugging keyboards, use `--watch` option.
 
@@ -82,7 +64,7 @@ If you want to suppress output of key events, use `-q` / `--quiet` option especi
 
 (**If you just need Emacs-like keybindings, consider to
 use
-[`example/config.py`](https://github.com/mooz/xkeysnail/blob/master/example/config.py),
+[`example/config.py`](https://github.com/mooz/keyscrew/blob/master/example/config.py),
 which contains Emacs-like keybindings)**.
 
 Configuration file is a Python script that consists of several keymaps defined
@@ -95,26 +77,28 @@ is satisfied.
 
 Argument `condition` specifies the condition of activating the `mappings` on an
 application and takes one of the following forms:
+
 - Regular expression (e.g., `re.compile("YYY")`)
-    - Activates the `mappings` if the pattern `YYY` matches the `WM_CLASS` of the application.
-    - Case Insensitivity matching against `WM_CLASS` via `re.IGNORECASE` (e.g. `re.compile('Gnome-terminal', re.IGNORECASE)`)
+  - Activates the `mappings` if the pattern `YYY` matches the `WM_CLASS` of the application.
+  - Case Insensitivity matching against `WM_CLASS` via `re.IGNORECASE` (e.g. `re.compile('Gnome-terminal', re.IGNORECASE)`)
 - `lambda wm_class: some_condition(wm_class)`
-    - Activates the `mappings` if the `WM_CLASS` of the application satisfies the condition specified by the `lambda` function.
-    - Case Insensitivity matching via `casefold()` or `lambda wm_class: wm_class.casefold()` (see example below to see how to compare to a list of names)
+  - Activates the `mappings` if the `WM_CLASS` of the application satisfies the condition specified by the `lambda` function.
+  - Case Insensitivity matching via `casefold()` or `lambda wm_class: wm_class.casefold()` (see example below to see how to compare to a list of names)
 - `None`: Refers to no condition. `None`-specified keymap will be a global keymap and is always enabled.
 
 Argument `mappings` is a dictionary in the form of `{key: command, key2:
 command2, ...}` where `key` and `command` take following forms:
+
 - `key`: Key to override specified by `K("YYY")`
-    - For the syntax of key specification, please refer to the [key specification section](#key-specification).
+  - For the syntax of key specification, please refer to the [key specification section](#key-specification).
 - `command`: one of the followings
-    - `K("YYY")`: Dispatch custom key to the application.
-    - `[command1, command2, ...]`: Execute commands sequentially.
-    - `{ ... }`: Sub-keymap. Used to define multiple stroke keybindings. See [multiple stroke keys](#multiple-stroke-keys) for details.
-    - `pass_through_key`: Pass through `key` to the application. Useful to override the global mappings behavior on certain applications.
-    - `escape_next_key`: Escape next key.
-    - Arbitrary function: The function is executed and the returned value is used as a command.
-        - Can be used to invoke UNIX commands.
+  - `K("YYY")`: Dispatch custom key to the application.
+  - `[command1, command2, ...]`: Execute commands sequentially.
+  - `{ ... }`: Sub-keymap. Used to define multiple stroke keybindings. See [multiple stroke keys](#multiple-stroke-keys) for details.
+  - `pass_through_key`: Pass through `key` to the application. Useful to override the global mappings behavior on certain applications.
+  - `escape_next_key`: Escape next key.
+  - Arbitrary function: The function is executed and the returned value is used as a command.
+    - Can be used to invoke UNIX commands.
 
 Argument `name` specifies the keymap name. This is an optional argument.
 
@@ -123,6 +107,7 @@ Argument `name` specifies the keymap name. This is an optional argument.
 Key specification in a keymap is in a form of `K("(<Modifier>-)*<Key>")` where
 
 `<Modifier>` is one of the followings
+
 - `C` or `Ctrl` -> Control key
 - `M` or `Alt` -> Alt key
 - `Shift` -> Shift key
@@ -131,7 +116,7 @@ Key specification in a keymap is in a form of `K("(<Modifier>-)*<Key>")` where
 You can specify left/right modifiers by adding any one of prefixes `L`/`R`.
 
 And `<Key>` is a key whose name is defined
-in [`key.py`](https://github.com/mooz/xkeysnail/blob/master/xkeysnail/key.py).
+in [`key.py`](https://github.com/mooz/keyscrew/blob/master/keyscrew/key.py).
 
 Here is a list of key specification examples:
 
@@ -170,12 +155,12 @@ Use the second value (in this case `Firefox`) as the `WM_CLASS` value in your
 
 ### Example `config.py`
 
-See [`example/config.py`](https://github.com/mooz/xkeysnail/blob/master/example/config.py).
+See [`example/config.py`](https://github.com/mooz/keyscrew/blob/master/example/config.py).
 
 Here is an excerpt of `example/config.py`.
 
 ```python
-from xkeysnail.transform import *
+from keyscrew.transform import *
 
 define_keymap(re.compile("Firefox|Google-chrome"), {
     # Ctrl+Alt+j/k to switch next/previous tab
@@ -215,7 +200,7 @@ define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
 
 ### Example of Case Insensitivity Matching
 
-```
+```python
 terminals = ["gnome-terminal","konsole","io.elementary.terminal","sakura"]
 terminals = [term.casefold() for term in terminals]
 termStr = "|".join(str(x) for x in terminals)
@@ -246,16 +231,15 @@ define_conditional_modmap(re.compile(termStr, re.IGNORECASE), {
 
 ## FAQ
 
-### How do I fix Firefox capturing Alt before xkeysnail?
+### How do I fix Firefox capturing Alt before keyscrew?
 
 In the Firefox location bar, go to `about:config`, search for `ui.key.menuAccessKeyFocuses`, and set the Value to `false`.
 
-
 ## License
 
-`xkeysnail` is distributed under GPL.
+`keyscrew` is distributed under GPL.
 
-    xkeysnail
+    keyscrew
     Copyright (C) 2018 Masafumi Oyamada
 
     This program is free software: you can redistribute it and/or modify
@@ -271,8 +255,8 @@ In the Firefox location bar, go to `about:config`, search for `ui.key.menuAccess
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-`xkeysnail` is based on `pykeymacs`
- (https://github.com/DreaminginCodeZH/pykeymacs), which is distributed under
+`keyscrew` is based on `pykeymacs`
+ (<https://github.com/DreaminginCodeZH/pykeymacs>), which is distributed under
  GPL.
 
     pykeymacs
