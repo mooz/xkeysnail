@@ -11,7 +11,7 @@ from keyscrew.log import wrap_logger
 from keyscrew.xlib_info import wait_for_display
 from keyscrew.key import Action, Combo, Key, Modifier
 from keyscrew.output import is_pressed, send_combo, send_key, send_key_action
-print('TESTEETATATA')
+
 WINDOW = wait_for_display()
 
 _pressed_modifier_keys = set()
