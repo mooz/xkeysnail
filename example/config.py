@@ -6,6 +6,89 @@ from xkeysnail.transform import *
 # define timeout for multipurpose_modmap
 define_timeout(1)
 
+# Define keyboard layout
+#define_layout(layout_name="Dvorak", keycode_to_scancode={
+#    # Dvorak_keycode(Keycode, also means keyname) : Key position on keyboard(Scancode named by qwerty layout)
+#    # Key.1 ~~ Key.9 are same as Qwerty
+#    Key.LEFT_BRACE  :Key.MINUS,
+#    Key.RIGHT_BRACE :Key.EQUAL,
+#    Key.APOSTROPHE  :Key.Q,
+#    Key.COMMA       :Key.W,
+#    Key.DOT         :Key.E,
+#    Key.P           :Key.R,
+#    Key.Y           :Key.T,
+#    Key.F           :Key.Y,
+#    Key.G           :Key.U,
+#    Key.C           :Key.I,
+#    Key.R           :Key.O,
+#    Key.L           :Key.P,
+#    Key.SLASH       :Key.LEFT_BRACE,
+#    Key.EQUAL       :Key.RIGHT_BRACE,
+#    Key.BACKSLASH   :Key.BACKSLASH,
+#    Key.A           :Key.A,
+#    Key.O           :Key.S,
+#    Key.E           :Key.D,
+#    Key.U           :Key.F,
+#    Key.I           :Key.G,
+#    Key.D           :Key.H,
+#    Key.H           :Key.J,
+#    Key.T           :Key.K,
+#    Key.N           :Key.L,
+#    Key.S           :Key.SEMICOLON,
+#    Key.MINUS       :Key.APOSTROPHE,
+#    Key.SEMICOLON   :Key.Z,
+#    Key.Q           :Key.X,
+#    Key.J           :Key.C,
+#    Key.K           :Key.V,
+#    Key.X           :Key.B,
+#    Key.B           :Key.N,
+#    Key.M           :Key.M,
+#    Key.W           :Key.COMMA,
+#    Key.V           :Key.DOT,
+#    Key.Z           :Key.SLASH,
+#})
+
+#define_layout(layout_name="Colemak", keycode_to_scancode={
+#    # Colemak_keycode(Keycode, also means keyname) : Key position on keyboard(Scancode named by qwerty layout)
+#    # Key.1 ~~ Key.9 are same as Qwerty
+#    Key.MINUS       :Key.MINUS,
+#    Key.EQUAL       :Key.EQUAL,
+#    Key.Q           :Key.Q,
+#    Key.W           :Key.W,
+#    Key.F           :Key.E,
+#    Key.P           :Key.R,
+#    Key.G           :Key.T,
+#    Key.J           :Key.Y,
+#    Key.L           :Key.U,
+#    Key.U           :Key.I,
+#    Key.Y           :Key.O,
+#    Key.SEMICOLON   :Key.P,
+#    Key.LEFT_BRACE  :Key.LEFT_BRACE,
+#    Key.RIGHT_BRACE :Key.RIGHT_BRACE,
+#    Key.BACKSLASH   :Key.BACKSLASH,
+#    Key.A           :Key.A,
+#    Key.R           :Key.S,
+#    Key.S           :Key.D,
+#    Key.T           :Key.F,
+#    Key.D           :Key.G,
+#    Key.H           :Key.H,
+#    Key.N           :Key.J,
+#    Key.E           :Key.K,
+#    Key.I           :Key.L,
+#    Key.O           :Key.SEMICOLON,
+#    Key.APOSTROPHE  :Key.APOSTROPHE,
+#    Key.Z           :Key.Z,
+#    Key.X           :Key.X,
+#    Key.C           :Key.C,
+#    Key.V           :Key.V,
+#    Key.B           :Key.B,
+#    Key.K           :Key.N,
+#    Key.M           :Key.M,
+#    Key.COMMA       :Key.COMMA,
+#    Key.DOT         :Key.DOT,
+#    Key.SLASH       :Key.SLASH,
+#})
+
 # [Global modemap] Change modifier keys as in xmodmap
 define_modmap({
     Key.CAPSLOCK: Key.LEFT_CTRL

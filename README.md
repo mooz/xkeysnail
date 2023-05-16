@@ -25,7 +25,7 @@ Requires root privilege and **Python 3**.
 
     sudo apt install python3-pip
     sudo pip3 install xkeysnail
-    
+
     # If you plan to compile from source
     sudo apt install python3-dev
 
@@ -36,20 +36,20 @@ Requires root privilege and **Python 3**.
     # Add your user to input group if you don't want to run xkeysnail
     # with sudo (log out and log in again to apply group change)
     sudo usermod -a -G input $USER
-    
+
     # If you plan to compile from source
     sudo dnf install python3-devel
-    
+
 ### Manjaro/Arch
 
-    # Some distros will need to compile evdev components 
+    # Some distros will need to compile evdev components
     # and may fail to do so if gcc is not installed.
     sudo pacman -Syy
     sudo pacman -S gcc
-    
+
 ### Solus
 
-    # Some distros will need to compile evdev components 
+    # Some distros will need to compile evdev components
     # and may fail to do so if gcc is not installed.
     sudo eopkg install gcc
     sudo eopkg install -c system.devel
@@ -167,6 +167,42 @@ and then click the application. `xprop` tells `WM_CLASS` of the application as f
 
 Use the second value (in this case `Firefox`) as the `WM_CLASS` value in your
 `config.py`.
+
+### For nonQwerty User (e.g. Dvorak, Colemak)
+
+`define_layout(layout_name=<layout_name>, keycode_to_scancode=<dict>)`
+
+See [`example/config.py`](https://github.com/mooz/xkeysnail/blob/master/example/config.py). If you use dvorak or Colemak layout, just uncomment the corresponding area in `config.py`
+
+#### Example
+```python
+define_layout(layout_name="Dvorak", keycode_to_scancode={
+    # Dvorak_keycode(Keycode, also means keyname) : Key position on keyboard(Scancode named by qwerty layout)
+    # Key.1 ~~ Key.9 are same as Qwerty
+    Key.LEFT_BRACE  :Key.MINUS,
+    Key.RIGHT_BRACE :Key.EQUAL,
+    Key.APOSTROPHE  :Key.Q,
+    Key.COMMA       :Key.W,
+    Key.DOT         :Key.E,
+    Key.P           :Key.R,
+    Key.Y           :Key.T,
+    Key.F           :Key.Y,
+    #...etc
+})
+```
+
+By the way, you can define your personal keyboard layout in this way.
+In the dict, the key:value refers the keycode:scancode .
+The `keycode` means
+```
+The key you want insert in your layout.
+```
+And the `scancode` means
+```
+The position of a key on the keyboard.
+Just use the name of the key on the common Qwerty layout to refer to this position.
+```
+
 
 ### Example `config.py`
 
