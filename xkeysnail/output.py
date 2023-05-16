@@ -27,9 +27,7 @@ mouse_btns = {256: ['BTN_0', 'BTN_MISC'],
               273: 'BTN_RIGHT'}
 _keyboard_codes.update(mouse_btns)
 
-_uinput = UInput(events={ecodes.EV_KEY: _keyboard_codes,
-                         ecodes.EV_REL: set([0,1,6,8,9]),
-                         })
+_uinput = UInput(events={ecodes.EV_KEY: _keyboard_codes})
 
 _pressed_modifier_keys = set()
 _pressed_keys = set()
